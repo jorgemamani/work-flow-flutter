@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
         if (state is AuthAuthenticated) {
           context.go(RouteNames.dashboard);
         } else if (state is AuthLoginFailure) {
-          AlertManager.showError(state.message);
+          AlertManager.showSnackBarError(message: state.message);
         }
       },
       child: Scaffold(

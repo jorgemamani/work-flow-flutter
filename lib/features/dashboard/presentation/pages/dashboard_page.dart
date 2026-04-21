@@ -83,16 +83,26 @@ class DashboardPage extends StatelessWidget {
     };
   }
 
-  void _onLogout(BuildContext context) async {
-    final confirm = await AlertManager.showConfirm(
+  void _onLogout(BuildContext context) {
+    AlertManager.showConfirmSheet(
       title: 'Cerrar sesión',
-      message: '¿Estás seguro que deseas cerrar sesión?',
-      confirmText: 'Cerrar sesión',
-      cancelText: 'Cancelar',
+      description: '¿Estás seguro que deseas cerrar sesión?',
+      options: [
+        SheetOption(
+          label: 'Cerrar sesión',
+          onTap: () {
+            if (context.mounted) {
+              context.read<AuthBloc>().add(const AuthLogoutRequested());
+            }
+          },
+        ),
+        SheetOption(
+          label: 'Cancelar',
+          onTap: () {},
+          style: SheetOptionStyle.outlined,
+        ),
+      ],
     );
-    if (confirm == true && context.mounted) {
-      context.read<AuthBloc>().add(const AuthLogoutRequested());
-    }
   }
 }
 

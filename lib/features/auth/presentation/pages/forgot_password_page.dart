@@ -38,12 +38,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthForgotPasswordSuccess) {
-          AlertManager.showSuccess(
-            'Te enviamos un correo con las instrucciones para recuperar tu contraseña.',
+          AlertManager.showSnackBarSuccess(
+            message:
+                'Te enviamos un correo con las instrucciones para recuperar tu contraseña.',
           );
           Navigator.of(context).pop();
         } else if (state is AuthForgotPasswordFailure) {
-          AlertManager.showError(state.message);
+          AlertManager.showSnackBarError(message: state.message);
         }
       },
       child: Scaffold(

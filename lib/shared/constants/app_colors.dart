@@ -26,4 +26,10 @@ class AppColors {
 
   static const Color border = Color(0xFFE2E8F0);
   static const Color divider = Color(0xFFF1F5F9);
+
+  /// Tokens de estado (SnackBar / AlertManager), alineados con lota-offline-flutter.
+  static const Color statusInfo = Color(0xFF334155);
+  static const Color statusSuccess = Color(0xFF059669);
+  static const Color statusWarning = Color(0xFFD97706);
+  static const Color statusError = Color(0xFFDC2626);
 }
