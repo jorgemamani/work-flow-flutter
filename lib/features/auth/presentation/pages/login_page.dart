@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../config/mock_auth_user.dart';
 import '../../../../routing/route_names.dart';
 import '../../../../shared/constants/app_branding.dart';
 import '../../../../shared/constants/app_colors.dart';
@@ -10,6 +11,7 @@ import '../../../../shared/managers/alert_manager.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
+import '../widgets/mock_auth_credentials_hint.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -41,6 +43,13 @@ class _LoginPageState extends State<LoginPage> {
         );
   }
 
+  void _fillMockCredentials(MockAuthUser user) {
+    setState(() {
+      _emailController.text = user.email;
+      _passwordController.text = user.password;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
@@ -70,6 +79,8 @@ class _LoginPageState extends State<LoginPage> {
                     _buildForgotPassword(),
                     const SizedBox(height: AppSizes.lg),
                     _buildLoginButton(),
+                    const SizedBox(height: AppSizes.lg),
+                    MockAuthCredentialsHint(onSelect: _fillMockCredentials),
                     const SizedBox(height: AppSizes.xl),
                   ],
                 ),

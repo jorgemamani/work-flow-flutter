@@ -4,9 +4,10 @@ enum AppUserRole {
   empleado,
   empleadoSupervisor,
   fotografo,
+  rrhh,
+  logistica,
   admin;
 
-  /// Slugs que puede mandar el backend (extensible).
   static const Set<String> _empleadoSlugs = {'empleado', 'employee'};
   static const Set<String> _supervisorSlugs = {
     'empleado_supervisor',
@@ -15,20 +16,31 @@ enum AppUserRole {
     'employee_supervisor',
   };
   static const Set<String> _fotografoSlugs = {'fotografo', 'photographer', 'photo'};
+  static const Set<String> _rrhhSlugs = {'rrhh', 'hr', 'recursos_humanos', 'recursos humanos'};
+  static const Set<String> _logisticaSlugs = {
+    'logistica',
+    'logistics',
+    'inventario',
+    'inventory',
+    'bodega',
+  };
   static const Set<String> _adminSlugs = {'admin', 'administrator', 'administrador'};
 
   String get displayLabel => switch (this) {
         AppUserRole.empleado => 'Empleado',
-        AppUserRole.empleadoSupervisor => 'Empleado supervisor',
+        AppUserRole.empleadoSupervisor => 'Supervisor',
         AppUserRole.fotografo => 'Fotógrafo',
+        AppUserRole.rrhh => 'RRHH',
+        AppUserRole.logistica => 'Logística',
         AppUserRole.admin => 'Admin',
       };
 
-  /// Valor estable para persistir / API.
   String get apiValue => switch (this) {
         AppUserRole.empleado => 'empleado',
         AppUserRole.empleadoSupervisor => 'empleado_supervisor',
         AppUserRole.fotografo => 'fotografo',
+        AppUserRole.rrhh => 'rrhh',
+        AppUserRole.logistica => 'logistica',
         AppUserRole.admin => 'admin',
       };
 
@@ -37,8 +49,9 @@ enum AppUserRole {
     if (_empleadoSlugs.contains(raw)) return AppUserRole.empleado;
     if (_supervisorSlugs.contains(raw)) return AppUserRole.empleadoSupervisor;
     if (_fotografoSlugs.contains(raw)) return AppUserRole.fotografo;
+    if (_rrhhSlugs.contains(raw)) return AppUserRole.rrhh;
+    if (_logisticaSlugs.contains(raw)) return AppUserRole.logistica;
     if (_adminSlugs.contains(raw)) return AppUserRole.admin;
-    // Compat numérica legada (1–4)
     if (value is int) {
       return switch (value) {
         1 => AppUserRole.empleado,

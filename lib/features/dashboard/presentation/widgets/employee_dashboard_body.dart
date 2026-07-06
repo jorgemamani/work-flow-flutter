@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../auth/domain/entities/user.dart';
-import '../../../../routing/route_names.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
 import '../../../../shared/entities/employee_obra_entities.dart';
-/// Vista principal empleado / supervisor / fotógrafo (obras, compañeros, productos).
+import '../../../../shared/widgets/employee_status_badge.dart';
+
+/// Vista de campo: empleado / supervisor / fotógrafo.
+/// Solo lectura. El acceso a inventario está en el bottom nav.
 class EmployeeDashboardBody extends StatefulWidget {
   const EmployeeDashboardBody({super.key, required this.user});
 
@@ -29,55 +30,60 @@ class _EmployeeDashboardBodyState extends State<EmployeeDashboardBody> {
 
   @override
   Widget build(BuildContext context) {
-    final obras = widget.user.obras;
+    final user = widget.user;
+    final obras = user.obras;
+    final perms = user.permissions;
+    final status = EmployeeStatus.fromBools(
+      enObra: perms.enObra,
+      enDescanso: perms.enDescanso,
+    );
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      child: Column(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (obras.length > 1) ...[
-            _ObraPicker(
-              obras: obras,
-              selectedIndex: _obraIndex,
-              onChanged: (i) => setState(() => _obraIndex = i),
-            ),
-            const SizedBox(height: AppSizes.md),
-          ],
-          // Acceso rápido al inventario
-          _InventoryShortcut(),
-          const SizedBox(height: AppSizes.md),
-          if (obras.isEmpty)
-            _EmptyObrasCard()
-          else ...[
-            _ObraActualCard(obra: obras[_obraIndex]),
-            const SizedBox(height: AppSizes.md),
-            _CompanerosCard(obra: obras[_obraIndex]),
-            const SizedBox(height: AppSizes.md),
-            _ProductosCard(obra: obras[_obraIndex]),
-          ],
+          _EmployeeHeader(user: user, status: status),
+          Expanded(
+            child: obras.isEmpty
+                ? _EmptyObrasView(status: status)
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (obras.length > 1) ...[
+                          _ObraPicker(
+                            obras: obras,
+                            selectedIndex: _obraIndex,
+                            onChanged: (i) => setState(() => _obraIndex = i),
+                          ),
+                          const SizedBox(height: AppSizes.md),
+                        ],
+                        _ObraActualCard(obra: obras[_obraIndex]),
+                        const SizedBox(height: AppSizes.md),
+                        _CompanerosCard(obra: obras[_obraIndex]),
+                        const SizedBox(height: AppSizes.md),
+                        _ProductosCard(obra: obras[_obraIndex]),
+                      ],
+                    ),
+                  ),
+          ),
         ],
       ),
     );
   }
 }
 
-class EmployeeDashboardHeader extends StatelessWidget {
-  const EmployeeDashboardHeader({
-    super.key,
-    required this.user,
-    required this.onLogout,
-  });
+// ── Header ──────────────────────────────────────────────────────────────────
+
+class _EmployeeHeader extends StatelessWidget {
+  const _EmployeeHeader({required this.user, required this.status});
 
   final User user;
-  final VoidCallback onLogout;
+  final EmployeeStatus status;
 
   static const _headerBlue = Color(0xFF2196F3);
-
-  String get _vistaSubtitle {
-    final base = user.role.displayLabel;
-    return '$base - Vista General';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,40 +96,41 @@ class EmployeeDashboardHeader extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(
         20,
         MediaQuery.paddingOf(context).top + 12,
-        12,
+        20,
         20,
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hola, ${user.name}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hola, ${user.name.split(' ').first}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      user.role.displayLabel,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _vistaSubtitle,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.92),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: onLogout,
-            icon: const Icon(Icons.logout_rounded, color: Colors.white),
-            tooltip: 'Cerrar sesión',
+              ),
+              // Badge de estado — reutilizable en todas las pantallas.
+              EmployeeStatusBadge(status: status),
+            ],
           ),
         ],
       ),
@@ -131,62 +138,70 @@ class EmployeeDashboardHeader extends StatelessWidget {
   }
 }
 
-class _InventoryShortcut extends StatelessWidget {
+// ── Empty state ──────────────────────────────────────────────────────────────
+
+class _EmptyObrasView extends StatelessWidget {
+  const _EmptyObrasView({required this.status});
+
+  final EmployeeStatus status;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(RouteNames.inventory),
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.md),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF10B981), Color(0xFF059669)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF10B981).withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Row(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.inventory_2_rounded, color: Colors.white, size: 28),
-            SizedBox(width: AppSizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Inventario',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    'Ver y cargar activos, herramientas y vehículos',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.location_off_rounded,
+                size: 44,
+                color: AppColors.primary,
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded,
-                color: Colors.white70, size: 16),
+            const SizedBox(height: 20),
+            Text(
+              'No estás asignado a ninguna obra',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Cuando te asignen a una obra, vas a ver los detalles, '
+              'compañeros y herramientas disponibles acá.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.contact_support_outlined, size: 18),
+              label: const Text('Contactar a mi supervisor'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Obra picker ──────────────────────────────────────────────────────────────
 
 class _ObraPicker extends StatelessWidget {
   const _ObraPicker({
@@ -252,46 +267,18 @@ class _ObraPicker extends StatelessWidget {
   }
 }
 
-class _EmptyObrasCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        'No tenés obras asignadas por ahora.',
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-      ),
-    );
-  }
-}
+// ── Cards ────────────────────────────────────────────────────────────────────
 
 class _ObraActualCard extends StatelessWidget {
   const _ObraActualCard({required this.obra});
 
   final ObraAssignment obra;
 
-  static const _iconBg = Color(0xFFE3F2FD);
-  static const _iconFg = Color(0xFF1976D2);
-
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
-      iconBg: _iconBg,
-      iconFg: _iconFg,
+      iconBg: const Color(0xFFE3F2FD),
+      iconFg: const Color(0xFF1976D2),
       icon: Icons.location_on_rounded,
       title: 'Obra Actual',
       subtitle: 'Tu asignación activa',
@@ -311,15 +298,12 @@ class _CompanerosCard extends StatelessWidget {
 
   final ObraAssignment obra;
 
-  static const _iconBg = Color(0xFFE8F5E9);
-  static const _iconFg = Color(0xFF2E7D32);
-
   @override
   Widget build(BuildContext context) {
     final n = obra.companeros.length;
     return _SectionCard(
-      iconBg: _iconBg,
-      iconFg: _iconFg,
+      iconBg: const Color(0xFFE8F5E9),
+      iconFg: const Color(0xFF2E7D32),
       icon: Icons.groups_rounded,
       title: 'Compañeros de Obra',
       subtitle: '$n ${n == 1 ? 'miembro' : 'miembros'}',
@@ -349,9 +333,10 @@ class _CompanerosCard extends StatelessWidget {
                         children: [
                           Text(
                             c.nombre,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           Text(
                             c.puesto,
@@ -377,17 +362,14 @@ class _ProductosCard extends StatelessWidget {
 
   final ObraAssignment obra;
 
-  static const _iconBg = Color(0xFFF3E5F5);
-  static const _iconFg = Color(0xFF7B1FA2);
-
   @override
   Widget build(BuildContext context) {
     final n = obra.productos.length;
     return _SectionCard(
-      iconBg: _iconBg,
-      iconFg: _iconFg,
+      iconBg: const Color(0xFFF3E5F5),
+      iconFg: const Color(0xFF7B1FA2),
       icon: Icons.inventory_2_rounded,
-      title: 'Productos de la Obra',
+      title: 'Herramientas y Productos',
       subtitle: '$n ${n == 1 ? 'item' : 'items'}',
       child: Column(
         children: obra.productos
@@ -409,9 +391,10 @@ class _ProductosCard extends StatelessWidget {
                           children: [
                             Text(
                               p.nombre,
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -434,6 +417,8 @@ class _ProductosCard extends StatelessWidget {
     );
   }
 }
+
+// ── Reusables ────────────────────────────────────────────────────────────────
 
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
@@ -489,9 +474,10 @@ class _SectionCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       subtitle,
@@ -529,9 +515,10 @@ class _InfoRow extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: AppColors.textSecondary),
             ),
           ),
           Expanded(
@@ -539,9 +526,10 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -558,10 +546,22 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, fg) = switch (status) {
-      ObraProductStatus.operativo => (AppColors.success.withValues(alpha: 0.15), AppColors.success),
-      ObraProductStatus.enUso => (AppColors.warning.withValues(alpha: 0.2), const Color(0xFFB45309)),
-      ObraProductStatus.mantenimiento => (AppColors.info.withValues(alpha: 0.15), AppColors.info),
-      ObraProductStatus.averiado => (AppColors.error.withValues(alpha: 0.15), AppColors.error),
+      ObraProductStatus.operativo => (
+          AppColors.success.withValues(alpha: 0.15),
+          AppColors.success
+        ),
+      ObraProductStatus.enUso => (
+          AppColors.warning.withValues(alpha: 0.2),
+          const Color(0xFFB45309)
+        ),
+      ObraProductStatus.mantenimiento => (
+          AppColors.info.withValues(alpha: 0.15),
+          AppColors.info
+        ),
+      ObraProductStatus.averiado => (
+          AppColors.error.withValues(alpha: 0.15),
+          AppColors.error
+        ),
     };
 
     return Container(

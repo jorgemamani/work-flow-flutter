@@ -141,7 +141,7 @@ class _SubItemTile extends StatelessWidget {
         dense: true,
         leading: CircleAvatar(
           radius: 14,
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Text(
             '${index + 1}',
             style: const TextStyle(
@@ -175,7 +175,7 @@ class _SubItemTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: condColor.withOpacity(0.12),
+                color: condColor.withValues(alpha: 0.12),
                 borderRadius:
                     BorderRadius.circular(AppSizes.radiusFull),
               ),
@@ -400,7 +400,7 @@ class _SubItemSheetState extends State<_SubItemSheet> {
                       onSelected: (_) =>
                           setState(() => _condition = c),
                       selectedColor:
-                          AppColors.primary.withOpacity(0.15),
+                          AppColors.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
                         color: selected
                             ? AppColors.primary

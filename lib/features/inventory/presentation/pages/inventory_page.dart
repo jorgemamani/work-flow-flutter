@@ -42,6 +42,7 @@ class _InventoryPageState extends State<InventoryPage> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Inventario',
           style: TextStyle(
@@ -181,7 +182,7 @@ class _FilterChips extends StatelessWidget {
                     onSelected: (_) => context.read<InventoryBloc>().add(
                           InventoryTypeFilterChanged(selected ? null : t),
                         ),
-                    selectedColor: color.withOpacity(0.15),
+                    selectedColor: color.withValues(alpha: 0.15),
                     checkmarkColor: color,
                     labelStyle: TextStyle(
                       fontSize: 12,
@@ -213,7 +214,7 @@ class _FilterChips extends StatelessWidget {
                           InventoryConditionFilterChanged(
                               selected ? null : c),
                         ),
-                    selectedColor: color.withOpacity(0.15),
+                    selectedColor: color.withValues(alpha: 0.15),
                     checkmarkColor: color,
                     labelStyle: TextStyle(
                       fontSize: 12,

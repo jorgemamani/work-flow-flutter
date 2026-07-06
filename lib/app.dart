@@ -29,7 +29,11 @@ class WorkFlowApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
+        // AuthBloc es singleton en GetIt; acá solo lo exponemos al árbol de widgets.
+        BlocProvider<AuthBloc>(
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+          lazy: false,
+        ),
       ],
       child: MaterialApp.router(
         title: AppBranding.displayTitle,

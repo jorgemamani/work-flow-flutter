@@ -54,7 +54,7 @@ class AssetDetailPage extends StatelessWidget {
                         child: Icon(
                           AssetTypeTheme.iconFor(asset.type),
                           size: 60,
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withValues(alpha: 0.4),
                         ),
                       ),
                     ),
@@ -298,9 +298,9 @@ class _TypeBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.sm, vertical: AppSizes.xs),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -330,7 +330,7 @@ class _ConditionBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.sm, vertical: AppSizes.xs),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusFull),
       ),
       child: Text(
@@ -450,7 +450,7 @@ class _SubItemRow extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 11,
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Text(
             '$index',
             style: const TextStyle(

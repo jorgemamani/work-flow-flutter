@@ -278,7 +278,7 @@ class _CatalogSheetState<T> extends State<_CatalogSheet<T>> {
                             : null,
                         selected: isSelected,
                         selectedTileColor:
-                            AppColors.primary.withOpacity(0.06),
+                            AppColors.primary.withValues(alpha: 0.06),
                         onTap: () => widget.onSelected(item),
                       );
                     },

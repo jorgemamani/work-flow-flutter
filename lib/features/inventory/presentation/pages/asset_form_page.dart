@@ -176,7 +176,7 @@ class _AssetFormPageState extends State<AssetFormPage> {
                 const SizedBox(height: AppSizes.lg),
 
                 // ── Sección: Identificación ──────────────────────────
-                _SectionHeader(
+                const _SectionHeader(
                   icon: Icons.label_rounded,
                   title: 'Identificación',
                 ),
@@ -322,7 +322,7 @@ class _AssetFormPageState extends State<AssetFormPage> {
                 // ── Campos exclusivos de vehículo ────────────────────
                 if (_type == AssetType.vehicle) ...[
                   const SizedBox(height: AppSizes.md),
-                  _SectionHeader(
+                  const _SectionHeader(
                     icon: Icons.directions_car_rounded,
                     title: 'Datos del vehículo',
                   ),
@@ -412,7 +412,7 @@ class _AssetFormPageState extends State<AssetFormPage> {
 
                 // ── Estado ───────────────────────────────────────────
                 const SizedBox(height: AppSizes.lg),
-                _SectionHeader(
+                const _SectionHeader(
                   icon: Icons.health_and_safety_rounded,
                   title: 'Estado / Condición',
                 ),
@@ -425,7 +425,7 @@ class _AssetFormPageState extends State<AssetFormPage> {
                 // ── Sub-ítems (toolBox) ──────────────────────────────
                 if (_type == AssetType.toolBox) ...[
                   const SizedBox(height: AppSizes.lg),
-                  _SectionHeader(
+                  const _SectionHeader(
                     icon: Icons.list_alt_rounded,
                     title: 'Contenido de la caja',
                   ),
@@ -440,7 +440,7 @@ class _AssetFormPageState extends State<AssetFormPage> {
 
                 // ── Fotos ────────────────────────────────────────────
                 const SizedBox(height: AppSizes.lg),
-                _SectionHeader(
+                const _SectionHeader(
                   icon: Icons.photo_library_rounded,
                   title: 'Fotos',
                 ),
@@ -461,7 +461,7 @@ class _AssetFormPageState extends State<AssetFormPage> {
 
                 // ── Observaciones ────────────────────────────────────
                 const SizedBox(height: AppSizes.lg),
-                _SectionHeader(
+                const _SectionHeader(
                   icon: Icons.notes_rounded,
                   title: 'Observaciones',
                 ),
@@ -613,7 +613,7 @@ class _TypeSelector extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? color.withOpacity(0.15)
+                      ? color.withValues(alpha: 0.15)
                       : AppColors.divider,
                   borderRadius:
                       BorderRadius.circular(AppSizes.radiusFull),
@@ -676,7 +676,7 @@ class _ConditionSelector extends StatelessWidget {
               margin: const EdgeInsets.only(right: AppSizes.sm),
               padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
               decoration: BoxDecoration(
-                color: isSelected ? color.withOpacity(0.12) : AppColors.divider,
+                color: isSelected ? color.withValues(alpha: 0.12) : AppColors.divider,
                 borderRadius:
                     BorderRadius.circular(AppSizes.radiusMd),
                 border: Border.all(
@@ -746,7 +746,7 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSizes.sm),
-        Expanded(
+        const Expanded(
           child: Divider(
             color: AppColors.border,
             height: 1,

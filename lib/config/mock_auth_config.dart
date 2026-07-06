@@ -1,18 +1,15 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 
-/// Credenciales y flag para entrar al dashboard sin backend.
+/// Interruptor del login mock. Las credenciales y perfiles viven en
+/// [MockAuthUsers] — este archivo solo controla si el mock está activo.
 ///
-/// TODO(workflow): Eliminar [MockAuthConfig] y [AuthRemoteMockDataSource] cuando
-/// el login real esté integrado. Buscar en el repo: `AUTH-MOCK`.
+/// TODO(workflow): Eliminar cuando el login real esté integrado. Buscar: AUTH-MOCK.
 class MockAuthConfig {
   MockAuthConfig._();
 
-  /// Poné `false` para forzar API real incluso en debug.
+  /// `false` fuerza API real incluso en debug.
   static const bool useMockAuth = true;
 
-  /// Solo aplica en modo debug (release/profile nunca usa mock).
+  /// Solo aplica en debug (release/profile nunca usa mock).
   static bool get isEnabled => kDebugMode && useMockAuth;
-
-  static const String email = 'dev@local.test';
-  static const String password = 'dev123456';
 }

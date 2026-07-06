@@ -100,13 +100,13 @@ class _AddPhotoButton extends StatelessWidget {
           height: 88,
           decoration: BoxDecoration(
             border: Border.all(
-              color: AppColors.primary.withOpacity(0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
               style: BorderStyle.solid,
             ),
             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
           ),
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
@@ -114,7 +114,7 @@ class _AddPhotoButton extends StatelessWidget {
                 color: AppColors.primary,
                 size: 26,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 'Añadir',
                 style: TextStyle(

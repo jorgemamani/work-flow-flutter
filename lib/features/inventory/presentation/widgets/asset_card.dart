@@ -162,7 +162,7 @@ class _TypeIcon extends StatelessWidget {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       ),
       child: Icon(AssetTypeTheme.iconFor(type), color: color, size: 22),
@@ -184,7 +184,7 @@ class _ConditionBadge extends StatelessWidget {
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusFull),
       ),
       child: Text(

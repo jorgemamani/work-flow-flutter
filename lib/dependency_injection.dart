@@ -74,7 +74,8 @@ Future<void> configureDependencies() async {
   sl.registerSingleton<ForgotPasswordUseCase>(ForgotPasswordUseCase(sl<IAuthRepository>()));
   sl.registerSingleton<GetLoggedUserUseCase>(GetLoggedUserUseCase(sl<IAuthRepository>()));
 
-  sl.registerFactory<AuthBloc>(
+  // AuthBloc como singleton para que el router y la UI compartan la misma instancia.
+  sl.registerLazySingleton<AuthBloc>(
     () => AuthBloc(
       loginUseCase: sl<LoginUseCase>(),
       forgotPasswordUseCase: sl<ForgotPasswordUseCase>(),
