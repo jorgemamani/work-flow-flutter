@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
@@ -19,6 +20,9 @@ class AppTextField extends StatefulWidget {
     this.onFieldSubmitted,
     this.enabled = true,
     this.isPassword = false,
+    this.maxLines = 1,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -34,6 +38,9 @@ class AppTextField extends StatefulWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final bool enabled;
   final bool isPassword;
+  final int maxLines;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -59,6 +66,9 @@ class _AppTextFieldState extends State<AppTextField> {
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onFieldSubmitted,
       enabled: widget.enabled,
+      maxLines: widget.obscureText || _obscureText ? 1 : widget.maxLines,
+      textCapitalization: widget.textCapitalization,
+      inputFormatters: widget.inputFormatters,
       style: Theme.of(context).textTheme.bodyLarge,
       decoration: InputDecoration(
         labelText: widget.label,

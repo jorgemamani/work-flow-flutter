@@ -115,6 +115,14 @@ class _AdminDashboardContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _DashboardCard(
+          icon: Icons.inventory_2_rounded,
+          title: 'Inventario',
+          subtitle: 'Gestionar activos, herramientas y vehículos',
+          color: const Color(0xFF10B981),
+          onTap: () => context.push(RouteNames.inventory),
+        ),
+        const SizedBox(height: AppSizes.sm),
+        _DashboardCard(
           icon: Icons.manage_accounts_outlined,
           title: 'Usuarios',
           subtitle: 'Gestionar todos los usuarios',

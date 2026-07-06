@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../auth/domain/entities/user.dart';
+import '../../../../routing/route_names.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
 import '../../../../shared/entities/employee_obra_entities.dart';
@@ -42,6 +44,9 @@ class _EmployeeDashboardBodyState extends State<EmployeeDashboardBody> {
             ),
             const SizedBox(height: AppSizes.md),
           ],
+          // Acceso rápido al inventario
+          _InventoryShortcut(),
+          const SizedBox(height: AppSizes.md),
           if (obras.isEmpty)
             _EmptyObrasCard()
           else ...[
@@ -121,6 +126,63 @@ class EmployeeDashboardHeader extends StatelessWidget {
             tooltip: 'Cerrar sesión',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _InventoryShortcut extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push(RouteNames.inventory),
+      child: Container(
+        padding: const EdgeInsets.all(AppSizes.md),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF10B981), Color(0xFF059669)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF10B981).withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.inventory_2_rounded, color: Colors.white, size: 28),
+            SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Inventario',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    'Ver y cargar activos, herramientas y vehículos',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded,
+                color: Colors.white70, size: 16),
+          ],
+        ),
       ),
     );
   }

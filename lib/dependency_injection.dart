@@ -17,6 +17,22 @@ import 'features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'features/auth/domain/usecases/get_logged_user_usecase.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/inventory/data/database/app_database.dart';
+import 'features/inventory/data/datasources/asset_local_datasource.dart';
+import 'features/inventory/data/repositories/asset_catalog_repository_impl.dart';
+import 'features/inventory/data/repositories/asset_repository_impl.dart';
+import 'features/inventory/domain/repositories/asset_catalog_repository.dart';
+import 'features/inventory/domain/repositories/asset_repository.dart';
+import 'features/inventory/domain/usecases/create_asset_usecase.dart';
+import 'features/inventory/domain/usecases/create_brand_usecase.dart';
+import 'features/inventory/domain/usecases/create_model_usecase.dart';
+import 'features/inventory/domain/usecases/delete_asset_usecase.dart';
+import 'features/inventory/domain/usecases/get_assets_usecase.dart';
+import 'features/inventory/domain/usecases/get_brands_usecase.dart';
+import 'features/inventory/domain/usecases/get_models_usecase.dart';
+import 'features/inventory/domain/usecases/update_asset_usecase.dart';
+import 'features/inventory/presentation/bloc/asset_form_bloc.dart';
+import 'features/inventory/presentation/bloc/inventory_bloc.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -64,6 +80,49 @@ Future<void> configureDependencies() async {
       forgotPasswordUseCase: sl<ForgotPasswordUseCase>(),
       getLoggedUserUseCase: sl<GetLoggedUserUseCase>(),
       authRepository: sl<IAuthRepository>(),
+    ),
+  );
+
+  // --- Inventory feature ---
+  sl.registerSingleton<AppDatabase>(AppDatabase.instance);
+
+  sl.registerSingleton<IAssetLocalDataSource>(
+    AssetLocalDataSource(sl<AppDatabase>()),
+  );
+
+  sl.registerSingleton<IAssetRepository>(
+    AssetRepositoryImpl(sl<IAssetLocalDataSource>()),
+  );
+
+  sl.registerSingleton<IAssetCatalogRepository>(
+    AssetCatalogRepositoryImpl(sl<IAssetLocalDataSource>()),
+  );
+
+  sl.registerSingleton<GetAssetsUseCase>(GetAssetsUseCase(sl<IAssetRepository>()));
+  sl.registerSingleton<CreateAssetUseCase>(CreateAssetUseCase(sl<IAssetRepository>()));
+  sl.registerSingleton<UpdateAssetUseCase>(UpdateAssetUseCase(sl<IAssetRepository>()));
+  sl.registerSingleton<DeleteAssetUseCase>(DeleteAssetUseCase(sl<IAssetRepository>()));
+
+  sl.registerSingleton<GetBrandsUseCase>(GetBrandsUseCase(sl<IAssetCatalogRepository>()));
+  sl.registerSingleton<CreateBrandUseCase>(CreateBrandUseCase(sl<IAssetCatalogRepository>()));
+  sl.registerSingleton<GetModelsUseCase>(GetModelsUseCase(sl<IAssetCatalogRepository>()));
+  sl.registerSingleton<CreateModelUseCase>(CreateModelUseCase(sl<IAssetCatalogRepository>()));
+
+  sl.registerFactory<InventoryBloc>(
+    () => InventoryBloc(
+      getAssetsUseCase: sl<GetAssetsUseCase>(),
+      deleteAssetUseCase: sl<DeleteAssetUseCase>(),
+    ),
+  );
+
+  sl.registerFactory<AssetFormBloc>(
+    () => AssetFormBloc(
+      getBrandsUseCase: sl<GetBrandsUseCase>(),
+      createBrandUseCase: sl<CreateBrandUseCase>(),
+      getModelsUseCase: sl<GetModelsUseCase>(),
+      createModelUseCase: sl<CreateModelUseCase>(),
+      createAssetUseCase: sl<CreateAssetUseCase>(),
+      updateAssetUseCase: sl<UpdateAssetUseCase>(),
     ),
   );
 }
