@@ -1,13 +1,28 @@
-import 'dart:convert';
-
 import '../../../../core/http_client/domain/http_client.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/api_response_parser.dart';
 import '../models/user_model.dart';
 
+/// Resultado del flujo de login (antes de enriquecer con `/auth/me`).
+typedef AuthLoginResult = ({
+  UserModel user,
+  String accessToken,
+  String refreshToken,
+});
+
 abstract class IAuthRemoteDataSource {
-  Future<({UserModel user, String token, String refreshToken})> login({
+  /// Flujo multitenant:
+  /// 1. `GET /tenants/resolve?cuit=` → tenantId
+  /// 2. `POST /auth/login` con `x-tenant-id`
+  Future<AuthLoginResult> login({
+    required String cuit,
     required String email,
     required String password,
   });
+
+  /// Permisos, scope y estado actual (`GET /auth/me`).
+  /// Requiere token guardado (interceptor lo inyecta).
+  Future<UserModel> getMe({required UserModel baseUser});
 
   Future<void> forgotPassword({required String email});
 }
@@ -18,29 +33,49 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
   final IHttpClient _httpClient;
 
   @override
-  Future<({UserModel user, String token, String refreshToken})> login({
+  Future<AuthLoginResult> login({
+    required String cuit,
     required String email,
     required String password,
   }) async {
-    final response = await _httpClient.post(
-      '/auth/login',
-      data: jsonEncode({'email': email, 'password': password}),
-      headers: {'Content-Type': 'application/json'},
+    final resolveResponse = await _httpClient.get(
+      ApiEndpoints.resolveTenant,
+      queryParameters: {'cuit': cuit},
     ) as Map<String, dynamic>;
 
-    final user = UserModel.fromJson(response['user'] as Map<String, dynamic>);
-    final token = response['token'] as String;
-    final refreshToken = response['refresh_token'] as String;
+    final tenantId =
+        ApiResponseParser.unwrap(resolveResponse)['id'] as String;
 
-    return (user: user, token: token, refreshToken: refreshToken);
+    final loginResponse = await _httpClient.post(
+      ApiEndpoints.login,
+      data: {'email': email, 'password': password},
+      headers: {'x-tenant-id': tenantId},
+    ) as Map<String, dynamic>;
+
+    final data = ApiResponseParser.unwrap(loginResponse);
+    final user = UserModel.fromAuthUserDto(
+      data['user'] as Map<String, dynamic>,
+    );
+
+    return (
+      user: user,
+      accessToken: data['accessToken'] as String,
+      refreshToken: data['refreshToken'] as String,
+    );
+  }
+
+  @override
+  Future<UserModel> getMe({required UserModel baseUser}) async {
+    final response = await _httpClient.get(ApiEndpoints.me) as Map<String, dynamic>;
+    final data = ApiResponseParser.unwrap(response);
+    return baseUser.applyMeResponse(data);
   }
 
   @override
   Future<void> forgotPassword({required String email}) async {
     await _httpClient.post(
-      '/auth/forgot-password',
-      data: jsonEncode({'email': email}),
-      headers: {'Content-Type': 'application/json'},
+      ApiEndpoints.forgotPassword,
+      data: {'email': email},
     );
   }
 }

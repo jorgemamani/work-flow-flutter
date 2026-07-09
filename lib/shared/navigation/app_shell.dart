@@ -70,13 +70,12 @@ class _AppShellState extends State<AppShell> {
 
     // Roles de campo (empleado, supervisor, fotógrafo) tienen restricciones
     // adicionales sobre cuándo pueden ver la bitácora.
-    final isFieldRole = !perms.canWriteObras && !perms.canWriteEmpleados;
+    final isFieldRole = user.role.isFieldRole;
 
-    // Bitácora para roles de campo: solo si está activo en una obra asignada.
-    // Para roles globales (admin, rrhh, logística): basta tener el permiso.
-    final showBitacora = perms.canAccessBitacora &&
-        (!isFieldRole ||
-            (perms.enObra && !perms.enDescanso && user.obras.isNotEmpty));
+    final showBitacora = perms.showBitacoraTab(
+      isFieldRole: isFieldRole,
+      tieneObras: user.obras.isNotEmpty,
+    );
 
     return [
       const _NavTab(

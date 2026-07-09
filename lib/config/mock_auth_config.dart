@@ -1,15 +1,14 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'environment/environment.dart';
 
-/// Interruptor del login mock. Las credenciales y perfiles viven en
-/// [MockAuthUsers] — este archivo solo controla si el mock está activo.
+/// Interruptor centralizado de mocks.
 ///
-/// TODO(workflow): Eliminar cuando el login real esté integrado. Buscar: AUTH-MOCK.
+/// El flag ya no es una constante hardcodeada: lo controla [Environment].
+/// En `dev` → mock activo. En `staging` y `prod` → siempre API real.
+///
+/// Para forzar la API real en desarrollo, setear `useMockData = false`
+/// en [DevConfig] o correr con `--dart-define=ENVIRONMENT=staging`.
 class MockAuthConfig {
   MockAuthConfig._();
 
-  /// `false` fuerza API real incluso en debug.
-  static const bool useMockAuth = true;
-
-  /// Solo aplica en debug (release/profile nunca usa mock).
-  static bool get isEnabled => kDebugMode && useMockAuth;
+  static bool get isEnabled => Environment.instance.useMockData;
 }

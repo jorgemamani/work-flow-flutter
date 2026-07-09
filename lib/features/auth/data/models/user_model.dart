@@ -15,22 +15,62 @@ class UserModel extends User {
     super.obras,
   });
 
+  /// Parsea `AuthUserDto` de `POST /auth/login` (sin scope ni estado).
+  factory UserModel.fromAuthUserDto(Map<String, dynamic> json) {
+    final firstName = json['firstName'] as String? ?? '';
+    final lastName = json['lastName'] as String? ?? '';
+    final fullName = [firstName, lastName]
+        .where((s) => s.isNotEmpty)
+        .join(' ')
+        .trim();
+
+    final rawPerms = json['permissions'];
+    final permisos = rawPerms is List
+        ? List<String>.from(rawPerms)
+        : <String>[];
+
+    return UserModel(
+      id: json['id'] as String,
+      name: fullName.isNotEmpty ? fullName : json['email'] as String,
+      email: json['email'] as String,
+      role: AppUserRole.fromApi(json['role']),
+      roleRaw: json['role'] as String?,
+      permissions: UserPermissions(
+        permisos: permisos,
+        scope: PermissionScope.global(),
+      ),
+      avatarUrl: json['avatarUrl'] as String?,
+      obras: const [],
+    );
+  }
+
+  /// Enriquece el usuario con `GET /auth/me` (permisos, scope, estado).
+  UserModel applyMeResponse(Map<String, dynamic> meData) {
+    final usuario = meData['usuario'] as Map<String, dynamic>;
+    final permissions = UserPermissions.fromMeResponse(meData);
+
+    return UserModel(
+      id: usuario['id'] as String? ?? id,
+      name: usuario['nombre'] as String? ?? name,
+      email: email,
+      role: AppUserRole.fromApi(usuario['rol'] ?? roleRaw ?? role.apiValue),
+      roleRaw: usuario['rol'] as String? ?? roleRaw,
+      permissions: permissions,
+      avatarUrl: avatarUrl,
+      obras: obras,
+    );
+  }
+
+  /// Parsea el usuario persistido localmente (storage).
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    final roleSource = json['role'] ?? json['user_role'] ?? json['type'];
+    final roleSource =
+        json['role'] ?? json['role_raw'] ?? json['user_role'] ?? json['type'];
     final role = AppUserRole.fromApi(roleSource);
 
-    // Permisos: vienen del campo `permisos` de la API (`GET /me`).
-    // Si la respuesta no los incluye aún, se generan desde el rol (legacy).
     final UserPermissions permissions;
-    if (json['permisos'] != null) {
-      permissions = UserPermissions.fromJson({
-        'permisos': json['permisos'],
-        'scope': json['scope'],
-        'en_obra': json['estado_actual']?['en_obra'],
-        'en_descanso': json['estado_actual']?['en_descanso'],
-      });
-    } else if (json['permissions'] != null) {
-      permissions = UserPermissions.fromJson(json['permissions'] as Map<String, dynamic>);
+    if (json['permissions'] is Map<String, dynamic>) {
+      permissions =
+          UserPermissions.fromJson(json['permissions'] as Map<String, dynamic>);
     } else {
       permissions = const UserPermissions(
         permisos: [],
@@ -40,7 +80,8 @@ class UserModel extends User {
 
     return UserModel(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: json['name'] as String? ??
+          '${json['firstName'] ?? ''} ${json['lastName'] ?? ''}'.trim(),
       email: json['email'] as String,
       role: role,
       permissions: permissions,

@@ -6,7 +6,11 @@ class LoginUseCase {
 
   final IAuthRepository _repository;
 
-  Future<User> call({required String email, required String password}) {
-    return _repository.login(email: email, password: password);
+  Future<User> call({
+    required String cuit,
+    required String email,
+    required String password,
+  }) {
+    return _repository.login(cuit: cuit, email: email, password: password);
   }
 }

@@ -5,21 +5,17 @@ import '../../../../config/mock_auth_user.dart';
 import '../../../../config/mock_auth_users.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
+import '../../../../shared/enums/app_user_role.dart';
 
-/// Panel de acceso rápido a usuarios mock. Solo visible en debug con mock activo.
+/// Panel de acceso rápido a usuarios mock. Solo visible cuando el mock está activo.
 class MockAuthCredentialsHint extends StatelessWidget {
-  const MockAuthCredentialsHint({
-    super.key,
-    required this.onSelect,
-  });
+  const MockAuthCredentialsHint({super.key, required this.onSelect});
 
   final void Function(MockAuthUser user) onSelect;
 
   @override
   Widget build(BuildContext context) {
     if (!MockAuthConfig.isEnabled) return const SizedBox.shrink();
-
-    final users = MockAuthUsers.uniqueForDevUi;
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.md),
@@ -33,8 +29,11 @@ class MockAuthCredentialsHint extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.science_outlined,
-                  size: 16, color: AppColors.primary.withValues(alpha: 0.8)),
+              Icon(
+                Icons.science_outlined,
+                size: 16,
+                color: AppColors.primary.withValues(alpha: 0.8),
+              ),
               const SizedBox(width: 6),
               Text(
                 'Usuarios de prueba (mock)',
@@ -57,7 +56,9 @@ class MockAuthCredentialsHint extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: users.map((user) => _UserChip(user: user, onTap: () => onSelect(user))).toList(),
+            children: MockAuthUsers.uniqueForDevUi
+                .map((u) => _UserChip(user: u, onTap: () => onSelect(u)))
+                .toList(),
           ),
         ],
       ),
@@ -78,7 +79,11 @@ class _UserChip extends StatelessWidget {
         user.devLabel,
         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),
-      avatar: Icon(_iconForRole(user), size: 16, color: AppColors.primary),
+      avatar: Icon(
+        _iconForRole(user),
+        size: 16,
+        color: AppColors.primary,
+      ),
       onPressed: onTap,
       backgroundColor: Colors.white,
       side: BorderSide(color: AppColors.primary.withValues(alpha: 0.25)),
@@ -87,16 +92,14 @@ class _UserChip extends StatelessWidget {
   }
 
   IconData _iconForRole(MockAuthUser user) {
-    if (user.obrasScope == MockObrasScope.none) {
-      return Icons.person_off_outlined;
-    }
-    return switch (user.role.name) {
-      'admin' => Icons.admin_panel_settings_outlined,
-      'rrhh' => Icons.groups_outlined,
-      'logistica' => Icons.inventory_2_outlined,
-      'empleadoSupervisor' => Icons.supervisor_account_outlined,
-      'fotografo' => Icons.camera_alt_outlined,
-      _ => Icons.person_outline,
+    if (user.obrasScope == MockObrasScope.none) return Icons.person_off_outlined;
+    return switch (user.role) {
+      AppUserRole.admin => Icons.admin_panel_settings_outlined,
+      AppUserRole.rrhh => Icons.groups_outlined,
+      AppUserRole.logistica => Icons.inventory_2_outlined,
+      AppUserRole.empleadoSupervisor => Icons.supervisor_account_outlined,
+      AppUserRole.fotografo => Icons.camera_alt_outlined,
+      AppUserRole.empleado => Icons.person_outline,
     };
   }
 }

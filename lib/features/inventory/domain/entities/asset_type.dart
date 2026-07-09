@@ -8,6 +8,16 @@ enum AssetType {
 }
 
 extension AssetTypeX on AssetType {
+  /// Valor que espera la API en el campo `category` del modelo.
+  String get apiCategory => switch (this) {
+        AssetType.vehicle => 'VEHICLE',
+        AssetType.tool => 'TOOL',
+        AssetType.toolBox => 'TOOLBOX',
+        AssetType.epp => 'EPP',
+        AssetType.cable => 'CABLE_ACCESSORY',
+        AssetType.consumable => 'CONSUMABLE',
+      };
+
   String get label {
     switch (this) {
       case AssetType.vehicle:

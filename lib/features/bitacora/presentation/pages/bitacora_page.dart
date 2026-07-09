@@ -38,7 +38,7 @@ class _BitacoraPageState extends State<BitacoraPage> {
 
         final user = state.user;
         final perms = user.permissions;
-        final isEmpleado = !perms.canWriteObras && !perms.canWriteEmpleados;
+        final isEmpleado = user.role.isFieldRole;
 
         // Filtrado según rol.
         final allEntries = isEmpleado

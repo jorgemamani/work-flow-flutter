@@ -22,11 +22,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+  final _cuitController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
+    _cuitController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -37,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
 
     context.read<AuthBloc>().add(
           AuthLoginRequested(
+            cuit: _cuitController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text,
           ),
@@ -45,6 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _fillMockCredentials(MockAuthUser user) {
     setState(() {
+      _cuitController.text = '30-12345678-9';
       _emailController.text = user.email;
       _passwordController.text = user.password;
     });
@@ -129,17 +133,35 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         children: [
           AppTextField(
+            controller: _cuitController,
+            label: 'CUIT de la empresa',
+            hint: 'Ej: 30-12345678-9',
+            prefixIcon:
+                const Icon(Icons.business_outlined, color: AppColors.textSecondary),
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Ingresa el CUIT de tu empresa';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: AppSizes.md),
+          AppTextField(
             controller: _emailController,
             label: 'Correo electrónico',
             hint: 'nombre@empresa.com',
-            prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
+            prefixIcon:
+                const Icon(Icons.email_outlined, color: AppColors.textSecondary),
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Ingresa tu correo electrónico';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value.trim())) {
                 return 'Ingresa un correo válido';
               }
               return null;
@@ -149,7 +171,8 @@ class _LoginPageState extends State<LoginPage> {
           AppTextField(
             controller: _passwordController,
             label: 'Contraseña',
-            prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
+            prefixIcon:
+                const Icon(Icons.lock_outline, color: AppColors.textSecondary),
             isPassword: true,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _onLogin(),
