@@ -87,6 +87,16 @@ class AssetFormPhotoRemoved extends AssetFormEvent {
   List<Object?> get props => [index];
 }
 
+/// Inicia la subida de todas las fotos pendientes para un activo ya creado.
+class AssetFormImageUploadsStarted extends AssetFormEvent {
+  const AssetFormImageUploadsStarted({required this.assetId});
+
+  final String assetId;
+
+  @override
+  List<Object?> get props => [assetId];
+}
+
 class AssetFormSubItemAdded extends AssetFormEvent {
   const AssetFormSubItemAdded(this.subItem);
 

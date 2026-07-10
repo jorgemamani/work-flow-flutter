@@ -1,24 +1,14 @@
 import '../features/auth/domain/entities/user_permissions.dart';
+import '../shared/constants/permission_modules.dart';
 import '../shared/enums/app_user_role.dart';
 
-/// Permisos simulados por rol. En producción esto vendrá de `GET /me`
-/// con la forma:
-/// ```json
-/// {
-///   "usuario": { "id": 1, "nombre": "...", "rol": "empleado" },
-///   "permisos": ["obras.read", "herramientas.read", ...],
-///   "scope": { "tipo": "obra", "obra_id": "12" },
-///   "estado_actual": { "en_obra": true, "en_descanso": false }
-/// }
-/// ```
+/// Permisos simulados por rol usando el catálogo canónico del API
+/// (`modulo.accion` en inglés). En producción vienen de `GET /auth/me`.
 ///
-/// TODO(workflow): Reemplazar [permissionsFor] con la respuesta real de la API.
-/// Buscar: PERMISSIONS-MOCK.
+/// `bitacora.*` se mantiene solo en mock — es feature 100% mobile.
 class MockPermissionsConfig {
   MockPermissionsConfig._();
 
-  /// Devuelve los permisos para el rol dado.
-  /// Reemplazar esta función por la llamada real a la API.
   static UserPermissions permissionsFor(
     AppUserRole role, {
     String? obraId,
@@ -66,56 +56,60 @@ class MockPermissionsConfig {
     );
   }
 
-  // ── Listas de permisos por rol ─────────────────────────────────────────────
+  // ── Listas alineadas al catálogo API (sección 2 del doc de integración) ──
 
+  /// Equivalente a rol `ADMIN` del backend + `bitacora.*` local.
   static const List<String> _adminPermisos = [
-    'obras.*',
-    'empleados.*',
-    'herramientas.*',
-    'logistica.*',
-    'bitacora.*',
-    'vehiculos.*',
-    'reportes.*',
-    'configuracion.*',
+    '${PermissionModules.users}.*',
+    '${PermissionModules.roles}.*',
+    '${PermissionModules.projects}.*',
+    '${PermissionModules.employees}.*',
+    '${PermissionModules.inventory}.*',
+    '${PermissionModules.warehouses}.*',
+    '${PermissionModules.transfers}.*',
+    '${PermissionModules.audits}.*',
+    '${PermissionModules.reports}.*',
+    '${PermissionModules.incidents}.*',
+    '${PermissionModules.bitacora}.*',
   ];
 
   static const List<String> _rrhhPermisos = [
-    'obras.*',
-    'empleados.*',
-    'herramientas.read',
-    'vehiculos.*',
-    'bitacora.*',
-    'reportes.read',
+    '${PermissionModules.projects}.*',
+    '${PermissionModules.employees}.*',
+    '${PermissionModules.inventory}.read',
+    '${PermissionModules.reports}.read',
+    '${PermissionModules.bitacora}.*',
   ];
 
   static const List<String> _logisticaPermisos = [
-    'herramientas.*',
-    'logistica.*',
-    'bitacora.read',
-    'vehiculos.read',
-    'obras.read',
+    '${PermissionModules.inventory}.*',
+    '${PermissionModules.warehouses}.*',
+    '${PermissionModules.transfers}.*',
+    '${PermissionModules.projects}.read',
+    '${PermissionModules.bitacora}.read',
   ];
 
   static const List<String> _supervisorPermisos = [
-    'obras.read',
-    'obras.write',
-    'herramientas.read',
-    'empleados.read',
-    'bitacora.*',
-    'vehiculos.read',
+    '${PermissionModules.projects}.read',
+    '${PermissionModules.projects}.write',
+    '${PermissionModules.inventory}.read',
+    '${PermissionModules.employees}.read',
+    '${PermissionModules.bitacora}.*',
   ];
 
   static const List<String> _fotografoPermisos = [
-    'obras.read',
-    'bitacora.read',
-    'bitacora.write',
+    '${PermissionModules.projects}.read',
+    '${PermissionModules.audits}.read',
+    '${PermissionModules.audits}.write',
+    '${PermissionModules.bitacora}.read',
+    '${PermissionModules.bitacora}.write',
   ];
 
   static const List<String> _empleadoPermisos = [
-    'obras.read',
-    'herramientas.read',
-    'empleados.read',
-    'bitacora.read',
-    'bitacora.write',
+    '${PermissionModules.projects}.read',
+    '${PermissionModules.inventory}.read',
+    '${PermissionModules.employees}.read',
+    '${PermissionModules.bitacora}.read',
+    '${PermissionModules.bitacora}.write',
   ];
 }

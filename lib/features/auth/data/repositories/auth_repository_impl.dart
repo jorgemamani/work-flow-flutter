@@ -15,14 +15,24 @@ class AuthRepositoryImpl implements IAuthRepository {
   static const _userKey = 'logged_user';
 
   @override
-  Future<User> login({required String email, required String password}) async {
-    final result = await _remoteDataSource.login(email: email, password: password);
+  Future<User> login({
+    required String cuit,
+    required String email,
+    required String password,
+  }) async {
+    final result = await _remoteDataSource.login(
+      cuit: cuit,
+      email: email,
+      password: password,
+    );
 
-    await _localStorage.saveToken(result.token);
+    // Guardar token antes de /me para que el interceptor lo inyecte.
+    await _localStorage.saveToken(result.accessToken);
     await _localStorage.saveRefreshToken(result.refreshToken);
-    await _localStorage.saveString(_userKey, jsonEncode(result.user.toJson()));
 
-    return result.user;
+    final user = await _enrichWithMe(result.user);
+    await _persistUser(user);
+    return user;
   }
 
   @override
@@ -35,15 +45,34 @@ class AuthRepositoryImpl implements IAuthRepository {
     final token = await _localStorage.getToken();
     if (token == null) return null;
 
-    final userJson = await _localStorage.getString(_userKey);
-    if (userJson == null) return null;
+    final cached = await _loadCachedUser();
+    if (cached == null) return null;
 
-    return UserModel.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
+    try {
+      final refreshed = await _enrichWithMe(cached);
+      await _persistUser(refreshed);
+      return refreshed;
+    } catch (_) {
+      return cached;
+    }
   }
 
   @override
   Future<void> logout() async {
     await _localStorage.clearSession();
     await _localStorage.remove(_userKey);
+  }
+
+  Future<UserModel> _enrichWithMe(UserModel baseUser) =>
+      _remoteDataSource.getMe(baseUser: baseUser);
+
+  Future<void> _persistUser(UserModel user) async {
+    await _localStorage.saveString(_userKey, jsonEncode(user.toJson()));
+  }
+
+  Future<UserModel?> _loadCachedUser() async {
+    final userJson = await _localStorage.getString(_userKey);
+    if (userJson == null) return null;
+    return UserModel.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
   }
 }

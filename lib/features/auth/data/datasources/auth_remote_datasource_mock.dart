@@ -14,7 +14,8 @@ import 'auth_remote_datasource.dart';
 /// TODO(workflow): Reemplazar por API real. Buscar: AUTH-MOCK.
 class AuthRemoteMockDataSource implements IAuthRemoteDataSource {
   @override
-  Future<({UserModel user, String token, String refreshToken})> login({
+  Future<AuthLoginResult> login({
+    required String cuit,
     required String email,
     required String password,
   }) async {
@@ -30,7 +31,6 @@ class AuthRemoteMockDataSource implements IAuthRemoteDataSource {
     final obras = _obrasParaScope(mockUser.obrasScope);
     final obraId = obras.isNotEmpty ? obras.first.id : null;
 
-    // TODO(workflow): Reemplazar por respuesta de GET /me. Buscar: PERMISSIONS-MOCK.
     final permissions = MockPermissionsConfig.permissionsFor(
       mockUser.role,
       obraId: obraId,
@@ -49,9 +49,15 @@ class AuthRemoteMockDataSource implements IAuthRemoteDataSource {
 
     return (
       user: user,
-      token: 'mock_access_token_${mockUser.id}',
+      accessToken: 'mock_access_token_${mockUser.id}',
       refreshToken: 'mock_refresh_token_${mockUser.id}',
     );
+  }
+
+  @override
+  Future<UserModel> getMe({required UserModel baseUser}) async {
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    return baseUser;
   }
 
   @override

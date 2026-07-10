@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/asset.dart';
@@ -9,6 +11,7 @@ import '../../domain/usecases/create_model_usecase.dart';
 import '../../domain/usecases/get_brands_usecase.dart';
 import '../../domain/usecases/get_models_usecase.dart';
 import '../../domain/usecases/update_asset_usecase.dart';
+import '../../domain/usecases/upload_asset_image_usecase.dart';
 import 'asset_form_event.dart';
 import 'asset_form_state.dart';
 
@@ -20,12 +23,14 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
     required CreateModelUseCase createModelUseCase,
     required CreateAssetUseCase createAssetUseCase,
     required UpdateAssetUseCase updateAssetUseCase,
+    required UploadAssetImageUseCase uploadAssetImageUseCase,
   })  : _getBrands = getBrandsUseCase,
         _createBrand = createBrandUseCase,
         _getModels = getModelsUseCase,
         _createModel = createModelUseCase,
         _createAsset = createAssetUseCase,
         _updateAsset = updateAssetUseCase,
+        _uploadImage = uploadAssetImageUseCase,
         super(const AssetFormState()) {
     on<AssetFormInitialized>(_onInitialized);
     on<AssetFormTypeChanged>(_onTypeChanged);
@@ -40,6 +45,7 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
     on<AssetFormSubItemRemoved>(_onSubItemRemoved);
     on<AssetFormConditionChanged>(_onConditionChanged);
     on<AssetFormSubmitted>(_onSubmitted);
+    on<AssetFormImageUploadsStarted>(_onImageUploadsStarted);
   }
 
   final GetBrandsUseCase _getBrands;
@@ -48,6 +54,7 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
   final CreateModelUseCase _createModel;
   final CreateAssetUseCase _createAsset;
   final UpdateAssetUseCase _updateAsset;
+  final UploadAssetImageUseCase _uploadImage;
 
   Future<void> _onInitialized(
     AssetFormInitialized event,
@@ -66,18 +73,28 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
         models = await _getModels(selectedBrand.id);
       }
 
+      // Las fotos de un activo existente ya son URLs remotas → confirmed
+      final photos = (event.asset?.photoPaths ?? const [])
+          .map(
+            (url) => AssetPhotoEntry(
+              localPath: url,
+              status: PhotoUploadStatus.confirmed,
+            ),
+          )
+          .toList();
+
       emit(state.copyWith(
         status: AssetFormStatus.initial,
         selectedType: type,
         brands: brands,
         models: models,
         selectedBrand: () => selectedBrand,
-        photoPaths: event.asset?.photoPaths ?? const [],
+        photos: photos,
       ));
     } catch (e) {
       emit(state.copyWith(
         status: AssetFormStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: () => e.toString(),
       ));
     }
   }
@@ -128,7 +145,7 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
         models: const [],
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(errorMessage: () => e.toString()));
     }
   }
 
@@ -148,7 +165,7 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
         selectedModel: () => model,
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(errorMessage: () => e.toString()));
     }
   }
 
@@ -156,40 +173,34 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
     AssetFormPhotoAdded event,
     Emitter<AssetFormState> emit,
   ) {
-    emit(state.copyWith(photoPaths: [...state.photoPaths, event.path]));
+    final entry = AssetPhotoEntry(localPath: event.path);
+    emit(state.copyWith(photos: [...state.photos, entry]));
   }
 
   void _onPhotoRemoved(
     AssetFormPhotoRemoved event,
     Emitter<AssetFormState> emit,
   ) {
-    final updated = List<String>.from(state.photoPaths)
+    final updated = List<AssetPhotoEntry>.from(state.photos)
       ..removeAt(event.index);
-    emit(state.copyWith(photoPaths: updated));
+    emit(state.copyWith(photos: updated));
   }
 
-  void _onSubItemAdded(
-    AssetFormSubItemAdded event,
-    Emitter<AssetFormState> emit,
-  ) {
-    // Sub-items are managed via form state in the page; BLoC only needs
-    // photoPaths and catalogs. Kept here for completeness.
+  static String _contentTypeFromPath(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    return switch (ext) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      'heic' => 'image/heic',
+      _ => 'image/jpeg',
+    };
   }
 
-  void _onSubItemUpdated(
-    AssetFormSubItemUpdated event,
-    Emitter<AssetFormState> emit,
-  ) {}
-
-  void _onSubItemRemoved(
-    AssetFormSubItemRemoved event,
-    Emitter<AssetFormState> emit,
-  ) {}
-
-  void _onConditionChanged(
-    AssetFormConditionChanged event,
-    Emitter<AssetFormState> emit,
-  ) {}
+  void _onSubItemAdded(AssetFormSubItemAdded event, Emitter<AssetFormState> emit) {}
+  void _onSubItemUpdated(AssetFormSubItemUpdated event, Emitter<AssetFormState> emit) {}
+  void _onSubItemRemoved(AssetFormSubItemRemoved event, Emitter<AssetFormState> emit) {}
+  void _onConditionChanged(AssetFormConditionChanged event, Emitter<AssetFormState> emit) {}
 
   Future<void> _onSubmitted(
     AssetFormSubmitted event,
@@ -203,15 +214,65 @@ class AssetFormBloc extends Bloc<AssetFormEvent, AssetFormState> {
       } else {
         saved = await _updateAsset(event.asset);
       }
+
       emit(state.copyWith(
         status: AssetFormStatus.success,
         savedAsset: saved,
       ));
+
+      // Disparar subida de fotos pendientes en segundo plano
+      if (state.hasPendingPhotos) {
+        add(AssetFormImageUploadsStarted(assetId: saved.id));
+      }
     } catch (e) {
       emit(state.copyWith(
         status: AssetFormStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: () => e.toString(),
       ));
+    }
+  }
+
+  /// Orquesta la subida secuencial de todas las fotos pendientes.
+  /// Cada foto actualiza su estado individualmente — la UI puede reaccionar
+  /// a `uploading`, `confirmed` o `error` por foto.
+  Future<void> _onImageUploadsStarted(
+    AssetFormImageUploadsStarted event,
+    Emitter<AssetFormState> emit,
+  ) async {
+    final photos = List<AssetPhotoEntry>.from(state.photos);
+
+    for (var i = 0; i < photos.length; i++) {
+      if (!photos[i].isPending) continue;
+
+      // Marcar como subiendo
+      photos[i] = photos[i].copyWith(status: PhotoUploadStatus.uploading);
+      emit(state.copyWith(photos: List.unmodifiable(photos)));
+
+      try {
+        final file = File(photos[i].localPath);
+        final contentType = _contentTypeFromPath(photos[i].localPath);
+
+        final confirmedImage = await _uploadImage(
+          assetId: event.assetId,
+          file: file,
+          contentType: contentType,
+          sortOrder: i,
+        );
+
+        photos[i] = photos[i].copyWith(
+          status: PhotoUploadStatus.confirmed,
+          remoteImage: confirmedImage,
+        );
+      } catch (e) {
+        // El PUT a R2 falló — NO se llama a confirm (ya garantizado en el repo).
+        // La foto queda en estado `error` para permitir reintentar desde la UI.
+        photos[i] = photos[i].copyWith(
+          status: PhotoUploadStatus.error,
+          errorMessage: e.toString(),
+        );
+      }
+
+      emit(state.copyWith(photos: List.unmodifiable(photos)));
     }
   }
 }
