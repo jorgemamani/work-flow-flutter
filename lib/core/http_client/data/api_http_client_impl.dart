@@ -118,8 +118,15 @@ class ApiHttpClient implements IHttpClient {
         if (statusCode == 401) {
           return const UnauthorizedException();
         }
-        final message = e.response?.data?['message'] as String? ??
-            'Error del servidor (${statusCode ?? 'desconocido'})';
+        // NestJS puede devolver `message` como String o como List<String>
+        // (en errores de class-validator devuelve un array de mensajes).
+        final rawMessage = e.response?.data?['message'];
+        final message = switch (rawMessage) {
+          final List<dynamic> list =>
+            list.map((e) => e.toString()).join(' | '),
+          final String s => s,
+          _ => 'Error del servidor (${statusCode ?? 'desconocido'})',
+        };
         return ServerException(message: message, statusCode: statusCode);
       case DioExceptionType.connectionError:
         return const NetworkException(

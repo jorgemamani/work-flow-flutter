@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/asset.dart';
 import '../../domain/entities/asset_brand.dart';
-import '../../domain/entities/asset_condition.dart';
 import '../../domain/entities/asset_model_entity.dart';
 import '../../domain/entities/asset_sub_item.dart';
 import '../../domain/entities/asset_type.dart';
@@ -17,7 +16,7 @@ abstract class IAssetLocalDataSource {
   Future<List<Asset>> getAssets({
     String? query,
     AssetType? type,
-    AssetCondition? condition,
+    String? conditionId,
     String? location,
   });
 
@@ -31,7 +30,11 @@ abstract class IAssetLocalDataSource {
   Future<void> deleteBrand(String id);
 
   Future<List<AssetModelEntity>> getModelsByBrand(String brandId);
-  Future<AssetModelEntity> createModel(String brandId, String name);
+  Future<AssetModelEntity> createModel({
+    required String brandId,
+    required String name,
+    required String category,
+  });
   Future<void> deleteModel(String id);
 }
 
@@ -47,7 +50,7 @@ class AssetLocalDataSource implements IAssetLocalDataSource {
   Future<List<Asset>> getAssets({
     String? query,
     AssetType? type,
-    AssetCondition? condition,
+    String? conditionId,
     String? location,
   }) async {
     final db = await _db.database;
@@ -59,9 +62,9 @@ class AssetLocalDataSource implements IAssetLocalDataSource {
       whereParts.add('type = ?');
       whereArgs.add(type.name);
     }
-    if (condition != null) {
-      whereParts.add('condition = ?');
-      whereArgs.add(condition.name);
+    if (conditionId != null) {
+      whereParts.add('condition_id = ?');
+      whereArgs.add(conditionId);
     }
     if (location != null && location.isNotEmpty) {
       whereParts.add('location LIKE ?');
@@ -217,7 +220,11 @@ class AssetLocalDataSource implements IAssetLocalDataSource {
   }
 
   @override
-  Future<AssetModelEntity> createModel(String brandId, String name) async {
+  Future<AssetModelEntity> createModel({
+    required String brandId,
+    required String name,
+    required String category,
+  }) async {
     final db = await _db.database;
     final model = AssetModelDbModel(
       id: _uuid.v4(),
@@ -229,7 +236,12 @@ class AssetLocalDataSource implements IAssetLocalDataSource {
       model.toMap(),
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
-    return model.toEntity();
+    return AssetModelEntity(
+      id: model.id,
+      brandId: model.brandId,
+      name: model.name,
+      category: category,
+    );
   }
 
   @override

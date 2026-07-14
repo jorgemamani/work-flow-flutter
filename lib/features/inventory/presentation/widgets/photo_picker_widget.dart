@@ -6,6 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/constants/app_sizes.dart';
+import '../../../../shared/utils/bottom_sheet_utils.dart';
+import '../../../../shared/utils/image_content_type_utils.dart';
+import '../../../../shared/widgets/app_image.dart';
+import '../bloc/asset_form_state.dart';
+
+typedef PhotoAddedCallback = void Function(String path, String contentType);
 
 class PhotoPickerWidget extends StatelessWidget {
   const PhotoPickerWidget({
@@ -15,8 +21,8 @@ class PhotoPickerWidget extends StatelessWidget {
     required this.onRemove,
   });
 
-  final List<String> photos;
-  final ValueChanged<String> onAdd;
+  final List<AssetPhotoEntry> photos;
+  final PhotoAddedCallback onAdd;
   final ValueChanged<int> onRemove;
 
   bool get _canAdd => photos.length < AppConstants.maxPhotosPerAsset;
@@ -59,7 +65,7 @@ class PhotoPickerWidget extends StatelessWidget {
                 ),
               for (var i = 0; i < photos.length; i++)
                 _PhotoTile(
-                  path: photos[i],
+                  entry: photos[i],
                   onRemove: () => onRemove(i),
                 ),
             ],
@@ -77,11 +83,36 @@ class PhotoPickerWidget extends StatelessWidget {
       imageQuality: 85,
       maxWidth: 1280,
     );
-    if (xFile != null) {
-      onAdd(xFile.path);
+    if (xFile == null) return;
+
+    try {
+      final bytes = await xFile.readAsBytes();
+      if (bytes.isEmpty) return;
+
+      final contentType = resolveImageContentType(
+        mimeType: xFile.mimeType,
+        path: xFile.path,
+      );
+      final ext = fileExtensionForContentType(contentType);
+      final persisted = File(
+        '${Directory.systemTemp.path}/wf_asset_'
+        '${DateTime.now().millisecondsSinceEpoch}.$ext',
+      );
+      await persisted.writeAsBytes(bytes, flush: true);
+
+      onAdd(persisted.path, contentType);
+    } catch (_) {
+      // Si falla la copia local, intentar con el path original del picker.
+      final contentType = resolveImageContentType(
+        mimeType: xFile.mimeType,
+        path: xFile.path,
+      );
+      onAdd(xFile.path, contentType);
     }
   }
 }
+
+// ── Add button ────────────────────────────────────────────────────────────────
 
 class _AddPhotoButton extends StatelessWidget {
   const _AddPhotoButton({required this.onCamera, required this.onGallery});
@@ -131,7 +162,7 @@ class _AddPhotoButton extends StatelessWidget {
   }
 
   void _showOptions(BuildContext context) {
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
@@ -162,21 +193,28 @@ class _AddPhotoButton extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSizes.md),
-            ListTile(
-              leading: const Icon(Icons.camera_alt_rounded),
-              title: const Text('Tomar foto'),
-              onTap: () {
-                Navigator.pop(context);
-                onCamera();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_rounded),
-              title: const Text('Elegir de galería'),
-              onTap: () {
-                Navigator.pop(context);
-                onGallery();
-              },
+            Material(
+              color: Colors.transparent,
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.camera_alt_rounded),
+                    title: const Text('Tomar foto'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      onCamera();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_library_rounded),
+                    title: const Text('Elegir de galería'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      onGallery();
+                    },
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: AppSizes.sm),
           ],
@@ -186,10 +224,12 @@ class _AddPhotoButton extends StatelessWidget {
   }
 }
 
-class _PhotoTile extends StatelessWidget {
-  const _PhotoTile({required this.path, required this.onRemove});
+// ── Photo tile ────────────────────────────────────────────────────────────────
 
-  final String path;
+class _PhotoTile extends StatelessWidget {
+  const _PhotoTile({required this.entry, required this.onRemove});
+
+  final AssetPhotoEntry entry;
   final VoidCallback onRemove;
 
   @override
@@ -198,36 +238,75 @@ class _PhotoTile extends StatelessWidget {
       padding: const EdgeInsets.only(right: AppSizes.sm),
       child: Stack(
         children: [
+          // ── Imagen (local o remota, resuelta por AppImage) ──────────────
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-            child: Image.file(
-              File(path),
+            child: AppImage(
+              path: entry.displayUrl,
               width: 80,
               height: 88,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 80,
-                height: 88,
-                color: AppColors.border,
-                child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
-              ),
             ),
           ),
-          Positioned(
-            top: 4,
-            right: 4,
-            child: GestureDetector(
-              onTap: onRemove,
+
+          // ── Overlay de estado ────────────────────────────────────────────
+          if (entry.isUploading)
+            Positioned.fill(
               child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  color: Colors.black54,
-                  shape: BoxShape.circle,
+                decoration: BoxDecoration(
+                  color: Colors.black45,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                 ),
-                child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
+                child: const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+          if (entry.hasError)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.error_rounded,
+                    color: Colors.redAccent,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+
+          // ── Botón de eliminar (no mostrar mientras sube) ─────────────────
+          if (!entry.isUploading)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: GestureDetector(
+                onTap: onRemove,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

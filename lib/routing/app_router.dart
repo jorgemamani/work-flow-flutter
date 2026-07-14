@@ -9,6 +9,8 @@ import '../features/auth/presentation/pages/login_page.dart';
 import '../features/bitacora/presentation/pages/bitacora_page.dart';
 import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/inventory/domain/entities/asset.dart';
+import '../features/inventory/presentation/bloc/asset_detail_bloc.dart';
+import '../features/inventory/presentation/bloc/asset_detail_event.dart';
 import '../features/inventory/presentation/bloc/asset_form_bloc.dart';
 import '../features/inventory/presentation/bloc/inventory_bloc.dart';
 import '../features/inventory/presentation/pages/asset_detail_page.dart';
@@ -113,8 +115,9 @@ GoRouter buildAppRouter() {
               GoRoute(
                 path: RouteNames.inventory,
                 name: 'inventory',
-                builder: (context, state) => BlocProvider(
-                  create: (_) => sl<InventoryBloc>(),
+                // BlocProvider.value reutiliza el singleton de DI.
+                builder: (context, state) => BlocProvider.value(
+                  value: sl<InventoryBloc>(),
                   child: const InventoryPage(),
                 ),
                 routes: [
@@ -127,7 +130,10 @@ GoRouter buildAppRouter() {
                       return MultiBlocProvider(
                         providers: [
                           BlocProvider(create: (_) => sl<AssetFormBloc>()),
-                          BlocProvider(create: (_) => sl<InventoryBloc>()),
+                          // BlocProvider.value comparte el singleton:
+                          // el add(InventoryLoadRequested) del form
+                          // llega a la misma instancia que usa InventoryPage.
+                          BlocProvider.value(value: sl<InventoryBloc>()),
                         ],
                         child: AssetFormPage(asset: asset),
                       );
@@ -138,8 +144,12 @@ GoRouter buildAppRouter() {
                     name: 'assetDetail',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) {
-                      final asset = state.extra as Asset;
-                      return AssetDetailPage(asset: asset);
+                      final preview = state.extra as Asset;
+                      return BlocProvider(
+                        create: (_) => sl<AssetDetailBloc>()
+                          ..add(AssetDetailLoadRequested(preview)),
+                        child: AssetDetailPage(preview: preview),
+                      );
                     },
                   ),
                 ],

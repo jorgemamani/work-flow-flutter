@@ -1,5 +1,6 @@
 import '../../domain/entities/asset_brand.dart';
 import '../../domain/entities/asset_model_entity.dart';
+import '../../domain/entities/condition_entity.dart';
 import '../../domain/repositories/asset_catalog_repository.dart';
 import '../datasources/asset_remote_datasource.dart';
 
@@ -26,10 +27,14 @@ class AssetCatalogRepositoryImpl implements IAssetCatalogRepository {
       _remoteDataSource.getModels(brandId: brandId);
 
   @override
-  Future<AssetModelEntity> createModel(String brandId, String name) =>
+  Future<AssetModelEntity> createModel({
+    required String brandId,
+    required String name,
+    required String category,
+  }) =>
       _remoteDataSource.createModel(
         name: name,
-        category: 'TOOL',
+        category: category,
         brandId: brandId,
       );
 
@@ -37,4 +42,20 @@ class AssetCatalogRepositoryImpl implements IAssetCatalogRepository {
   Future<void> deleteModel(String id) async {
     // Soft-delete manejado por la API; no expuesto desde el catálogo.
   }
+
+  @override
+  Future<List<ConditionEntity>> getConditions() =>
+      _remoteDataSource.getConditions();
+
+  @override
+  Future<ConditionEntity> createCondition({
+    required String name,
+    required String color,
+    int? sortOrder,
+  }) =>
+      _remoteDataSource.createCondition(
+        name: name,
+        color: color,
+        sortOrder: sortOrder,
+      );
 }

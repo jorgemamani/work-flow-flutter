@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../routing/route_names.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
-import '../../domain/entities/asset_condition.dart';
+import '../../../../shared/managers/alert_manager.dart';
+import '../../../../shared/utils/color_utils.dart';
 import '../../domain/entities/asset_type.dart';
 import '../bloc/inventory_bloc.dart';
 import '../bloc/inventory_event.dart';
@@ -202,17 +203,17 @@ class _FilterChips extends StatelessWidget {
               const SizedBox(width: AppSizes.sm),
 
               // Condition filters
-              ...AssetCondition.values.map((c) {
-                final selected = state.conditionFilter == c;
-                final color = AssetTypeTheme.conditionColor(c);
+              ...state.conditions.map((c) {
+                final selected = state.conditionFilterId == c.id;
+                final color = colorFromHex(c.color) ?? AppColors.textSecondary;
                 return Padding(
                   padding: const EdgeInsets.only(right: AppSizes.xs),
                   child: FilterChip(
-                    label: Text(c.displayName),
+                    label: Text(c.name),
                     selected: selected,
                     onSelected: (_) => context.read<InventoryBloc>().add(
                           InventoryConditionFilterChanged(
-                              selected ? null : c),
+                              selected ? null : c.id),
                         ),
                     selectedColor: color.withValues(alpha: 0.15),
                     checkmarkColor: color,
@@ -295,29 +296,23 @@ class _AssetList extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context, String assetId) {
-    showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Eliminar activo'),
-        content:
-            const Text('¿Estás seguro? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context
-                  .read<InventoryBloc>()
-                  .add(InventoryAssetDeleted(assetId));
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    final inventoryBloc = context.read<InventoryBloc>();
+    AlertManager.showConfirmSheet(
+      title: 'Eliminar activo',
+      description: '¿Estás seguro? Esta acción no se puede deshacer.',
+      options: [
+        SheetOption(
+          label: 'Eliminar',
+          onTap: () =>
+              inventoryBloc.add(InventoryAssetDeleted(assetId)),
+          isDestructive: true,
+        ),
+        SheetOption(
+          label: 'Cancelar',
+          onTap: () {},
+          style: SheetOptionStyle.outlined,
+        ),
+      ],
     );
   }
 }

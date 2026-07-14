@@ -10,6 +10,9 @@ import '../../domain/entities/asset_brand.dart';
 import '../../domain/entities/asset_image.dart';
 import '../../domain/entities/asset_model_entity.dart';
 import '../../domain/entities/asset_type.dart';
+import '../../domain/entities/condition_entity.dart';
+import '../../domain/entities/project_entity.dart';
+import '../../domain/entities/warehouse_entity.dart';
 import '../models/asset_image_model.dart';
 
 abstract class IAssetRemoteDataSource {
@@ -24,12 +27,32 @@ abstract class IAssetRemoteDataSource {
   Future<List<AssetBrand>> getBrands();
   Future<AssetBrand> createBrand(String name);
 
+  // ── Projects ──────────────────────────────────────────────────────────────
+  Future<List<ProjectEntity>> getProjects();
+  Future<ProjectEntity> createProject(String name);
+
+  // ── Warehouses ────────────────────────────────────────────────────────────
+  Future<List<WarehouseEntity>> getWarehouses();
+  Future<WarehouseEntity> createWarehouse({
+    required String name,
+    required String type,
+    String? projectId,
+  });
+
   // ── Models ────────────────────────────────────────────────────────────────
   Future<List<AssetModelEntity>> getModels({String? brandId});
   Future<AssetModelEntity> createModel({
     required String name,
     required String category,
     String? brandId,
+  });
+
+  // ── Conditions ────────────────────────────────────────────────────────────
+  Future<List<ConditionEntity>> getConditions();
+  Future<ConditionEntity> createCondition({
+    required String name,
+    required String color,
+    int? sortOrder,
   });
 
   // ── Images (flujo R2) ─────────────────────────────────────────────────────
@@ -187,6 +210,40 @@ class AssetRemoteDataSourceImpl implements IAssetRemoteDataSource {
     return _modelFromApiJson(response['data'] as Map<String, dynamic>);
   }
 
+  // ── Conditions ────────────────────────────────────────────────────────────
+
+  @override
+  Future<List<ConditionEntity>> getConditions() async {
+    final response = await _httpClient.get(
+      ApiEndpoints.conditions,
+      queryParameters: {'limit': 100},
+    ) as Map<String, dynamic>;
+
+    final data = response['data'] as List<dynamic>;
+    return data
+        .map((e) => _conditionFromJson(e as Map<String, dynamic>))
+        .where((c) => c.isActive)
+        .toList();
+  }
+
+  @override
+  Future<ConditionEntity> createCondition({
+    required String name,
+    required String color,
+    int? sortOrder,
+  }) async {
+    final response = await _httpClient.post(
+      ApiEndpoints.conditions,
+      data: {
+        'name': name,
+        'color': color,
+        if (sortOrder != null) 'sortOrder': sortOrder,
+      },
+    ) as Map<String, dynamic>;
+
+    return _conditionFromJson(response['data'] as Map<String, dynamic>);
+  }
+
   // ── Images ────────────────────────────────────────────────────────────────
 
   @override
@@ -210,32 +267,40 @@ class AssetRemoteDataSourceImpl implements IAssetRemoteDataSource {
     required File file,
     required String contentType,
   }) async {
+    if (!await file.exists()) {
+      throw const ServerException(
+        message: 'No se encontró el archivo de imagen en el dispositivo.',
+      );
+    }
+
     final bytes = await file.readAsBytes();
+    if (bytes.isEmpty) {
+      throw const ServerException(message: 'El archivo de imagen está vacío.');
+    }
+
     try {
-      final response = await _r2Dio.put<dynamic>(
+      await _r2Dio.put<void>(
         uploadUrl,
-        data: Stream.fromIterable(bytes.map((b) => [b])),
+        data: bytes,
         options: Options(
-          headers: {
-            'Content-Type': contentType,
-            'Content-Length': bytes.length,
-          },
-          // R2 presigned URLs rechazan el header Authorization —
-          // por eso se usa _r2Dio (sin interceptor de auth).
-          extra: {'withToken': false},
+          headers: {Headers.contentTypeHeader: contentType},
+          followRedirects: false,
+          validateStatus: (status) =>
+              status != null && status >= 200 && status < 300,
+          responseType: ResponseType.plain,
+          sendTimeout: const Duration(seconds: 120),
+          receiveTimeout: const Duration(seconds: 120),
         ),
       );
-
-      if (response.statusCode != 200) {
-        throw ServerException(
-          message: 'Error al subir imagen a R2 (HTTP ${response.statusCode})',
-          statusCode: response.statusCode,
-        );
-      }
     } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final body = e.response?.data?.toString();
+      final detail = body != null && body.isNotEmpty ? ': $body' : '';
       throw ServerException(
-        message: 'Error de red al subir imagen: ${e.message}',
-        statusCode: e.response?.statusCode,
+        message: status != null
+            ? 'Error al subir imagen a R2 (HTTP $status)$detail'
+            : 'Error de red al subir imagen: ${e.message}',
+        statusCode: status,
       );
     }
   }
@@ -277,12 +342,73 @@ class AssetRemoteDataSourceImpl implements IAssetRemoteDataSource {
     await _httpClient.delete(ApiEndpoints.assetImageById(assetId, imageId));
   }
 
+  // ── Projects ─────────────────────────────────────────────────────────────
+
+  @override
+  Future<List<ProjectEntity>> getProjects() async {
+    final response = await _httpClient.get(
+      ApiEndpoints.projects,
+      queryParameters: {'limit': 100, 'status': 'ACTIVE'},
+    ) as Map<String, dynamic>;
+
+    final data = response['data'] as List<dynamic>;
+    return data
+        .map((e) => _projectFromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<ProjectEntity> createProject(String name) async {
+    final response = await _httpClient.post(
+      ApiEndpoints.projects,
+      data: {'name': name},
+    ) as Map<String, dynamic>;
+
+    return _projectFromJson(response['data'] as Map<String, dynamic>);
+  }
+
+  // ── Warehouses ───────────────────────────────────────────────────────────
+
+  @override
+  Future<List<WarehouseEntity>> getWarehouses() async {
+    final response = await _httpClient.get(
+      ApiEndpoints.warehouses,
+      queryParameters: {'limit': 100},
+    ) as Map<String, dynamic>;
+
+    final data = response['data'] as List<dynamic>;
+    return data
+        .map((e) => _warehouseFromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<WarehouseEntity> createWarehouse({
+    required String name,
+    required String type,
+    String? projectId,
+  }) async {
+    final response = await _httpClient.post(
+      ApiEndpoints.warehouses,
+      data: {
+        'name': name,
+        'type': type,
+        if (projectId != null) 'projectId': projectId,
+      },
+    ) as Map<String, dynamic>;
+
+    return _warehouseFromJson(response['data'] as Map<String, dynamic>);
+  }
+
   // ── Helpers de mapeo ──────────────────────────────────────────────────────
 
   Asset _assetFromApiJson(Map<String, dynamic> json) {
     final model = json['model'] as Map<String, dynamic>?;
     final brand = model?['brand'] as Map<String, dynamic>?;
     final category = model?['category'] as String?;
+    final warehouse = json['currentWarehouse'] as Map<String, dynamic>?;
+    final project = json['currentProject'] as Map<String, dynamic>?;
+    final condition = json['condition'] as Map<String, dynamic>?;
 
     final images = (json['images'] as List<dynamic>?)
             ?.map((e) => AssetImageModel.fromJson(e as Map<String, dynamic>))
@@ -294,7 +420,9 @@ class AssetRemoteDataSourceImpl implements IAssetRemoteDataSource {
       type: _categoryToType(category),
       description: json['description'] as String? ??
           model?['name'] as String? ??
-          json['internalCode'] as String,
+          json['internalCode'] as String? ??
+          '',
+      internalCode: json['internalCode'] as String?,
       brandId: brand?['id'] as String?,
       brandName: brand?['name'] as String?,
       modelId: json['modelId'] as String?,
@@ -302,12 +430,17 @@ class AssetRemoteDataSourceImpl implements IAssetRemoteDataSource {
       serialNumber: json['serialNumber'] as String?,
       color: json['color'] as String?,
       quantity: (json['quantity'] as num?)?.toInt() ?? 1,
-      location: (json['currentWarehouse'] as Map<String, dynamic>?)?['name']
-              as String? ??
-          (json['currentProject'] as Map<String, dynamic>?)?['name'] as String?,
+      location: warehouse?['name'] as String? ?? project?['name'] as String?,
+      currentProjectId: json['currentProjectId'] as String?,
+      currentProjectName: project?['name'] as String?,
+      currentWarehouseId: json['currentWarehouseId'] as String?,
+      currentWarehouseName: warehouse?['name'] as String?,
+      conditionId: json['conditionId'] as String? ?? condition?['id'] as String?,
+      conditionName: condition?['name'] as String?,
+      conditionColor: condition?['color'] as String?,
       observations: json['notes'] as String?,
-      // Las fotos confirmadas se almacenan como URLs públicas
       photoPaths: images.map((img) => img.url).toList(),
+      images: images,
       // Vehículo
       licensePlate: json['licensePlate'] as String?,
       year: (json['year'] as num?)?.toInt(),
@@ -320,12 +453,44 @@ class AssetRemoteDataSourceImpl implements IAssetRemoteDataSource {
     );
   }
 
+  ProjectEntity _projectFromJson(Map<String, dynamic> json) {
+    return ProjectEntity(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      location: json['location'] as String?,
+      clientCompany: json['clientCompany'] as String?,
+      status: json['status'] as String? ?? 'ACTIVE',
+    );
+  }
+
+  WarehouseEntity _warehouseFromJson(Map<String, dynamic> json) {
+    return WarehouseEntity(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      type: json['type'] as String? ?? 'CENTRAL',
+      projectId: json['projectId'] as String?,
+      address: json['address'] as String?,
+      isActive: json['isActive'] as bool? ?? true,
+    );
+  }
+
+  ConditionEntity _conditionFromJson(Map<String, dynamic> json) {
+    return ConditionEntity(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      color: json['color'] as String? ?? '#607D8B',
+      sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+      isActive: json['isActive'] as bool? ?? true,
+    );
+  }
+
   AssetModelEntity _modelFromApiJson(Map<String, dynamic> json) {
     final brandMap = json['brand'] as Map<String, dynamic>?;
     return AssetModelEntity(
       id: json['id'] as String,
       brandId: json['brandId'] as String? ?? brandMap?['id'] as String? ?? '',
       name: json['name'] as String,
+      category: json['category'] as String? ?? 'TOOL',
     );
   }
 

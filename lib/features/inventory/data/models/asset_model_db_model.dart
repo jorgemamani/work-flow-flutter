@@ -25,8 +25,12 @@ class AssetModelDbModel {
         'name': name,
       };
 
-  AssetModelEntity toEntity() =>
-      AssetModelEntity(id: id, brandId: brandId, name: name);
+  AssetModelEntity toEntity() => AssetModelEntity(
+        id: id,
+        brandId: brandId,
+        name: name,
+        category: 'TOOL',
+      );
 
   factory AssetModelDbModel.fromEntity(AssetModelEntity entity) =>
       AssetModelDbModel(

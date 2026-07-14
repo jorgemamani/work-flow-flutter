@@ -5,42 +5,27 @@ import '../../domain/entities/asset_brand.dart';
 import '../../domain/entities/asset_image.dart';
 import '../../domain/entities/asset_model_entity.dart';
 import '../../domain/entities/asset_type.dart';
+import '../../domain/entities/condition_entity.dart';
+import '../../domain/entities/project_entity.dart';
+import '../../domain/entities/warehouse_entity.dart';
 
 enum AssetFormStatus { initial, loading, success, failure }
 
-/// Estado de una foto individual durante el flujo de subida a R2.
-enum PhotoUploadStatus {
-  /// Foto seleccionada localmente, aún no subida.
-  pending,
+enum PhotoUploadStatus { pending, uploading, confirmed, error }
 
-  /// PUT a R2 en curso.
-  uploading,
-
-  /// Confirmada en el backend — `remoteUrl` disponible.
-  confirmed,
-
-  /// PUT a R2 o confirmación fallaron.
-  error,
-}
-
-/// Representa una foto en el formulario de activo.
-/// Puede estar pendiente (solo ruta local) o confirmada (URL remota).
 class AssetPhotoEntry extends Equatable {
   const AssetPhotoEntry({
     required this.localPath,
+    this.contentType = 'image/jpeg',
     this.status = PhotoUploadStatus.pending,
     this.remoteImage,
     this.errorMessage,
   });
 
-  /// Ruta local en el dispositivo (del `image_picker`).
   final String localPath;
-
+  final String contentType;
   final PhotoUploadStatus status;
-
-  /// Disponible solo cuando `status == confirmed`.
   final AssetImage? remoteImage;
-
   final String? errorMessage;
 
   bool get isPending => status == PhotoUploadStatus.pending;
@@ -48,16 +33,17 @@ class AssetPhotoEntry extends Equatable {
   bool get isConfirmed => status == PhotoUploadStatus.confirmed;
   bool get hasError => status == PhotoUploadStatus.error;
 
-  /// URL a mostrar en la UI (remota si está confirmada, local si no).
   String get displayUrl => remoteImage?.url ?? localPath;
 
   AssetPhotoEntry copyWith({
     PhotoUploadStatus? status,
     AssetImage? remoteImage,
     String? errorMessage,
+    String? contentType,
   }) {
     return AssetPhotoEntry(
       localPath: localPath,
+      contentType: contentType ?? this.contentType,
       status: status ?? this.status,
       remoteImage: remoteImage ?? this.remoteImage,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -65,7 +51,7 @@ class AssetPhotoEntry extends Equatable {
   }
 
   @override
-  List<Object?> get props => [localPath, status, remoteImage, errorMessage];
+  List<Object?> get props => [localPath, contentType, status, remoteImage, errorMessage];
 }
 
 class AssetFormState extends Equatable {
@@ -76,9 +62,17 @@ class AssetFormState extends Equatable {
     this.models = const [],
     this.selectedBrand,
     this.selectedModel,
+    this.conditions = const [],
+    this.selectedCondition,
+    this.projects = const [],
+    this.selectedProject,
+    this.warehouses = const [],
+    this.selectedWarehouse,
     this.photos = const [],
     this.savedAsset,
     this.errorMessage,
+    this.isLoadingCatalogs = false,
+    this.isLoadingModels = false,
   });
 
   final AssetFormStatus status;
@@ -88,20 +82,30 @@ class AssetFormState extends Equatable {
   final AssetBrand? selectedBrand;
   final AssetModelEntity? selectedModel;
 
-  /// Lista unificada de fotos (pendientes + confirmadas).
-  final List<AssetPhotoEntry> photos;
+  final List<ConditionEntity> conditions;
+  final ConditionEntity? selectedCondition;
 
+  final List<ProjectEntity> projects;
+  final ProjectEntity? selectedProject;
+
+  final List<WarehouseEntity> warehouses;
+  final WarehouseEntity? selectedWarehouse;
+
+  final List<AssetPhotoEntry> photos;
   final Asset? savedAsset;
   final String? errorMessage;
 
-  /// Rutas locales (compat. con widgets que aún usan `photoPaths`).
+  final bool isLoadingCatalogs;
+  final bool isLoadingModels;
+
   List<String> get photoPaths => photos.map((p) => p.localPath).toList();
 
-  /// ¿Hay fotos pendientes de subir?
-  bool get hasPendingPhotos =>
-      photos.any((p) => p.status == PhotoUploadStatus.pending);
+  bool get hasPendingPhotos => photos.any(
+        (p) =>
+            p.status == PhotoUploadStatus.pending ||
+            p.status == PhotoUploadStatus.error,
+      );
 
-  /// ¿Alguna foto está subiendo en este momento?
   bool get isUploadingPhotos =>
       photos.any((p) => p.status == PhotoUploadStatus.uploading);
 
@@ -112,9 +116,17 @@ class AssetFormState extends Equatable {
     List<AssetModelEntity>? models,
     AssetBrand? Function()? selectedBrand,
     AssetModelEntity? Function()? selectedModel,
+    List<ConditionEntity>? conditions,
+    ConditionEntity? Function()? selectedCondition,
+    List<ProjectEntity>? projects,
+    ProjectEntity? Function()? selectedProject,
+    List<WarehouseEntity>? warehouses,
+    WarehouseEntity? Function()? selectedWarehouse,
     List<AssetPhotoEntry>? photos,
     Asset? savedAsset,
     String? Function()? errorMessage,
+    bool? isLoadingCatalogs,
+    bool? isLoadingModels,
   }) {
     return AssetFormState(
       status: status ?? this.status,
@@ -125,10 +137,24 @@ class AssetFormState extends Equatable {
           selectedBrand != null ? selectedBrand() : this.selectedBrand,
       selectedModel:
           selectedModel != null ? selectedModel() : this.selectedModel,
+      conditions: conditions ?? this.conditions,
+      selectedCondition: selectedCondition != null
+          ? selectedCondition()
+          : this.selectedCondition,
+      projects: projects ?? this.projects,
+      selectedProject:
+          selectedProject != null ? selectedProject() : this.selectedProject,
+      warehouses: warehouses ?? this.warehouses,
+      selectedWarehouse:
+          selectedWarehouse != null
+              ? selectedWarehouse()
+              : this.selectedWarehouse,
       photos: photos ?? this.photos,
       savedAsset: savedAsset ?? this.savedAsset,
       errorMessage:
           errorMessage != null ? errorMessage() : this.errorMessage,
+      isLoadingCatalogs: isLoadingCatalogs ?? this.isLoadingCatalogs,
+      isLoadingModels: isLoadingModels ?? this.isLoadingModels,
     );
   }
 
@@ -140,8 +166,16 @@ class AssetFormState extends Equatable {
         models,
         selectedBrand,
         selectedModel,
+        conditions,
+        selectedCondition,
+        projects,
+        selectedProject,
+        warehouses,
+        selectedWarehouse,
         photos,
         savedAsset,
         errorMessage,
+        isLoadingCatalogs,
+        isLoadingModels,
       ];
 }

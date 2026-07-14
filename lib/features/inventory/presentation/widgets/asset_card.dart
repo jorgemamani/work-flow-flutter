@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
+import '../../../../shared/widgets/app_image.dart';
+import '../../../../shared/utils/color_utils.dart';
 import '../../domain/entities/asset.dart';
-import '../../domain/entities/asset_condition.dart';
 import '../../domain/entities/asset_type.dart';
 import 'asset_type_theme.dart';
 
@@ -26,7 +25,9 @@ class AssetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final typeColor = AssetTypeTheme.colorFor(asset.type);
-    final condColor = AssetTypeTheme.conditionColor(asset.condition);
+    final condColor =
+        colorFromHex(asset.conditionColor) ?? AppColors.textSecondary;
+    final condLabel = asset.conditionName ?? '—';
 
     return Card(
       margin: const EdgeInsets.symmetric(
@@ -72,7 +73,7 @@ class AssetCard extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSizes.sm),
                         _ConditionBadge(
-                          label: asset.condition.displayName,
+                          label: condLabel,
                           color: condColor,
                         ),
                       ],
@@ -247,17 +248,11 @@ class _PhotoThumbnails extends StatelessWidget {
             padding: const EdgeInsets.only(right: 4),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: Image.file(
-                File(p),
+              child: AppImage(
+                path: p,
                 width: 28,
                 height: 28,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 28,
-                  height: 28,
-                  color: AppColors.border,
-                  child: const Icon(Icons.broken_image, size: 14),
-                ),
               ),
             ),
           ),

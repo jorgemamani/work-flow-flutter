@@ -1,5 +1,4 @@
 import '../entities/asset.dart';
-import '../entities/asset_condition.dart';
 import '../entities/asset_type.dart';
 import '../repositories/asset_repository.dart';
 
@@ -11,13 +10,13 @@ class GetAssetsUseCase {
   Future<List<Asset>> call({
     String? query,
     AssetType? type,
-    AssetCondition? condition,
+    String? conditionId,
     String? location,
   }) {
     return _repository.getAssets(
       query: query,
       type: type,
-      condition: condition,
+      conditionId: conditionId,
       location: location,
     );
   }

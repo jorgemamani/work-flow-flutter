@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
+import '../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../domain/entities/asset_condition.dart';
@@ -227,7 +228,7 @@ void _openSubItemSheet({
   AssetSubItem? existing,
   required ValueChanged<AssetSubItem> onSave,
 }) {
-  showModalBottomSheet<void>(
+  showAppBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

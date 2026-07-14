@@ -1,27 +1,58 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../routing/route_names.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
+import '../../../../shared/widgets/app_image.dart';
+import '../../../../shared/utils/color_utils.dart';
 import '../../domain/entities/asset.dart';
-import '../../domain/entities/asset_condition.dart';
 import '../../domain/entities/asset_sub_item.dart';
 import '../../domain/entities/asset_type.dart';
+import '../bloc/asset_detail_bloc.dart';
+import '../bloc/asset_detail_state.dart';
 import '../widgets/asset_type_theme.dart';
 
 class AssetDetailPage extends StatelessWidget {
-  const AssetDetailPage({super.key, required this.asset});
+  const AssetDetailPage({super.key, required this.preview});
+
+  /// Activo parcial de la lista; las fotos se cargan vía [AssetDetailBloc].
+  final Asset preview;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AssetDetailBloc, AssetDetailState>(
+      builder: (context, state) {
+        final asset = state.asset ?? preview;
+        final isLoadingPhotos =
+            state.status == AssetDetailStatus.loading &&
+            asset.photoPaths.isEmpty;
+
+        return _AssetDetailBody(
+          asset: asset,
+          isLoadingPhotos: isLoadingPhotos,
+        );
+      },
+    );
+  }
+}
+
+class _AssetDetailBody extends StatelessWidget {
+  const _AssetDetailBody({
+    required this.asset,
+    required this.isLoadingPhotos,
+  });
 
   final Asset asset;
+  final bool isLoadingPhotos;
 
   @override
   Widget build(BuildContext context) {
     final typeColor = AssetTypeTheme.colorFor(asset.type);
-    final condColor = AssetTypeTheme.conditionColor(asset.condition);
+    final condColor =
+        colorFromHex(asset.conditionColor) ?? AppColors.textSecondary;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -46,9 +77,16 @@ class AssetDetailPage extends StatelessWidget {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: asset.photoPaths.isNotEmpty
-                  ? _HeroPhoto(path: asset.photoPaths.first)
-                  : Container(
+              background: isLoadingPhotos
+                  ? Container(
+                      color: typeColor,
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    )
+                  : asset.photoPaths.isNotEmpty
+                      ? _HeroPhoto(path: asset.photoPaths.first)
+                      : Container(
                       color: typeColor,
                       child: Center(
                         child: Icon(
@@ -89,7 +127,7 @@ class AssetDetailPage extends StatelessWidget {
 
                   // Condition badge
                   _ConditionBadge(
-                    condition: asset.condition,
+                    label: asset.conditionName ?? '—',
                     color: condColor,
                   ),
                   const SizedBox(height: AppSizes.lg),
@@ -277,11 +315,11 @@ class _HeroPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.file(
-      File(path),
+    return AppImage(
+      path: path,
       fit: BoxFit.cover,
       width: double.infinity,
-      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      errorWidget: const SizedBox.shrink(),
     );
   }
 }
@@ -319,9 +357,9 @@ class _TypeBadge extends StatelessWidget {
 }
 
 class _ConditionBadge extends StatelessWidget {
-  const _ConditionBadge({required this.condition, required this.color});
+  const _ConditionBadge({required this.label, required this.color});
 
-  final AssetCondition condition;
+  final String label;
   final Color color;
 
   @override
@@ -334,7 +372,7 @@ class _ConditionBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSizes.radiusFull),
       ),
       child: Text(
-        condition.displayName,
+        label,
         style: TextStyle(
           fontSize: 12,
           color: color,
@@ -514,14 +552,7 @@ class _PhotoGrid extends StatelessWidget {
       itemCount: paths.length,
       itemBuilder: (_, i) => ClipRRect(
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        child: Image.file(
-          File(paths[i]),
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            color: AppColors.border,
-            child: const Icon(Icons.broken_image),
-          ),
-        ),
+        child: AppImage(path: paths[i], fit: BoxFit.cover),
       ),
     );
   }

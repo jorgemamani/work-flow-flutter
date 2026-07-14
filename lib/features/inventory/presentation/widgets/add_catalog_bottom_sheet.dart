@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
+import '../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
+
+typedef OnCatalogItemCreated = Future<void> Function(String name);
 
 /// Bottom sheet para agregar un nuevo ítem al catálogo (marca / modelo).
 class AddCatalogBottomSheet extends StatefulWidget {
@@ -15,7 +18,7 @@ class AddCatalogBottomSheet extends StatefulWidget {
 
   final String title;
   final String hint;
-  final ValueChanged<String> onConfirm;
+  final OnCatalogItemCreated onConfirm;
 
   @override
   State<AddCatalogBottomSheet> createState() => _AddCatalogBottomSheetState();
@@ -100,10 +103,13 @@ class _AddCatalogBottomSheetState extends State<AddCatalogBottomSheet> {
             const SizedBox(height: AppSizes.md),
             AppButton(
               label: 'Agregar',
-              onPressed: () {
-                if (_formKey.currentState?.validate() == true) {
-                  widget.onConfirm(_ctrl.text.trim());
-                  Navigator.pop(context);
+              onPressed: () async {
+                if (_formKey.currentState?.validate() != true) return;
+                try {
+                  await widget.onConfirm(_ctrl.text.trim());
+                  if (context.mounted) Navigator.pop(context);
+                } catch (_) {
+                  // El error se muestra vía AlertManager en el caller.
                 }
               },
             ),
@@ -114,13 +120,13 @@ class _AddCatalogBottomSheetState extends State<AddCatalogBottomSheet> {
   }
 }
 
-void showAddCatalogSheet({
+Future<void> showAddCatalogSheet({
   required BuildContext context,
   required String title,
   required String hint,
-  required ValueChanged<String> onConfirm,
+  required OnCatalogItemCreated onConfirm,
 }) {
-  showModalBottomSheet<void>(
+  return showAppBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

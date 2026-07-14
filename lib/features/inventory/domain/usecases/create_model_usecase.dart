@@ -9,6 +9,11 @@ class CreateModelUseCase {
   Future<AssetModelEntity> call({
     required String brandId,
     required String name,
+    required String category,
   }) =>
-      _repository.createModel(brandId, name);
+      _repository.createModel(
+        brandId: brandId,
+        name: name,
+        category: category,
+      );
 }

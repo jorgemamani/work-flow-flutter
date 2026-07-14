@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../domain/entities/asset.dart';
-import '../../domain/entities/asset_condition.dart';
 import '../../domain/entities/asset_sub_item.dart';
 import '../../domain/entities/asset_type.dart';
 
@@ -18,7 +17,9 @@ class AssetDbModel {
     this.color,
     required this.quantity,
     this.location,
-    required this.condition,
+    this.conditionId,
+    this.conditionName,
+    this.conditionColor,
     this.observations,
     required this.photoPaths,
     this.licensePlate,
@@ -43,7 +44,9 @@ class AssetDbModel {
   final String? color;
   final int quantity;
   final String? location;
-  final String condition;
+  final String? conditionId;
+  final String? conditionName;
+  final String? conditionColor;
   final String? observations;
   final String photoPaths; // JSON array
   final String? licensePlate;
@@ -69,7 +72,9 @@ class AssetDbModel {
       color: map['color'] as String?,
       quantity: map['quantity'] as int? ?? 1,
       location: map['location'] as String?,
-      condition: map['condition'] as String? ?? 'good',
+      conditionId: map['condition_id'] as String?,
+      conditionName: map['condition_name'] as String?,
+      conditionColor: map['condition_color'] as String?,
       observations: map['observations'] as String?,
       photoPaths: map['photo_paths'] as String? ?? '[]',
       licensePlate: map['license_plate'] as String?,
@@ -96,7 +101,9 @@ class AssetDbModel {
         'color': color,
         'quantity': quantity,
         'location': location,
-        'condition': condition,
+        'condition_id': conditionId,
+        'condition_name': conditionName,
+        'condition_color': conditionColor,
         'observations': observations,
         'photo_paths': photoPaths,
         'license_plate': licensePlate,
@@ -123,7 +130,9 @@ class AssetDbModel {
       color: color,
       quantity: quantity,
       location: location,
-      condition: _conditionFromString(condition),
+      conditionId: conditionId,
+      conditionName: conditionName,
+      conditionColor: conditionColor,
       observations: observations,
       photoPaths: List<String>.from(jsonDecode(photoPaths) as List),
       subItems: subItems,
@@ -153,7 +162,9 @@ class AssetDbModel {
       color: entity.color,
       quantity: entity.quantity,
       location: entity.location,
-      condition: entity.condition.name,
+      conditionId: entity.conditionId,
+      conditionName: entity.conditionName,
+      conditionColor: entity.conditionColor,
       observations: entity.observations,
       photoPaths: jsonEncode(entity.photoPaths),
       licensePlate: entity.licensePlate,
@@ -172,13 +183,6 @@ class AssetDbModel {
     return AssetType.values.firstWhere(
       (e) => e.name == value,
       orElse: () => AssetType.tool,
-    );
-  }
-
-  static AssetCondition _conditionFromString(String value) {
-    return AssetCondition.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => AssetCondition.good,
     );
   }
 }

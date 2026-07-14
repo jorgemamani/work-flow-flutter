@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../../domain/entities/asset_condition.dart';
 import '../../domain/entities/asset_type.dart';
 
 abstract class InventoryEvent extends Equatable {
@@ -33,12 +32,12 @@ class InventoryTypeFilterChanged extends InventoryEvent {
 }
 
 class InventoryConditionFilterChanged extends InventoryEvent {
-  const InventoryConditionFilterChanged(this.condition);
+  const InventoryConditionFilterChanged(this.conditionId);
 
-  final AssetCondition? condition;
+  final String? conditionId;
 
   @override
-  List<Object?> get props => [condition];
+  List<Object?> get props => [conditionId];
 }
 
 class InventoryFiltersCleared extends InventoryEvent {

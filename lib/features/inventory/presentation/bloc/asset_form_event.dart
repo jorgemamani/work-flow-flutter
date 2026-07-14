@@ -2,10 +2,11 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/asset.dart';
 import '../../domain/entities/asset_brand.dart';
-import '../../domain/entities/asset_condition.dart';
 import '../../domain/entities/asset_model_entity.dart';
-import '../../domain/entities/asset_sub_item.dart';
 import '../../domain/entities/asset_type.dart';
+import '../../domain/entities/condition_entity.dart';
+import '../../domain/entities/project_entity.dart';
+import '../../domain/entities/warehouse_entity.dart';
 
 abstract class AssetFormEvent extends Equatable {
   const AssetFormEvent();
@@ -69,13 +70,36 @@ class AssetFormModelCreated extends AssetFormEvent {
   List<Object?> get props => [brandId, name];
 }
 
-class AssetFormPhotoAdded extends AssetFormEvent {
-  const AssetFormPhotoAdded(this.path);
+class AssetFormConditionSelected extends AssetFormEvent {
+  const AssetFormConditionSelected(this.condition);
 
-  final String path;
+  final ConditionEntity? condition;
 
   @override
-  List<Object?> get props => [path];
+  List<Object?> get props => [condition];
+}
+
+class AssetFormConditionCreated extends AssetFormEvent {
+  const AssetFormConditionCreated({required this.name, required this.color});
+
+  final String name;
+  final String color;
+
+  @override
+  List<Object?> get props => [name, color];
+}
+
+class AssetFormPhotoAdded extends AssetFormEvent {
+  const AssetFormPhotoAdded({
+    required this.path,
+    required this.contentType,
+  });
+
+  final String path;
+  final String contentType;
+
+  @override
+  List<Object?> get props => [path, contentType];
 }
 
 class AssetFormPhotoRemoved extends AssetFormEvent {
@@ -87,51 +111,40 @@ class AssetFormPhotoRemoved extends AssetFormEvent {
   List<Object?> get props => [index];
 }
 
-/// Inicia la subida de todas las fotos pendientes para un activo ya creado.
-class AssetFormImageUploadsStarted extends AssetFormEvent {
-  const AssetFormImageUploadsStarted({required this.assetId});
+class AssetFormProjectSelected extends AssetFormEvent {
+  const AssetFormProjectSelected(this.project);
 
-  final String assetId;
+  final ProjectEntity? project;
 
   @override
-  List<Object?> get props => [assetId];
+  List<Object?> get props => [project];
 }
 
-class AssetFormSubItemAdded extends AssetFormEvent {
-  const AssetFormSubItemAdded(this.subItem);
+class AssetFormProjectCreated extends AssetFormEvent {
+  const AssetFormProjectCreated(this.name);
 
-  final AssetSubItem subItem;
+  final String name;
 
   @override
-  List<Object?> get props => [subItem];
+  List<Object?> get props => [name];
 }
 
-class AssetFormSubItemUpdated extends AssetFormEvent {
-  const AssetFormSubItemUpdated({required this.index, required this.subItem});
+class AssetFormWarehouseSelected extends AssetFormEvent {
+  const AssetFormWarehouseSelected(this.warehouse);
 
-  final int index;
-  final AssetSubItem subItem;
+  final WarehouseEntity? warehouse;
 
   @override
-  List<Object?> get props => [index, subItem];
+  List<Object?> get props => [warehouse];
 }
 
-class AssetFormSubItemRemoved extends AssetFormEvent {
-  const AssetFormSubItemRemoved(this.index);
+class AssetFormWarehouseCreated extends AssetFormEvent {
+  const AssetFormWarehouseCreated(this.name);
 
-  final int index;
-
-  @override
-  List<Object?> get props => [index];
-}
-
-class AssetFormConditionChanged extends AssetFormEvent {
-  const AssetFormConditionChanged(this.condition);
-
-  final AssetCondition condition;
+  final String name;
 
   @override
-  List<Object?> get props => [condition];
+  List<Object?> get props => [name];
 }
 
 class AssetFormSubmitted extends AssetFormEvent {

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/delete_asset_usecase.dart';
 import '../../domain/usecases/get_assets_usecase.dart';
+import '../../domain/usecases/get_conditions_usecase.dart';
 import 'inventory_event.dart';
 import 'inventory_state.dart';
 
@@ -9,8 +10,10 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
   InventoryBloc({
     required GetAssetsUseCase getAssetsUseCase,
     required DeleteAssetUseCase deleteAssetUseCase,
+    required GetConditionsUseCase getConditionsUseCase,
   })  : _getAssets = getAssetsUseCase,
         _deleteAsset = deleteAssetUseCase,
+        _getConditions = getConditionsUseCase,
         super(const InventoryState()) {
     on<InventoryLoadRequested>(_onLoad);
     on<InventorySearchChanged>(_onSearchChanged);
@@ -22,12 +25,14 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
 
   final GetAssetsUseCase _getAssets;
   final DeleteAssetUseCase _deleteAsset;
+  final GetConditionsUseCase _getConditions;
 
   Future<void> _onLoad(
     InventoryLoadRequested event,
     Emitter<InventoryState> emit,
   ) async {
     emit(state.copyWith(status: InventoryStatus.loading));
+    await _loadConditions(emit);
     await _fetchAssets(emit);
   }
 
@@ -51,7 +56,7 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     InventoryConditionFilterChanged event,
     Emitter<InventoryState> emit,
   ) async {
-    emit(state.copyWith(conditionFilter: () => event.condition));
+    emit(state.copyWith(conditionFilterId: () => event.conditionId));
     await _fetchAssets(emit);
   }
 
@@ -62,7 +67,7 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     emit(state.copyWith(
       query: '',
       typeFilter: () => null,
-      conditionFilter: () => null,
+      conditionFilterId: () => null,
     ));
     await _fetchAssets(emit);
   }
@@ -82,12 +87,22 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     }
   }
 
+  Future<void> _loadConditions(Emitter<InventoryState> emit) async {
+    try {
+      final conditions = await _getConditions();
+      conditions.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      emit(state.copyWith(conditions: conditions));
+    } catch (_) {
+      // El filtro por condición queda vacío si falla la carga.
+    }
+  }
+
   Future<void> _fetchAssets(Emitter<InventoryState> emit) async {
     try {
       final assets = await _getAssets(
         query: state.query.isEmpty ? null : state.query,
         type: state.typeFilter,
-        condition: state.conditionFilter,
+        conditionId: state.conditionFilterId,
       );
       emit(state.copyWith(
         status: InventoryStatus.success,

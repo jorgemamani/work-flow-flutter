@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/local_storage/domain/local_storage.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -52,7 +53,11 @@ class AuthRepositoryImpl implements IAuthRepository {
       final refreshed = await _enrichWithMe(cached);
       await _persistUser(refreshed);
       return refreshed;
+    } on UnauthorizedException {
+      await logout();
+      return null;
     } catch (_) {
+      // Error de red: mantener sesión local para tolerar offline breve.
       return cached;
     }
   }

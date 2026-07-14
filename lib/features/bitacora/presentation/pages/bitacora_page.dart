@@ -7,6 +7,7 @@ import '../../../../features/auth/domain/entities/user.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_sizes.dart';
 import '../../../../shared/entities/employee_obra_entities.dart';
+import '../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../data/mock_bitacora_datasource.dart';
 import '../../domain/entities/bitacora_entry.dart';
 
@@ -102,7 +103,7 @@ class _BitacoraPageState extends State<BitacoraPage> {
   }
 
   void _showAddEntrySheet(BuildContext context, User user) {
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

@@ -3,13 +3,14 @@ import 'dart:io';
 import '../entities/asset.dart';
 import '../entities/asset_image.dart';
 import '../entities/asset_type.dart';
-import '../entities/asset_condition.dart';
+import '../entities/project_entity.dart';
+import '../entities/warehouse_entity.dart';
 
 abstract class IAssetRepository {
   Future<List<Asset>> getAssets({
     String? query,
     AssetType? type,
-    AssetCondition? condition,
+    String? conditionId,
     String? location,
   });
 
@@ -35,4 +36,16 @@ abstract class IAssetRepository {
   Future<List<AssetImage>> getImages(String assetId);
 
   Future<void> deleteImage({required String assetId, required String imageId});
+
+  // ── Proyectos y almacenes ──────────────────────────────────────────────────
+
+  Future<List<ProjectEntity>> getProjects();
+  Future<ProjectEntity> createProject(String name);
+
+  Future<List<WarehouseEntity>> getWarehouses();
+  Future<WarehouseEntity> createWarehouse({
+    required String name,
+    required String type,
+    String? projectId,
+  });
 }
