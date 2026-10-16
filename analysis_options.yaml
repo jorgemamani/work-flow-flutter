@@ -5,6 +5,10 @@ analyzer:
     invalid_annotation_target: ignore
   exclude:
     - lib/l10n/**
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
 
 linter:
   rules:
