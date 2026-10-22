@@ -17,11 +17,13 @@ class LocalDatabase {
   static Future<LocalDatabase> open({
     required DatabaseFactory factory,
     required String path,
+    bool singleInstance = true,
   }) async {
     final db = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: version,
+        singleInstance: singleInstance,
         onCreate: (db, _) => _create(db),
       ),
     );
