@@ -138,22 +138,32 @@ class SessionCubit extends Cubit<SessionState> {
     required String documentNumber,
     required String pin,
   }) =>
-      _login(() => _session.loginField(cuit: cuit, documentNumber: documentNumber, pin: pin));
+      _login(
+        () => _session.loginField(cuit: cuit, documentNumber: documentNumber, pin: pin),
+        askTenant: false,
+      );
 
   Future<void> loginOffice({
     required String email,
     required String password,
     String? cuit,
   }) =>
-      _login(() => _session.loginOffice(email: email, password: password, cuit: cuit));
+      _login(
+        () => _session.loginOffice(email: email, password: password, cuit: cuit),
+        // Con CUIT la empresa ya está elegida; sin él, se pregunta si hay varias.
+        askTenant: cuit == null || cuit.isEmpty,
+      );
 
-  Future<void> _login(Future<List<Membership>> Function() call) async {
+  Future<void> _login(
+    Future<List<Membership>> Function() call, {
+    required bool askTenant,
+  }) async {
     emit(state.copyWith(busy: true, clearError: true));
     try {
       final memberships = await call();
       final profile = await _profiles.fetch();
       await _adopt(profile);
-      if (memberships.length > 1) {
+      if (askTenant && memberships.length > 1) {
         emit(state.copyWith(
           phase: SessionPhase.choosingTenant,
           memberships: memberships,
