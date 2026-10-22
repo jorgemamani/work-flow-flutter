@@ -1,0 +1,574 @@
+{
+  "@@locale": "es",
+  "tabHome": "Inicio",
+  "tabItems": "Ítems",
+  "tabRecords": "Registros",
+  "tabAccount": "Cuenta",
+  "tabDailyLogs": "Bitácoras",
+  "tabVerifications": "Verificaciones",
+  "tabIncidents": "Incidencias",
+  "tabRequirements": "Solicitudes",
+  "loginField": "Campo",
+  "loginOffice": "Oficina",
+  "companyCuit": "CUIT de la empresa",
+  "companyCuitOptional": "CUIT de la empresa (opcional)",
+  "invalidCuit": "El CUIT tiene 11 dígitos",
+  "documentNumber": "DNI o CUIL",
+  "pin": "PIN",
+  "email": "Email",
+  "password": "Contraseña",
+  "signIn": "Ingresar",
+  "requiredField": "Obligatorio",
+  "loginOffline": "Sin conexión. Para ingresar por primera vez hace falta señal.",
+  "loginHelp": "¿Olvidaste el PIN? Pedile a tu empresa que lo resetee.",
+  "sessionExpiredKeepQueue": "Tu sesión venció. Ingresá de nuevo: lo que registraste sin señal se conserva y se envía después.",
+  "chooseCompany": "Elegí la empresa",
+  "chooseCompanyHelp": "Trabajás en más de una empresa. ¿Con cuál querés entrar?",
+  "helloName": "Hola, {name}",
+  "@helloName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noProject": "No tenés un proyecto asignado. Cuando te asignen uno, aparece acá después de sincronizar.",
+  "noProjectShort": "Sin proyecto",
+  "downloadingProject": "Descargando los datos del proyecto…",
+  "changeProject": "Cambiar proyecto",
+  "onSite": "Arriba en la mina",
+  "offSite": "Abajo",
+  "quickActions": "Qué querés hacer",
+  "summary": "Resumen",
+  "actionScan": "Escanear",
+  "actionReceiveRemito": "Recibir remito",
+  "actionVerification": "Verificación",
+  "actionDailyLog": "Bitácora",
+  "actionIncident": "Incidencia",
+  "actionCheckUp": "Registrar subida",
+  "actionCheckDown": "Registrar bajada",
+  "actionRequirement": "Solicitud",
+  "actionReturn": "Devolución",
+  "myItems": "A mi cargo",
+  "projectItems": "Del proyecto",
+  "receivedReports": "Informes recibidos",
+  "offline": "Sin conexión",
+  "online": "Con conexión",
+  "offlineWorkingLocally": "trabajando con los datos del teléfono",
+  "lastSync": "Última sync {when}",
+  "@lastSync": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "neverSynced": "Todavía no se sincronizó",
+  "allSynced": "Todo enviado",
+  "pendingCount": "{count, plural, =1{1 acción pendiente de enviar} other{{count} acciones pendientes de enviar}}",
+  "@pendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedCount": "{count, plural, =1{1 acción falló: revisala} other{{count} acciones fallaron: revisalas}}",
+  "@failedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agoNow": "recién",
+  "agoMinutes": "hace {count} min",
+  "@agoMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agoHours": "hace {count} h",
+  "@agoHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agoDays": "{count, plural, =1{hace 1 día} other{hace {count} días}}",
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncTitle": "Sincronización",
+  "syncNow": "Sincronizar ahora",
+  "syncing": "Sincronizando…",
+  "workOffline": "Trabajar sin conexión",
+  "workOfflineHelp": "No usa la red aunque haya señal. Todo se guarda en el teléfono.",
+  "failedTitle": "Con problemas ({count})",
+  "@failedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingTitle": "Pendientes en orden ({count})",
+  "@pendingTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nothingPending": "No hay nada pendiente",
+  "attempts": "{count, plural, =1{1 intento} other{{count} intentos}}",
+  "@attempts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retry": "Reintentar",
+  "discard": "Descartar",
+  "understood": "Entendido",
+  "redownloadAll": "Volver a descargar todo",
+  "offlineWillRetry": "Sin señal: se reintenta solo",
+  "errorPhotoMissing": "La foto ya no está en el teléfono",
+  "pendingSync": "Sin enviar",
+  "savedQueued": "Guardado. Se envía cuando haya señal.",
+  "savedLocallyHint": "Se guarda en el teléfono con la hora de ahora y se envía solo al tener señal.",
+  "needsConnection": "Esto necesita conexión",
+  "opMove": "Mover {code}",
+  "@opMove": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "opStatus": "Cambiar estado de {code}",
+  "@opStatus": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "opReception": "Recepción del remito {number}",
+  "@opReception": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "opReturn": "Remito de devolución",
+  "opReturnSubmit": "Enviar remito de devolución",
+  "opVerification": "{count, plural, =1{Verificación de 1 ítem} other{Verificación de {count} ítems}}",
+  "@opVerification": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opDailyLog": "Bitácora diaria",
+  "opIncident": "Incidencia: {title}",
+  "@opIncident": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "opRequirement": "{count, plural, =1{Solicitud de 1 ítem} other{Solicitud de {count} ítems}}",
+  "@opRequirement": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "opCheckInUp": "Subida de {name}",
+  "@opCheckInUp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "opCheckInDown": "Bajada de {name}",
+  "@opCheckInDown": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "opPhoto": "Foto ({what})",
+  "@opPhoto": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "searchItems": "Buscar por código, modelo o patente",
+  "noMyItems": "No tenés ítems a tu cargo",
+  "noProjectItems": "No hay ítems en el proyecto",
+  "consumables": "Consumibles",
+  "inTransit": "En tránsito",
+  "withPerson": "Con",
+  "itemNotFound": "No se encontró el ítem",
+  "noCurrentPhoto": "Sin foto vigente",
+  "inOpenRemito": "En un remito abierto",
+  "whereIsIt": "Dónde está",
+  "sinceAgo": "Desde {when}",
+  "@sinceAgo": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "details": "Datos",
+  "internalCode": "Código interno",
+  "barcode": "Código de barras",
+  "serialNumber": "N° de serie",
+  "licensePlate": "Patente",
+  "category": "Categoría",
+  "custodian": "Responsable",
+  "description": "Descripción",
+  "contents": "Contiene ({count})",
+  "@contents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveItem": "Mover",
+  "changeStatus": "Cambiar estado",
+  "reportIncident": "Reportar una incidencia",
+  "requestRepairOrWriteOff": "Pedir reparación o baja",
+  "nowAt": "Ahora en: {where}",
+  "@nowAt": {
+    "placeholders": {
+      "where": {
+        "type": "String"
+      }
+    }
+  },
+  "toMyCharge": "A mi cargo",
+  "notesOptional": "Notas (opcional)",
+  "confirmMove": "Confirmar movimiento",
+  "status": "Estado",
+  "condition": "Condición",
+  "reasonOptional": "Motivo (opcional)",
+  "save": "Guardar",
+  "scanTitle": "Escanear código",
+  "cameraUnavailable": "No se pudo abrir la cámara. Tipeá el código abajo.",
+  "codeNotFound": "No hay ningún ítem con el código {code}",
+  "@codeNotFound": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "typeCode": "O tipeá el código",
+  "statusOperational": "Operativo",
+  "statusReserved": "Reservado",
+  "statusInRepair": "En reparación",
+  "statusDamaged": "Dañado",
+  "statusLost": "Perdido",
+  "statusRetired": "De baja",
+  "holderLocation": "Ubicación",
+  "holderAsset": "Contenedor o vehículo",
+  "holderEmployee": "Persona",
+  "holderInTransit": "En tránsito",
+  "locProjectRoot": "La mina",
+  "locWarehouse": "Almacén",
+  "locWorkshop": "Taller",
+  "locOffice": "Oficina",
+  "locCamp": "Campamento",
+  "locWorkFront": "Frente de obra",
+  "locOther": "Otra",
+  "remitoDraft": "Borrador",
+  "remitoPendingApproval": "Pendiente de aprobación",
+  "remitoApproved": "Aprobado",
+  "remitoRejected": "Rechazado",
+  "remitoInTransit": "En tránsito",
+  "remitoReceived": "Recibido completo",
+  "remitoReceivedWithDiff": "Recibido con diferencias",
+  "remitoControlled": "Controlado",
+  "remitoCancelled": "Anulado",
+  "remitoTypeShipment": "Envío",
+  "remitoTypeReturn": "Devolución",
+  "remitoTypeTransfer": "Traslado",
+  "remitoTypeWorkshop": "Envío a taller",
+  "remitoTypePersonDelivery": "Entrega a persona",
+  "incomingRemitos": "Remitos por recibir",
+  "noIncomingRemitos": "No hay remitos en camino a este proyecto",
+  "fromTo": "{origin} → {dest}",
+  "@fromTo": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "dest": {
+        "type": "String"
+      }
+    }
+  },
+  "dispatchedAgo": "Despachado {when}",
+  "@dispatchedAgo": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "recentRemitos": "Remitos recientes",
+  "remitoNotFound": "No se encontró el remito",
+  "receiveRemitoTitle": "Recibir remito {number}",
+  "@receiveRemitoTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "receptionHelp": "Marcá cada ítem. Faltante: queda en tránsito y avisa a logística. Dañado: foto obligatoria.",
+  "markReceived": "Recibido",
+  "markMissing": "Faltante",
+  "markDamaged": "Dañado",
+  "sentQuantity": "Enviado: {qty}",
+  "@sentQuantity": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedQuantity": "Cantidad recibida",
+  "lessThanSent": "Menos que lo enviado: la diferencia se informa como faltante",
+  "whatHappened": "¿Qué pasó? (opcional)",
+  "damagedNeedsPhoto": "Los ítems dañados necesitan al menos una foto",
+  "confirmReception": "Confirmar recepción",
+  "receptionSummary": "Recibidos: {ok} · Faltantes: {missing} · Dañados: {damaged}",
+  "@receptionSummary": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      },
+      "damaged": {
+        "type": "int"
+      }
+    }
+  },
+  "cancel": "Cancelar",
+  "confirm": "Confirmar",
+  "returnRemitoTitle": "Remito de devolución",
+  "origin": "Origen",
+  "destinationWarehouse": "Almacén de destino",
+  "itemsToReturn": "Qué baja",
+  "available": "Disponible: {qty}",
+  "@available": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "createReturn": "{count, plural, =0{Armar devolución} =1{Armar devolución (1)} other{Armar devolución ({count})}}",
+  "@createReturn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleOptional": "Programación (opcional)",
+  "noSchedule": "Sin programación",
+  "photoLimitInfo": "Hasta {count} fotos por ítem",
+  "@photoLimitInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemsCount": "{count, plural, =0{Sin ítems} =1{1 ítem} other{{count} ítems}}",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseItems": "Elegir ítems",
+  "chooseItemsToVerify": "Ítems a verificar",
+  "verificationEmpty": "Elegí los ítems que vas a verificar",
+  "requiresPhoto": "Requiere foto",
+  "verificationMissingPhotos": "{count, plural, =1{Falta la foto de 1 ítem que la requiere} other{Faltan fotos de {count} ítems que las requieren}}",
+  "@verificationMissingPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photosOverLimit": "Máximo {count} fotos por ítem",
+  "@photosOverLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generalNotes": "Observaciones generales",
+  "submitVerification": "Enviar verificación",
+  "done": "Listo",
+  "photoFromCamera": "Sacar foto",
+  "photoFromGallery": "Elegir de la galería",
+  "photoRequired": "Foto obligatoria",
+  "photosCount": "{count} de {max} fotos",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photos": "Fotos",
+  "noDailyLogs": "Todavía no cargaste bitácoras",
+  "noVerifications": "Todavía no hiciste verificaciones",
+  "noReceivedReports": "No recibiste informes",
+  "noIncidents": "No hay incidencias",
+  "noRequirements": "No hay solicitudes",
+  "reviewApproved": "Aprobado",
+  "reviewObserved": "Observado",
+  "reviewPending": "Sin revisar",
+  "typeDailyLog": "Bitácora",
+  "typeReport": "Informe",
+  "typeIncident": "Incidencia",
+  "typeAssetAudit": "Auditoría de ítem",
+  "typeVerification": "Verificación",
+  "typeMovementChecklist": "Checklist de movimiento",
+  "whatDidYouDoToday": "¿Qué hiciste hoy?",
+  "tasks": "Tareas",
+  "addTask": "Agregar tarea",
+  "incidentTitle": "Título",
+  "kind": "Tipo",
+  "severityLabel": "Gravedad",
+  "relatedItem": "Ítem (opcional)",
+  "noItemSelected": "Ninguno: tocá para escanear o buscar",
+  "send": "Enviar",
+  "incidentMissing": "Faltante",
+  "incidentDamage": "Daño",
+  "incidentLoss": "Pérdida",
+  "incidentClaim": "Reclamo",
+  "incidentOther": "Otra",
+  "severityLow": "Baja",
+  "severityMedium": "Media",
+  "severityHigh": "Alta",
+  "severityCritical": "Crítica",
+  "incidentOpen": "Abierta",
+  "incidentInvestigating": "En análisis",
+  "incidentResolved": "Resuelta",
+  "incidentClosed": "Cerrada",
+  "reqNewItems": "Ítems nuevos",
+  "reqWriteOff": "Baja",
+  "reqRepair": "Reparación",
+  "reqPending": "Pendiente",
+  "reqInTransfer": "En traslado",
+  "reqInPurchase": "En compra",
+  "reqDelivered": "Entregada",
+  "reqRejected": "Rechazada",
+  "reqCancelled": "Cancelada",
+  "describeItem": "Describí qué necesitás",
+  "quantity": "Cantidad",
+  "addProjectItem": "Agregar ítem del proyecto",
+  "fromCatalog": "Del catálogo",
+  "otherItem": "Otro",
+  "neededByOptional": "Para cuándo (opcional)",
+  "checkInTitle": "Subida y bajada",
+  "confirmCheckUp": "¿Registrar la subida de {name}?",
+  "@confirmCheckUp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmCheckDown": "¿Registrar la bajada de {name}?",
+  "@confirmCheckDown": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "checkInTimeNote": "Queda registrada a las {time} (hora del teléfono).",
+  "@checkInTimeNote": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "youAreOnSite": "Estás arriba",
+  "youAreOffSite": "Estás abajo",
+  "registerUp": "Registrar subida",
+  "registerDown": "Registrar bajada",
+  "myCheckIns": "Mis marcaciones",
+  "wentUp": "Subida",
+  "wentDown": "Bajada",
+  "otherPeople": "Otras personas",
+  "noEmployees": "No hay personas para mostrar",
+  "settings": "Ajustes",
+  "changePin": "Cambiar PIN",
+  "switchCompany": "Cambiar de empresa",
+  "language": "Idioma",
+  "languageSystem": "El del teléfono",
+  "logout": "Cerrar sesión",
+  "logoutConfirm": "¿Cerrar la sesión en este teléfono?",
+  "logoutWithPending": "{count, plural, =1{Hay 1 acción sin enviar: si cerrás la sesión se pierde.} other{Hay {count} acciones sin enviar: si cerrás la sesión se pierden.}}",
+  "@logoutWithPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingBlocksSwitch": "Primero tienen que enviarse las acciones pendientes",
+  "dniValue": "DNI {dni}",
+  "@dniValue": {
+    "placeholders": {
+      "dni": {
+        "type": "String"
+      }
+    }
+  },
+  "currentPin": "PIN actual",
+  "newPin": "PIN nuevo",
+  "repeatPin": "Repetí el PIN nuevo",
+  "pinTooShort": "Entre 4 y 8 dígitos",
+  "pinMismatch": "No coinciden",
+  "pinChanged": "PIN cambiado"
+}

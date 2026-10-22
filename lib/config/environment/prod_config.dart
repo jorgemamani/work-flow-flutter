@@ -10,7 +10,4 @@ class ProdConfig implements BaseConfig {
   @override
   int get apiTimeout =>
       int.tryParse(dotenv.env['API_TIMEOUT'] ?? '30000') ?? 30000;
-
-  @override
-  bool get useMockData => false;
 }

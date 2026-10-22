@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../constants/app_sizes.dart';
 
 extension ContextExtensions on BuildContext {
@@ -16,4 +17,8 @@ extension ContextExtensions on BuildContext {
   bool get isMobile => screenWidth < AppSizes.mobileFrame;
   bool get isTablet => screenWidth >= AppSizes.mobileFrame && screenWidth < 1024;
   bool get isDesktop => screenWidth >= 1024;
+}
+
+extension L10nX on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
 }
