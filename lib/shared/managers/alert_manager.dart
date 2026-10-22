@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../utils/bottom_sheet_utils.dart';
 import '../enums/snack_bar_type_enum.dart';
 import '../widgets/bottom_sheets/confirm_bottom_sheet.dart';
 import '../widgets/bottom_sheets/info_bottom_sheet.dart';
@@ -237,16 +238,16 @@ abstract final class AlertManager {
     required String message,
     IconData? icon,
     String closeLabel = 'Entendido',
-  }) {
+  }) async {
     assert(
       _navigatorKey != null,
       'AlertManager.setup() debe llamarse antes de showInfoSheet().',
     );
 
     final context = _navigatorKey?.currentContext;
-    if (context == null) return Future.value();
+    if (context == null) return;
 
-    return showModalBottomSheet<void>(
+    await showAppBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -292,7 +293,7 @@ abstract final class AlertManager {
     required String title,
     required String description,
     required List<SheetOption> options,
-  }) {
+  }) async {
     assert(
       _navigatorKey != null,
       'AlertManager.setup() debe llamarse antes de showConfirmSheet().',
@@ -303,9 +304,9 @@ abstract final class AlertManager {
     );
 
     final context = _navigatorKey?.currentContext;
-    if (context == null) return Future.value();
+    if (context == null) return;
 
-    return showModalBottomSheet<void>(
+    await showAppBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -342,16 +343,16 @@ abstract final class AlertManager {
     bool isDismissible = true,
     bool enableDrag = true,
     bool isScrollControlled = false,
-  }) {
+  }) async {
     assert(
       _navigatorKey != null,
       'AlertManager.setup() debe llamarse antes de showCustomSheet().',
     );
 
     final context = _navigatorKey?.currentContext;
-    if (context == null) return Future.value(null);
+    if (context == null) return null;
 
-    return showModalBottomSheet<T>(
+    return showAppBottomSheet<T>(
       context: context,
       isDismissible: isDismissible,
       enableDrag: enableDrag,
