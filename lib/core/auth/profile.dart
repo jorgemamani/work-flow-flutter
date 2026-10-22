@@ -93,5 +93,7 @@ abstract final class Perms {
   static const submissionsCreate = 'submissions.create';
   static const requirementsCreate = 'requirements.create';
   static const inventoryWrite = 'inventory.write';
+  static const inventoryMove = 'inventory.move';
+  static const remitosControl = 'remitos.control';
   static const employeesRead = 'employees.read';
 }

@@ -940,6 +940,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noEmployees => 'No people to show';
 
   @override
+  String get onSiteRequiredTitle => 'Check in first';
+
+  @override
+  String onSiteRequiredBody(String project) {
+    return 'To do this at $project you need to be checked in. Register your check-in now? It is sent before everything else.';
+  }
+
+  @override
+  String get registerUpAndContinue => 'Check in and continue';
+
+  @override
   String get settings => 'Settings';
 
   @override

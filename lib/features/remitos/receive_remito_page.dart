@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/profile.dart';
 import '../../core/data/field_actions.dart';
 import '../../core/data/field_repository.dart';
 import '../../core/data/models.dart';
@@ -13,6 +14,7 @@ import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/photo_strip.dart';
 import '../auth/presentation/session_cubit.dart';
+import '../checkins/on_site_guard.dart';
 import '../items/item_lookup.dart';
 
 /// Recepción de un remito ítem por ítem (v4 §9.5): recibido, faltante o
@@ -94,6 +96,8 @@ class _ReceiveRemitoPageState extends State<ReceiveRemitoPage> {
       ),
     );
     if (ok != true || !mounted) return;
+    if (!await ensureOnSite(context, bypassPermissions: const [Perms.remitosWrite, Perms.remitosControl])) return;
+    if (!mounted) return;
     setState(() => _saving = true);
     await sl<FieldActions>().receiveRemito(
       remito: _remito!,

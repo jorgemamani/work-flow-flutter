@@ -1676,6 +1676,24 @@ abstract class AppLocalizations {
   /// **'No hay personas para mostrar'**
   String get noEmployees;
 
+  /// No description provided for @onSiteRequiredTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Primero registrá tu subida'**
+  String get onSiteRequiredTitle;
+
+  /// No description provided for @onSiteRequiredBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Para hacer esto en {project} tenés que figurar arriba. ¿Registramos tu subida ahora? Se envía antes que lo demás.'**
+  String onSiteRequiredBody(String project);
+
+  /// No description provided for @registerUpAndContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar subida y seguir'**
+  String get registerUpAndContinue;
+
   /// No description provided for @settings.
   ///
   /// In es, this message translates to:

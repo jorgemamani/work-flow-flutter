@@ -139,7 +139,8 @@ class ItemDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSizes.sm),
               ],
-              if (mineOrProject)
+              // La API exige inventory.move para cambiar estado o condición.
+              if (mineOrProject && profile.can(Perms.inventoryMove, projectId: session.projectId))
                 OutlinedButton.icon(
                   key: const Key('changeStatus'),
                   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),

@@ -541,6 +541,16 @@
   "wentDown": "Bajada",
   "otherPeople": "Otras personas",
   "noEmployees": "No hay personas para mostrar",
+  "onSiteRequiredTitle": "Primero registrá tu subida",
+  "onSiteRequiredBody": "Para hacer esto en {project} tenés que figurar arriba. ¿Registramos tu subida ahora? Se envía antes que lo demás.",
+  "@onSiteRequiredBody": {
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  },
+  "registerUpAndContinue": "Registrar subida y seguir",
   "settings": "Ajustes",
   "changePin": "Cambiar PIN",
   "switchCompany": "Cambiar de empresa",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/profile.dart';
 import '../../core/data/field_actions.dart';
 import '../../core/data/models.dart';
 import '../../dependency_injection.dart';
@@ -11,6 +12,7 @@ import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
 import '../auth/presentation/session_cubit.dart';
+import '../checkins/on_site_guard.dart';
 import 'item_lookup.dart';
 
 class _Dest {
@@ -87,6 +89,8 @@ class _MoveItemPageState extends State<MoveItemPage> {
   Future<void> _save(Asset asset) async {
     final d = _selected;
     if (d == null) return;
+    if (!await ensureOnSite(context, bypassPermissions: const [Perms.inventoryMove])) return;
+    if (!mounted) return;
     setState(() => _saving = true);
     await sl<FieldActions>().moveAsset(
       asset: asset,

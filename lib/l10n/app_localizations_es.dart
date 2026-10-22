@@ -941,6 +941,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noEmployees => 'No hay personas para mostrar';
 
   @override
+  String get onSiteRequiredTitle => 'Primero registrá tu subida';
+
+  @override
+  String onSiteRequiredBody(String project) {
+    return 'Para hacer esto en $project tenés que figurar arriba. ¿Registramos tu subida ahora? Se envía antes que lo demás.';
+  }
+
+  @override
+  String get registerUpAndContinue => 'Registrar subida y seguir';
+
+  @override
   String get settings => 'Ajustes';
 
   @override
