@@ -1,27 +1,25 @@
 import 'package:dio/dio.dart';
 
-import '../local_storage/domain/local_storage.dart';
-import 'session_expired_handler.dart';
+import '../auth/session_manager.dart';
+import '../outbox/outbox_processor.dart';
 
-/// Interceptor de Dio que inyecta `Authorization: Bearer <token>` en cada
-/// petición a la API. Ante un 401 limpia la sesión y notifica a la app.
+/// Pone `Authorization: Bearer …` y, ante un 401, refresca (rotando el
+/// refresh token) y reintenta una vez.
 class AuthInterceptor extends Interceptor {
-  AuthInterceptor(this._localStorage);
+  AuthInterceptor(this._session, this._dio);
 
-  final ILocalStorage _localStorage;
+  final SessionManager _session;
+  final Dio _dio;
 
-  static const _publicPaths = [
-    '/api/v1/auth/login',
-    '/api/v1/tenants/resolve',
-    '/api/v1/auth/forgot-password',
-  ];
+  static const _retried = 'auth.retried';
 
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await _localStorage.getToken();
+    await _session.ensureFresh();
+    final token = await _session.accessToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
@@ -33,14 +31,21 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (err.response?.statusCode == 401) {
-      final path = err.requestOptions.path;
-      final isPublic = _publicPaths.any(path.contains);
-      if (!isPublic) {
-        await _localStorage.clearSession();
-        await SessionExpiredHandler.instance.notify();
-      }
+    final opts = err.requestOptions;
+    if (err.response?.statusCode != 401 || opts.extra[_retried] == true) {
+      handler.next(err);
+      return;
     }
-    handler.next(err);
+    if (await _session.forceRefresh() != RefreshOutcome.ok) {
+      handler.next(err);
+      return;
+    }
+    try {
+      opts.extra[_retried] = true;
+      opts.headers['Authorization'] = 'Bearer ${await _session.accessToken()}';
+      handler.resolve(await _dio.fetch<dynamic>(opts));
+    } on DioException catch (e) {
+      handler.next(e);
+    }
   }
 }

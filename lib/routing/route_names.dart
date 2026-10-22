@@ -1,19 +1,30 @@
-class RouteNames {
-  RouteNames._();
+abstract final class RouteNames {
+  static const splash = '/';
+  static const login = '/login';
+  static const selectTenant = '/select-tenant';
 
-  static const String splash = '/';
-  static const String login = '/login';
-  static const String forgotPassword = '/forgot-password';
+  // Pestañas
+  static const home = '/home';
+  static const items = '/items';
+  static const records = '/records';
+  static const account = '/account';
 
-  // Shell (tabs)
-  static const String dashboard = '/dashboard';
-  static const String inventory = '/inventory';
-  static const String bitacora = '/bitacora';
+  // Pantallas sobre las pestañas
+  static const scan = '/scan';
+  static const item = '/item';
+  static const incomingRemitos = '/remitos/incoming';
+  static const remito = '/remito';
+  static const returnRemito = '/remitos/return';
+  static const newVerification = '/verifications/new';
+  static const newDailyLog = '/daily-logs/new';
+  static const newIncident = '/incidents/new';
+  static const newRequirement = '/requirements/new';
+  static const checkIn = '/check-in';
+  static const sync = '/sync';
+  static const changePin = '/account/pin';
 
-  // Sub-rutas de inventario (path completo para context.push/go)
-  static const String assetForm = '/inventory/form';
-  static const String assetDetail = '/inventory/detail';
-
-  // Cuenta (accesible desde el drawer)
-  static const String account = '/account';
+  static String itemDetail(String id) => '$item/$id';
+  static String moveItem(String id) => '$item/$id/move';
+  static String changeStatus(String id) => '$item/$id/status';
+  static String receiveRemito(String id) => '$remito/$id/receive';
 }

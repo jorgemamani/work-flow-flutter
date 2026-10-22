@@ -1,0 +1,299 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/data/field_actions.dart';
+import '../../core/data/field_repository.dart';
+import '../../core/data/models.dart';
+import '../../dependency_injection.dart';
+import '../../shared/constants/app_colors.dart';
+import '../../shared/constants/app_sizes.dart';
+import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/common.dart';
+import '../../shared/widgets/photo_strip.dart';
+import '../auth/presentation/session_cubit.dart';
+import '../items/item_lookup.dart';
+
+/// Verificación con fotos (REP-03, v4 §9.3 paso 8-9): un renglón por ítem,
+/// con la condición observada y fotos. Respeta "requiere foto" del modelo y
+/// el límite (de la programación o de la empresa, máximo 10).
+class VerificationFormPage extends StatefulWidget {
+  const VerificationFormPage({super.key});
+
+  @override
+  State<VerificationFormPage> createState() => _VerificationFormPageState();
+}
+
+class _VerificationFormPageState extends State<VerificationFormPage> {
+  ItemContext? _ctx;
+  List<Asset> _candidates = [];
+  List<VerificationSchedule> _schedules = [];
+  VerificationSchedule? _schedule;
+  final _lines = <VerificationLineInput>[];
+  final _notes = TextEditingController();
+  bool _saving = false;
+  bool _showErrors = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _notes.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final projectId = context.read<SessionCubit>().state.projectId;
+    if (projectId == null) return;
+    final repo = sl<FieldRepository>();
+    final ctx = await ItemContext.load();
+    final candidates = [
+      for (final a in await repo.projectAssets(projectId))
+        if (a.holderType != 'IN_TRANSIT') a,
+    ]..sort((a, b) => a.internalCode.compareTo(b.internalCode));
+    final schedules = await repo.schedules(projectId);
+    if (!mounted) return;
+    setState(() {
+      _ctx = ctx;
+      _candidates = candidates;
+      _schedules = schedules;
+    });
+  }
+
+  int _limit(BuildContext context) {
+    final company = context.read<SessionCubit>().state.profile?.maxPhotosPerVerification ?? 5;
+    return (_schedule?.photosPerItem ?? company).clamp(1, 10);
+  }
+
+  bool _requiresPhoto(Asset a) => _ctx?.models[a.modelId]?.requiresPhoto ?? false;
+
+  Future<void> _addItems() async {
+    final l = context.l10n;
+    final ctx = _ctx!;
+    final chosen = {for (final x in _lines) x.asset.id};
+    final picked = await showModalBottomSheet<Set<String>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (c) => _PickAssets(
+        title: l.chooseItemsToVerify,
+        assets: _candidates,
+        ctx: ctx,
+        initial: chosen,
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _lines.removeWhere((x) => !picked.contains(x.asset.id));
+      for (final a in _candidates) {
+        if (picked.contains(a.id) && !chosen.contains(a.id)) {
+          _lines.add(VerificationLineInput(asset: a, conditionId: a.conditionId));
+        }
+      }
+    });
+  }
+
+  Future<void> _submit() async {
+    final l = context.l10n;
+    final limit = _limit(context);
+    final missing = _lines.where((x) => _requiresPhoto(x.asset) && x.photos.isEmpty).toList();
+    final over = _lines.where((x) => x.photos.length > limit).toList();
+    if (missing.isNotEmpty || over.isNotEmpty) {
+      setState(() => _showErrors = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(missing.isNotEmpty ? l.verificationMissingPhotos(missing.length) : l.photosOverLimit(limit))),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    await sl<FieldActions>().submitVerification(
+      projectId: context.read<SessionCubit>().state.projectId!,
+      scheduleId: _schedule?.id,
+      lines: _lines,
+      notes: _notes.text.trim(),
+    );
+    if (!mounted) return;
+    showSaved(context);
+    context.pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final ctx = _ctx;
+    if (ctx == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final limit = _limit(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l.actionVerification)),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSizes.md),
+        children: [
+          if (_schedules.isNotEmpty) ...[
+            DropdownButtonFormField<String?>(
+              initialValue: _schedule?.id,
+              decoration: InputDecoration(labelText: l.scheduleOptional),
+              items: [
+                DropdownMenuItem(value: null, child: Text(l.noSchedule)),
+                for (final s in _schedules) DropdownMenuItem(value: s.id, child: Text(s.name)),
+              ],
+              onChanged: (v) => setState(() {
+                _schedule = v == null ? null : _schedules.firstWhere((s) => s.id == v);
+              }),
+            ),
+            const SizedBox(height: AppSizes.sm),
+          ],
+          Text(l.photoLimitInfo(limit), style: context.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+          SectionTitle(
+            l.itemsCount(_lines.length),
+            trailing: TextButton.icon(
+              key: const Key('addVerificationItems'),
+              onPressed: _addItems,
+              icon: const Icon(Icons.playlist_add),
+              label: Text(l.chooseItems),
+            ),
+          ),
+          if (_lines.isEmpty) EmptyState(icon: Icons.fact_check_outlined, text: l.verificationEmpty),
+          for (final line in _lines) ...[
+            Card(
+              key: Key('vline-${line.asset.internalCode}'),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSizes.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            ctx.resolver.label(line.asset),
+                            style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        if (_requiresPhoto(line.asset))
+                          StatusChip(l.requiresPhoto, color: AppColors.statusWarning, icon: Icons.photo_camera),
+                      ],
+                    ),
+                    if (ctx.conditions.isNotEmpty) ...[
+                      const SizedBox(height: AppSizes.sm),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (final c in ctx.conditions)
+                            ChoiceChip(
+                              label: Text(c.name),
+                              selected: line.conditionId == c.id,
+                              onSelected: (_) => setState(() => line.conditionId = c.id),
+                            ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: AppSizes.sm),
+                    PhotoStrip(
+                      photos: line.photos,
+                      max: limit,
+                      required: _requiresPhoto(line.asset),
+                      showError: _showErrors,
+                      onChanged: () => setState(() {}),
+                    ),
+                    TextFormField(
+                      initialValue: line.notes,
+                      decoration: InputDecoration(labelText: l.notesOptional, isDense: true),
+                      onChanged: (v) => line.notes = v,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSizes.sm),
+          ],
+          TextField(
+            controller: _notes,
+            maxLines: 2,
+            decoration: InputDecoration(labelText: l.generalNotes),
+          ),
+          const LocalSaveHint(),
+          FilledButton(
+            key: const Key('submitVerification'),
+            onPressed: _lines.isEmpty || _saving ? null : _submit,
+            child: Text(l.submitVerification),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Elegir varios ítems de una lista con búsqueda.
+class _PickAssets extends StatefulWidget {
+  const _PickAssets({
+    required this.title,
+    required this.assets,
+    required this.ctx,
+    required this.initial,
+  });
+
+  final String title;
+  final List<Asset> assets;
+  final ItemContext ctx;
+  final Set<String> initial;
+
+  @override
+  State<_PickAssets> createState() => _PickAssetsState();
+}
+
+class _PickAssetsState extends State<_PickAssets> {
+  late final Set<String> _sel = {...widget.initial};
+  String _q = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final list = [
+      for (final a in widget.assets)
+        if (a.matches(_q, model: widget.ctx.models[a.modelId])) a,
+    ];
+    return SafeArea(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              trailing: FilledButton(
+                key: const Key('pickDone'),
+                style: FilledButton.styleFrom(minimumSize: const Size(80, 40)),
+                onPressed: () => Navigator.pop(context, _sel),
+                child: Text(l.done),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
+              child: TextField(
+                onChanged: (v) => setState(() => _q = v),
+                decoration: InputDecoration(isDense: true, prefixIcon: const Icon(Icons.search), hintText: l.searchItems),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                children: [
+                  for (final a in list)
+                    CheckboxListTile(
+                      key: Key('pick-${a.internalCode}'),
+                      value: _sel.contains(a.id),
+                      onChanged: (v) => setState(() => v == true ? _sel.add(a.id) : _sel.remove(a.id)),
+                      title: Text(widget.ctx.resolver.label(a)),
+                      subtitle: Text(widget.ctx.where(a, inTransit: l.inTransit, withPerson: l.withPerson)),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
