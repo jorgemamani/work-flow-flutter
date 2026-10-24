@@ -37,7 +37,9 @@ GoRouter buildAppRouter() {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: RouteNames.splash,
-    refreshListenable: GoRouterRefreshStream(session.stream),
+    // Solo cambios de fase (login, logout, elegir empresa): refrescar con cada
+    // cambio de perfil reconstruía las pantallas abiertas y perdía su estado.
+    refreshListenable: GoRouterRefreshStream(session.stream.map((s) => s.phase).distinct()),
     redirect: (context, state) {
       final phase = session.state.phase;
       final loc = state.uri.path;

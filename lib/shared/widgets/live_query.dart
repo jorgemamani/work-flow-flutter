@@ -38,7 +38,9 @@ class _LiveQueryState<T> extends State<LiveQuery<T>> {
     _future = _run();
     _sub = sl<FieldRepository>().changes.listen((changed) {
       if (widget.sources.isEmpty || changed.any(widget.sources.contains)) {
-        setState(() => _future = _run());
+        setState(() {
+          _future = _run();
+        });
       }
     });
   }

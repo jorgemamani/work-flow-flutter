@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import 'core/sync/sync_coordinator.dart';
 import 'dependency_injection.dart';
@@ -74,6 +75,11 @@ class _WorkFlowAppState extends State<WorkFlowApp> with WidgetsBindingObserver {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           locale: locale,
+          // Fechas (DateFormat) en el idioma de la app, no en el default de intl.
+          builder: (context, child) {
+            Intl.defaultLocale = Localizations.localeOf(context).toLanguageTag();
+            return child!;
+          },
           localeResolutionCallback: (device, supported) {
             for (final l in supported) {
               if (l.languageCode == device?.languageCode) return l;
