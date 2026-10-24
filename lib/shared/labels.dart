@@ -102,6 +102,20 @@ extension EnumLabels on AppLocalizations {
         _ => s,
       };
 
+  String assetCategory(String s) => switch (s) {
+        'TOOL' => catTool,
+        'VEHICLE' => catVehicle,
+        'EPP' => catEpp,
+        'TECH_EQUIPMENT' => catTechEquipment,
+        'TOOLBOX' => catToolbox,
+        'CABLE_ACCESSORY' => catCableAccessory,
+        'CONSUMABLE' => catConsumable,
+        'INSTRUMENT' => catInstrument,
+        'EQUIPMENT' => catEquipment,
+        'CLOTHING' => catClothing,
+        _ => s,
+      };
+
   String holderType(String s) => switch (s) {
         'LOCATION' => holderLocation,
         'ASSET' => holderAsset,
@@ -113,6 +127,7 @@ extension EnumLabels on AppLocalizations {
     final a = label.args;
     return switch (label.key) {
       'opCreateAsset' => opCreateAsset(a['code'] ?? ''),
+      'opSetCurrentPhoto' => opSetCurrentPhoto(a['code'] ?? ''),
       'opMove' => opMove(a['code'] ?? ''),
       'opStatus' => opStatus(a['code'] ?? ''),
       'opReception' => opReception(a['number'] ?? ''),

@@ -110,7 +110,7 @@ class ItemDetailPage extends StatelessWidget {
                     if (a.manufacturerBarcode != null) _row(l.barcode, a.manufacturerBarcode!),
                     if (a.serialNumber != null) _row(l.serialNumber, a.serialNumber!),
                     if (a.licensePlate != null) _row(l.licensePlate, a.licensePlate!),
-                    if (model != null) _row(l.category, model.category),
+                    if (model != null) _row(l.category, l.assetCategory(model.category)),
                     if (a.custodianEmployeeId != null)
                       _row(l.custodian, ctx.employees[a.custodianEmployeeId]?.fullName ?? '—'),
                     if (a.description != null) _row(l.description, a.description!),

@@ -218,17 +218,29 @@ class FieldActions {
   /// teléfono. El ítem aparece enseguida en la base local (y se puede mover o
   /// verificar: esos hechos van después en la cola). Las fotos se encolan
   /// detrás del alta con `ownerType: ASSET`.
-  Future<String> createAsset(AssetDraft draft, {List<LocalPhoto> photos = const []}) async {
+  ///
+  /// Con [setCurrentPhoto] (permiso `photos.set_current`) la primera foto
+  /// queda como foto vigente (RN-22) una vez subida.
+  Future<String> createAsset(
+    AssetDraft draft, {
+    List<LocalPhoto> photos = const [],
+    bool setCurrentPhoto = false,
+  }) async {
     final id = newId();
     final at = nowIso(_clock());
     final body = {...draft.toBody(), 'occurredAt': at};
+    final current = setCurrentPhoto && photos.isNotEmpty ? photos.first : null;
     await _enqueue([
       _put(
         id,
         ApiPaths.asset(id),
         body,
         OutboxLabel('opCreateAsset', {'code': draft.internalCode.trim()}),
-        patches: [createAssetPatch(id, draft, at)],
+        patches: [
+          createAssetPatch(id, draft, at),
+          if (current != null)
+            RecordPatch(source: SyncSources.assets, id: id, fields: {'currentPhotoId': current.id}),
+        ],
       ),
       for (final p in photos)
         _photo(
@@ -238,6 +250,16 @@ class FieldActions {
           assetId: id,
           parentId: id,
           what: draft.internalCode.trim(),
+        ),
+      if (current != null)
+        OutboxOp(
+          id: '${current.id}-current',
+          kind: OutboxKind.request,
+          method: 'POST',
+          path: ApiPaths.attachmentSetCurrent(current.id),
+          label: OutboxLabel('opSetCurrentPhoto', {'code': draft.internalCode.trim()}),
+          occurredAt: DateTime.parse(at),
+          parentId: current.id,
         ),
     ]);
     return id;

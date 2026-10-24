@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/profile.dart';
 import '../../core/data/field_actions.dart';
 import '../../core/data/field_repository.dart';
 import '../../core/data/models.dart';
@@ -201,7 +202,12 @@ class _NewItemPageState extends State<NewItemPage> {
       setState(() => _codeError = l.codeAlreadyUsed(code));
       return;
     }
+    if (!mounted) return;
     setState(() => _saving = true);
+    final session = context.read<SessionCubit>().state;
+    final setCurrent = _photos.isNotEmpty &&
+        (session.profile?.can(Perms.photosSetCurrent, projectId: session.projectId) ?? false);
+    if (setCurrent) await sl<PhotoService>().cacheAsCurrent(_photos.first);
     final id = await sl<FieldActions>().createAsset(
       AssetDraft(
         model: model,
@@ -222,6 +228,7 @@ class _NewItemPageState extends State<NewItemPage> {
         custodianEmployeeId: _custodianId,
       ),
       photos: _photos,
+      setCurrentPhoto: setCurrent,
     );
     if (!mounted) return;
     showSaved(context);
@@ -262,7 +269,7 @@ class _NewItemPageState extends State<NewItemPage> {
                 title: Text(model?.name ?? l.chooseModel),
                 subtitle: model == null
                     ? (_showErrors ? Text(l.requiredField, style: const TextStyle(color: AppColors.statusError)) : null)
-                    : Text([if (brand != null) brand.name, model.category].join(' · ')),
+                    : Text([if (brand != null) brand.name, l.assetCategory(model.category)].join(' · ')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _pickModel(ctx),
               ),
@@ -471,7 +478,7 @@ class _ModelPickerState extends State<_ModelPicker> {
                             title: Text(m.name),
                             subtitle: Text([
                               if (widget.ctx.brands[m.brandId] != null) widget.ctx.brands[m.brandId]!.name,
-                              m.category,
+                              l.assetCategory(m.category),
                             ].join(' · ')),
                             onTap: () => Navigator.pop(context, m),
                           ),

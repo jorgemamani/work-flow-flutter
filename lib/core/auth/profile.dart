@@ -96,4 +96,5 @@ abstract final class Perms {
   static const inventoryMove = 'inventory.move';
   static const remitosControl = 'remitos.control';
   static const employeesRead = 'employees.read';
+  static const photosSetCurrent = 'photos.set_current';
 }

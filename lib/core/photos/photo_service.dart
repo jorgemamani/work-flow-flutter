@@ -91,6 +91,13 @@ class PhotoService {
   Future<File> _cacheFile(String attachmentId) async =>
       File(p.join((await _dir('photo_cache')).path, '$attachmentId.jpg'));
 
+  /// Una foto sacada en el teléfono que va a ser la vigente: se copia al
+  /// caché para verla ya, sin esperar a subirla y bajarla.
+  Future<void> cacheAsCurrent(LocalPhoto photo) async {
+    final src = File(photo.path);
+    if (await src.exists()) await src.copy((await _cacheFile(photo.id)).path);
+  }
+
   Future<File?> cached(String attachmentId) async {
     final f = await _cacheFile(attachmentId);
     return await f.exists() ? f : null;

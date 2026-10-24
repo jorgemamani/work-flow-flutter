@@ -204,14 +204,14 @@ void main() {
         );
     // Uno con un código que ya existe en la API (simula que otro lo cargó antes).
     final dupId = await actions.createAsset(draftWith(taken));
-    final id = await actions.createAsset(draftWith(code), photos: [photo]);
+    final id = await actions.createAsset(draftWith(code), photos: [photo], setCurrentPhoto: true);
     expect((await repo.projectAssets(project.id)).map((a) => a.id), containsAll([dupId, id]));
     expect((await processor.drain()).stop, DrainStop.offline);
 
     connectivity.setSimulatedOffline(false);
     final report = await processor.drain();
     expect(report.failed, 1);
-    expect(report.sent, 2);
+    expect(report.sent, 3);
     final failed = (await outbox.list()).single;
     expect(failed.errorStatus, 409);
 
@@ -226,6 +226,7 @@ void main() {
     expect(created['internalCode'], code);
     final photos = await api.get('/attachments', query: {'assetId': id}) as List;
     expect(photos.map((p) => (p as Map)['uploadStatus']), contains('UPLOADED'));
+    expect(created['currentPhotoId'], photo.id);
     final second = await api.get('/inventory/assets/$dupId') as Map<String, dynamic>;
     expect(second['internalCode'], fixed);
     expect((await repo.asset(id))!.hasPendingChange, isFalse);

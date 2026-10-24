@@ -1862,6 +1862,72 @@ abstract class AppLocalizations {
   /// **'Otro código interno'**
   String get fixCodeTitle;
 
+  /// No description provided for @catTool.
+  ///
+  /// In es, this message translates to:
+  /// **'Herramienta'**
+  String get catTool;
+
+  /// No description provided for @catVehicle.
+  ///
+  /// In es, this message translates to:
+  /// **'Vehículo'**
+  String get catVehicle;
+
+  /// No description provided for @catEpp.
+  ///
+  /// In es, this message translates to:
+  /// **'EPP'**
+  String get catEpp;
+
+  /// No description provided for @catTechEquipment.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipo tecnológico'**
+  String get catTechEquipment;
+
+  /// No description provided for @catToolbox.
+  ///
+  /// In es, this message translates to:
+  /// **'Caja de herramientas'**
+  String get catToolbox;
+
+  /// No description provided for @catCableAccessory.
+  ///
+  /// In es, this message translates to:
+  /// **'Cables y accesorios'**
+  String get catCableAccessory;
+
+  /// No description provided for @catConsumable.
+  ///
+  /// In es, this message translates to:
+  /// **'Consumible'**
+  String get catConsumable;
+
+  /// No description provided for @catInstrument.
+  ///
+  /// In es, this message translates to:
+  /// **'Instrumento'**
+  String get catInstrument;
+
+  /// No description provided for @catEquipment.
+  ///
+  /// In es, this message translates to:
+  /// **'Equipo'**
+  String get catEquipment;
+
+  /// No description provided for @catClothing.
+  ///
+  /// In es, this message translates to:
+  /// **'Indumentaria'**
+  String get catClothing;
+
+  /// No description provided for @opSetCurrentPhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto vigente de {code}'**
+  String opSetCurrentPhoto(String code);
+
   /// No description provided for @settings.
   ///
   /// In es, this message translates to:

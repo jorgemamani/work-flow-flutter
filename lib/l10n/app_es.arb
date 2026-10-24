@@ -593,6 +593,24 @@
   },
   "fixCode": "Corregir código",
   "fixCodeTitle": "Otro código interno",
+  "catTool": "Herramienta",
+  "catVehicle": "Vehículo",
+  "catEpp": "EPP",
+  "catTechEquipment": "Equipo tecnológico",
+  "catToolbox": "Caja de herramientas",
+  "catCableAccessory": "Cables y accesorios",
+  "catConsumable": "Consumible",
+  "catInstrument": "Instrumento",
+  "catEquipment": "Equipo",
+  "catClothing": "Indumentaria",
+  "opSetCurrentPhoto": "Foto vigente de {code}",
+  "@opSetCurrentPhoto": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "settings": "Ajustes",
   "changePin": "Cambiar PIN",
   "switchCompany": "Cambiar de empresa",

@@ -1039,6 +1039,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fixCodeTitle => 'Another internal code';
 
   @override
+  String get catTool => 'Tool';
+
+  @override
+  String get catVehicle => 'Vehicle';
+
+  @override
+  String get catEpp => 'PPE';
+
+  @override
+  String get catTechEquipment => 'Tech equipment';
+
+  @override
+  String get catToolbox => 'Toolbox';
+
+  @override
+  String get catCableAccessory => 'Cables and accessories';
+
+  @override
+  String get catConsumable => 'Consumable';
+
+  @override
+  String get catInstrument => 'Instrument';
+
+  @override
+  String get catEquipment => 'Equipment';
+
+  @override
+  String get catClothing => 'Clothing';
+
+  @override
+  String opSetCurrentPhoto(String code) {
+    return 'Current photo of $code';
+  }
+
+  @override
   String get settings => 'Settings';
 
   @override

@@ -80,7 +80,7 @@ class _RequirementFormPageState extends State<RequirementFormPage> {
           child: ListView(
             children: [
               for (final m in models)
-                ListTile(title: Text(m.name), subtitle: Text(m.category), onTap: () => Navigator.pop(c, m)),
+                ListTile(title: Text(m.name), subtitle: Text(context.l10n.assetCategory(m.category)), onTap: () => Navigator.pop(c, m)),
             ],
           ),
         ),
