@@ -75,6 +75,17 @@ class FieldRepository {
     return null;
   }
 
+  /// ¿Algún ítem local (sincronizado o creado en el teléfono) ya usa este
+  /// código interno? La API responde 409 si se repite en la empresa.
+  Future<bool> internalCodeInUse(String code, {String? exceptId}) async {
+    final c = code.trim().toLowerCase();
+    if (c.isEmpty) return false;
+    for (final a in await _all(SyncSources.assets, Asset.new)) {
+      if (a.id != exceptId && a.internalCode.trim().toLowerCase() == c) return true;
+    }
+    return false;
+  }
+
   Future<List<StockBalance>> projectStock(String projectId) async => [
         for (final s in await _all(SyncSources.stockBalances, StockBalance.new))
           if (s.effectiveProjectId == projectId && s.quantity > 0) s,

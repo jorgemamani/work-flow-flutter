@@ -551,6 +551,48 @@
     }
   },
   "registerUpAndContinue": "Registrar subida y seguir",
+  "newItem": "Nuevo ítem",
+  "createItem": "Dar de alta",
+  "chooseModel": "Elegí el modelo",
+  "searchModels": "Buscar modelo o marca",
+  "noModels": "No hay modelos. Se cargan desde la web.",
+  "codes": "Códigos",
+  "barcodeOptional": "Código de barras del fabricante (opcional)",
+  "serialNumberOptional": "N° de serie (opcional)",
+  "serialRequired": "Exige n° de serie",
+  "custodyRequired": "Lleva responsable",
+  "vehicle": "Vehículo",
+  "container": "Contenedor",
+  "vehicleData": "Datos del vehículo",
+  "chassisNumber": "N° de chasis",
+  "engineNumber": "N° de motor",
+  "year": "Año",
+  "initialLocation": "Dónde queda",
+  "chooseLocation": "Elegí dónde queda",
+  "companyLocation": "de la empresa",
+  "me": "yo",
+  "custodianRequired": "Elegí el responsable",
+  "descriptionOptional": "Descripción (opcional)",
+  "codeAlreadyUsed": "Ya hay un ítem con el código {code}",
+  "@codeAlreadyUsed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "createWithThisCode": "Dar de alta un ítem con este código",
+  "scanCodeTitle": "Escanear código",
+  "opCreateAsset": "Alta de {code}",
+  "@opCreateAsset": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "fixCode": "Corregir código",
+  "fixCodeTitle": "Otro código interno",
   "settings": "Ajustes",
   "changePin": "Cambiar PIN",
   "switchCompany": "Cambiar de empresa",

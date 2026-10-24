@@ -952,6 +952,94 @@ class AppLocalizationsEs extends AppLocalizations {
   String get registerUpAndContinue => 'Registrar subida y seguir';
 
   @override
+  String get newItem => 'Nuevo ítem';
+
+  @override
+  String get createItem => 'Dar de alta';
+
+  @override
+  String get chooseModel => 'Elegí el modelo';
+
+  @override
+  String get searchModels => 'Buscar modelo o marca';
+
+  @override
+  String get noModels => 'No hay modelos. Se cargan desde la web.';
+
+  @override
+  String get codes => 'Códigos';
+
+  @override
+  String get barcodeOptional => 'Código de barras del fabricante (opcional)';
+
+  @override
+  String get serialNumberOptional => 'N° de serie (opcional)';
+
+  @override
+  String get serialRequired => 'Exige n° de serie';
+
+  @override
+  String get custodyRequired => 'Lleva responsable';
+
+  @override
+  String get vehicle => 'Vehículo';
+
+  @override
+  String get container => 'Contenedor';
+
+  @override
+  String get vehicleData => 'Datos del vehículo';
+
+  @override
+  String get chassisNumber => 'N° de chasis';
+
+  @override
+  String get engineNumber => 'N° de motor';
+
+  @override
+  String get year => 'Año';
+
+  @override
+  String get initialLocation => 'Dónde queda';
+
+  @override
+  String get chooseLocation => 'Elegí dónde queda';
+
+  @override
+  String get companyLocation => 'de la empresa';
+
+  @override
+  String get me => 'yo';
+
+  @override
+  String get custodianRequired => 'Elegí el responsable';
+
+  @override
+  String get descriptionOptional => 'Descripción (opcional)';
+
+  @override
+  String codeAlreadyUsed(String code) {
+    return 'Ya hay un ítem con el código $code';
+  }
+
+  @override
+  String get createWithThisCode => 'Dar de alta un ítem con este código';
+
+  @override
+  String get scanCodeTitle => 'Escanear código';
+
+  @override
+  String opCreateAsset(String code) {
+    return 'Alta de $code';
+  }
+
+  @override
+  String get fixCode => 'Corregir código';
+
+  @override
+  String get fixCodeTitle => 'Otro código interno';
+
+  @override
   String get settings => 'Ajustes';
 
   @override

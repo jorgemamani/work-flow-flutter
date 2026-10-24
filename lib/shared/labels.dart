@@ -112,6 +112,7 @@ extension EnumLabels on AppLocalizations {
   String outboxLabel(OutboxLabel label) {
     final a = label.args;
     return switch (label.key) {
+      'opCreateAsset' => opCreateAsset(a['code'] ?? ''),
       'opMove' => opMove(a['code'] ?? ''),
       'opStatus' => opStatus(a['code'] ?? ''),
       'opReception' => opReception(a['number'] ?? ''),

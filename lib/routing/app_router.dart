@@ -14,6 +14,7 @@ import '../features/incidents/incident_form_page.dart';
 import '../features/items/item_detail_page.dart';
 import '../features/items/items_page.dart';
 import '../features/items/move_item_page.dart';
+import '../features/items/new_item_page.dart';
 import '../features/items/scan_page.dart';
 import '../features/items/status_change_page.dart';
 import '../features/records/daily_log_form_page.dart';
@@ -84,6 +85,13 @@ GoRouter buildAppRouter() {
         ],
       ),
       _page(RouteNames.scan, (_) => const ScanPage()),
+      _page(
+        RouteNames.newItem,
+        (s) => NewItemPage(
+          initialCode: s.uri.queryParameters['code'],
+          initialBarcode: s.uri.queryParameters['barcode'],
+        ),
+      ),
       _page('${RouteNames.item}/:id', (s) => ItemDetailPage(assetId: s.pathParameters['id']!)),
       _page('${RouteNames.item}/:id/move', (s) => MoveItemPage(assetId: s.pathParameters['id']!)),
       _page('${RouteNames.item}/:id/status', (s) => StatusChangePage(assetId: s.pathParameters['id']!)),

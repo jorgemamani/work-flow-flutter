@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/profile.dart';
 import '../../core/data/field_repository.dart';
 import '../../core/data/models.dart';
 import '../../dependency_injection.dart';
@@ -49,6 +50,13 @@ class _ItemsPageState extends State<ItemsPage> {
         appBar: AppBar(
           title: Text(l.tabItems),
           actions: [
+            if (session.profile?.can(Perms.inventoryWrite, projectId: projectId) ?? false)
+              IconButton(
+                key: const Key('newItemButton'),
+                tooltip: l.newItem,
+                icon: const Icon(Icons.add),
+                onPressed: () => context.push(RouteNames.newItem),
+              ),
             IconButton(
               key: const Key('scanButton'),
               tooltip: l.actionScan,

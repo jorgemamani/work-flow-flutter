@@ -64,6 +64,70 @@ class RequirementItemInput {
       };
 }
 
+/// Datos de un ítem nuevo (alta desde el celular, D-18 / contrato §4).
+class AssetDraft {
+  AssetDraft({
+    required this.model,
+    required this.internalCode,
+    required this.holderType,
+    required this.holderId,
+    this.effectiveLocationId,
+    this.effectiveProjectId,
+    this.manufacturerBarcode,
+    this.serialNumber,
+    this.conditionId,
+    this.description,
+    this.notes,
+    this.licensePlate,
+    this.chassisNumber,
+    this.engineNumber,
+    this.year,
+    this.custodianEmployeeId,
+  });
+
+  final AssetModel model;
+  final String internalCode;
+
+  /// Portador inicial: LOCATION, ASSET (contenedor/vehículo) o EMPLOYEE.
+  final String holderType;
+  final String holderId;
+
+  /// Dónde queda realmente (para mostrarlo antes de sincronizar).
+  final String? effectiveLocationId;
+  final String? effectiveProjectId;
+  final String? manufacturerBarcode;
+  final String? serialNumber;
+  final String? conditionId;
+  final String? description;
+  final String? notes;
+  final String? licensePlate;
+  final String? chassisNumber;
+  final String? engineNumber;
+  final int? year;
+  final String? custodianEmployeeId;
+
+  static String? _clean(String? v) => (v == null || v.trim().isEmpty) ? null : v.trim();
+
+  /// Body de `PUT /inventory/assets/:id` (sin `occurredAt`).
+  Json toBody() => {
+        'modelId': model.id,
+        'internalCode': internalCode.trim(),
+        'initialHolder': {'type': holderType, 'id': holderId},
+        if (_clean(manufacturerBarcode) != null) 'manufacturerBarcode': _clean(manufacturerBarcode),
+        if (_clean(serialNumber) != null) 'serialNumber': _clean(serialNumber),
+        if (conditionId != null) 'conditionId': conditionId,
+        if (_clean(description) != null) 'description': _clean(description),
+        if (_clean(notes) != null) 'notes': _clean(notes),
+        if (model.isVehicle) ...{
+          if (_clean(licensePlate) != null) 'licensePlate': _clean(licensePlate),
+          if (_clean(chassisNumber) != null) 'chassisNumber': _clean(chassisNumber),
+          if (_clean(engineNumber) != null) 'engineNumber': _clean(engineNumber),
+          if (year != null) 'year': year,
+        },
+        if (model.requiresCustody && custodianEmployeeId != null) 'custodianEmployeeId': custodianEmployeeId,
+      };
+}
+
 class ReturnLineInput {
   const ReturnLineInput({this.assetId, this.modelId, this.variant, this.quantity});
 
@@ -149,6 +213,68 @@ class FieldActions {
       );
 
   // ── Ítems ──────────────────────────────────────────────────────────────────
+
+  /// Alta de un ítem sin señal (D-18): `PUT /inventory/assets/:id` con id del
+  /// teléfono. El ítem aparece enseguida en la base local (y se puede mover o
+  /// verificar: esos hechos van después en la cola). Las fotos se encolan
+  /// detrás del alta con `ownerType: ASSET`.
+  Future<String> createAsset(AssetDraft draft, {List<LocalPhoto> photos = const []}) async {
+    final id = newId();
+    final at = nowIso(_clock());
+    final body = {...draft.toBody(), 'occurredAt': at};
+    await _enqueue([
+      _put(
+        id,
+        ApiPaths.asset(id),
+        body,
+        OutboxLabel('opCreateAsset', {'code': draft.internalCode.trim()}),
+        patches: [createAssetPatch(id, draft, at)],
+      ),
+      for (final p in photos)
+        _photo(
+          p,
+          ownerType: 'ASSET',
+          ownerId: id,
+          assetId: id,
+          parentId: id,
+          what: draft.internalCode.trim(),
+        ),
+    ]);
+    return id;
+  }
+
+  /// La fila que ve el teléfono hasta que la API devuelva la verdadera.
+  static RecordPatch createAssetPatch(String id, AssetDraft d, String at) {
+    final body = d.toBody();
+    body.remove('initialHolder');
+    return RecordPatch(source: SyncSources.assets, id: id, fields: {
+      ...body,
+      '_local': true,
+      'status': 'OPERATIONAL',
+      'holderType': d.holderType,
+      'holderId': d.holderId,
+      'effectiveLocationId': d.effectiveLocationId,
+      'effectiveProjectId': d.effectiveProjectId,
+      'custodianEmployeeId': d.custodianEmployeeId,
+      'openRemitoId': null,
+      'currentPhotoId': null,
+      'locationUpdatedAt': at,
+      'createdAt': at,
+    });
+  }
+
+  /// Después de un 409 ("el código ya existe"): corrige el código interno del
+  /// alta fallida y la vuelve a la cola con el mismo id (y sus fotos).
+  static (Json, List<RecordPatch>, OutboxLabel) withNewInternalCode(OutboxOp op, String code) {
+    final body = {...?op.body, 'internalCode': code.trim()};
+    final patches = [
+      for (final p in op.patches)
+        p.source == SyncSources.assets && p.id == op.id
+            ? RecordPatch(source: p.source, id: p.id, fields: {...p.fields, 'internalCode': code.trim()})
+            : p,
+    ];
+    return (body, patches, OutboxLabel('opCreateAsset', {'code': code.trim()}));
+  }
 
   /// Mover un ítem dentro del proyecto (RN-02): a una ubicación, a un
   /// contenedor/vehículo (D17) o a mi cargo.

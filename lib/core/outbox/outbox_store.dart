@@ -145,19 +145,54 @@ class OutboxStore implements PendingPatchSource {
   }
 
   /// El usuario pide reintentar un fallido: vuelve a la cola con el mismo id
-  /// y en su lugar original (el orden es por `seq`).
-  Future<void> retry(int seq) async {
-    await _db.update(
-      'outbox',
-      {
+  /// y en su lugar original (el orden es por `seq`), junto con los hijos que
+  /// fallaron por él (sus fotos). Sus cambios optimistas se aplican de nuevo.
+  ///
+  /// Con [body], [patches] o [label] se corrige el hecho antes de reintentar
+  /// (ej. otro código interno después de un 409): el id no cambia.
+  Future<void> retry(
+    int seq, {
+    Map<String, dynamic>? body,
+    List<RecordPatch>? patches,
+    OutboxLabel? label,
+  }) async {
+    final touched = <String>{};
+    await _db.transaction((txn) async {
+      final rows = await txn.query('outbox', where: 'seq = ?', whereArgs: [seq]);
+      if (rows.isEmpty) return;
+      final op = OutboxOp.fromRow(rows.first);
+      final reset = {
         'status': OutboxStatus.pending.name,
         'last_error': null,
         'error_status': null,
         'updated_at': _now(),
-      },
-      where: 'seq = ?',
-      whereArgs: [seq],
-    );
+      };
+      await txn.update(
+        'outbox',
+        {
+          ...reset,
+          if (body != null) 'body': jsonEncode(body),
+          if (label != null) 'label': label.encode(),
+          if (patches != null)
+            'patches': patches.isEmpty
+                ? null
+                : jsonEncode([for (final p in patches) p.toJson()]),
+        },
+        where: 'seq = ?',
+        whereArgs: [seq],
+      );
+      await txn.update(
+        'outbox',
+        reset,
+        where: 'parent_id = ? AND status = ?',
+        whereArgs: [op.id, OutboxStatus.failed.name],
+      );
+      for (final p in patches ?? op.patches) {
+        await _records.applyPatch(txn, p);
+        touched.add(p.source);
+      }
+    });
+    _records.notify(touched);
     await _emit();
   }
 

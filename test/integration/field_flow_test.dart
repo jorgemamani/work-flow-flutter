@@ -159,4 +159,77 @@ void main() {
 
     await local.close();
   }, skip: base == null ? 'API_BASE_URL no definida' : false, timeout: const Timeout(Duration(minutes: 2)));
+
+  test('alta de ítem sin señal con foto; código repetido → 409, se corrige y entra con el mismo id', () async {
+    final (local, records, outbox) = await openTestDb();
+    final mockConn = MockConnectivity();
+    when(() => mockConn.checkConnectivity()).thenAnswer((_) async => [ConnectivityResult.wifi]);
+    when(() => mockConn.onConnectivityChanged).thenAnswer((_) => const Stream.empty());
+    final connectivity = ConnectivityService(connectivity: mockConn);
+    await connectivity.start(simulatedOffline: false);
+
+    final opts = BaseOptions(baseUrl: '$base${ApiPaths.prefix}', headers: {'Content-Type': 'application/json'});
+    final guard = OfflineGuardInterceptor(connectivity);
+    final session = SessionManager(authDio: Dio(opts)..interceptors.add(guard), tokens: MemoryTokens());
+    final apiDio = Dio(opts);
+    apiDio.interceptors
+      ..add(guard)
+      ..add(AuthInterceptor(session, apiDio));
+    final api = ApiClient(apiDio, Dio()..interceptors.add(guard));
+    final engine = SyncEngine(fetcher: api, applier: SyncApplier(records, outbox), store: records);
+    final processor = OutboxProcessor(store: outbox, transport: api, session: session);
+    final actions = FieldActions(outbox: outbox, onEnqueued: () {});
+    final repo = FieldRepository(records);
+
+    // Logística (inventory.write) de la empresa demo.
+    await session.loginOffice(email: 'admin@minerademo.com', password: 'Admin1234!', cuit: '30123456789');
+    await engine.pull();
+    final models = await repo.models();
+    final model = models.values.firstWhere((m) => !m.isBulk && !m.requiresSerialNumber && !m.requiresCustody);
+    final project = (await repo.projects()).first;
+    final taken = (await repo.projectAssets(project.id)).first.internalCode;
+    final code = 'MOB-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+
+    connectivity.setSimulatedOffline(true);
+    final tmp = await Directory.systemTemp.createTemp('wf');
+    final f = File('${tmp.path}/alta.jpg')..writeAsBytesSync(_jpeg);
+    final photo = LocalPhoto(id: newId(), path: f.path, sizeBytes: f.lengthSync(), takenAt: DateTime.now());
+    AssetDraft draftWith(String c) => AssetDraft(
+          model: model,
+          internalCode: c,
+          holderType: 'LOCATION',
+          holderId: project.rootLocationId!,
+          effectiveLocationId: project.rootLocationId,
+          effectiveProjectId: project.id,
+        );
+    // Uno con un código que ya existe en la API (simula que otro lo cargó antes).
+    final dupId = await actions.createAsset(draftWith(taken));
+    final id = await actions.createAsset(draftWith(code), photos: [photo]);
+    expect((await repo.projectAssets(project.id)).map((a) => a.id), containsAll([dupId, id]));
+    expect((await processor.drain()).stop, DrainStop.offline);
+
+    connectivity.setSimulatedOffline(false);
+    final report = await processor.drain();
+    expect(report.failed, 1);
+    expect(report.sent, 2);
+    final failed = (await outbox.list()).single;
+    expect(failed.errorStatus, 409);
+
+    // Corregir el código y reintentar con el mismo id.
+    final fixed = '$code-B';
+    final (body, patches, label) = FieldActions.withNewInternalCode(failed, fixed);
+    await outbox.retry(failed.seq!, body: body, patches: patches, label: label);
+    expect((await processor.drain()).sent, 1);
+    await engine.pull();
+
+    final created = await api.get('/inventory/assets/$id') as Map<String, dynamic>;
+    expect(created['internalCode'], code);
+    final photos = await api.get('/attachments', query: {'assetId': id}) as List;
+    expect(photos.map((p) => (p as Map)['uploadStatus']), contains('UPLOADED'));
+    final second = await api.get('/inventory/assets/$dupId') as Map<String, dynamic>;
+    expect(second['internalCode'], fixed);
+    expect((await repo.asset(id))!.hasPendingChange, isFalse);
+
+    await local.close();
+  }, skip: base == null ? 'API_BASE_URL no definida' : false, timeout: const Timeout(Duration(minutes: 2)));
 }

@@ -63,6 +63,8 @@ class AssetModel extends Model {
   bool get isContainer => raw['isContainer'] as bool? ?? false;
   bool get isVehicle => raw['isVehicle'] as bool? ?? false;
   bool get requiresPhoto => raw['requiresPhoto'] as bool? ?? false;
+  bool get requiresSerialNumber => raw['requiresSerialNumber'] as bool? ?? false;
+  bool get requiresCustody => raw['requiresCustody'] as bool? ?? false;
   String? get unitOfMeasure => _s(raw, 'unitOfMeasure');
   List<String> get variants =>
       [for (final v in raw['variants'] as List? ?? const []) v.toString()];

@@ -1694,6 +1694,174 @@ abstract class AppLocalizations {
   /// **'Registrar subida y seguir'**
   String get registerUpAndContinue;
 
+  /// No description provided for @newItem.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo ítem'**
+  String get newItem;
+
+  /// No description provided for @createItem.
+  ///
+  /// In es, this message translates to:
+  /// **'Dar de alta'**
+  String get createItem;
+
+  /// No description provided for @chooseModel.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí el modelo'**
+  String get chooseModel;
+
+  /// No description provided for @searchModels.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar modelo o marca'**
+  String get searchModels;
+
+  /// No description provided for @noModels.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay modelos. Se cargan desde la web.'**
+  String get noModels;
+
+  /// No description provided for @codes.
+  ///
+  /// In es, this message translates to:
+  /// **'Códigos'**
+  String get codes;
+
+  /// No description provided for @barcodeOptional.
+  ///
+  /// In es, this message translates to:
+  /// **'Código de barras del fabricante (opcional)'**
+  String get barcodeOptional;
+
+  /// No description provided for @serialNumberOptional.
+  ///
+  /// In es, this message translates to:
+  /// **'N° de serie (opcional)'**
+  String get serialNumberOptional;
+
+  /// No description provided for @serialRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Exige n° de serie'**
+  String get serialRequired;
+
+  /// No description provided for @custodyRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Lleva responsable'**
+  String get custodyRequired;
+
+  /// No description provided for @vehicle.
+  ///
+  /// In es, this message translates to:
+  /// **'Vehículo'**
+  String get vehicle;
+
+  /// No description provided for @container.
+  ///
+  /// In es, this message translates to:
+  /// **'Contenedor'**
+  String get container;
+
+  /// No description provided for @vehicleData.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos del vehículo'**
+  String get vehicleData;
+
+  /// No description provided for @chassisNumber.
+  ///
+  /// In es, this message translates to:
+  /// **'N° de chasis'**
+  String get chassisNumber;
+
+  /// No description provided for @engineNumber.
+  ///
+  /// In es, this message translates to:
+  /// **'N° de motor'**
+  String get engineNumber;
+
+  /// No description provided for @year.
+  ///
+  /// In es, this message translates to:
+  /// **'Año'**
+  String get year;
+
+  /// No description provided for @initialLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Dónde queda'**
+  String get initialLocation;
+
+  /// No description provided for @chooseLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí dónde queda'**
+  String get chooseLocation;
+
+  /// No description provided for @companyLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'de la empresa'**
+  String get companyLocation;
+
+  /// No description provided for @me.
+  ///
+  /// In es, this message translates to:
+  /// **'yo'**
+  String get me;
+
+  /// No description provided for @custodianRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí el responsable'**
+  String get custodianRequired;
+
+  /// No description provided for @descriptionOptional.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción (opcional)'**
+  String get descriptionOptional;
+
+  /// No description provided for @codeAlreadyUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay un ítem con el código {code}'**
+  String codeAlreadyUsed(String code);
+
+  /// No description provided for @createWithThisCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Dar de alta un ítem con este código'**
+  String get createWithThisCode;
+
+  /// No description provided for @scanCodeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanear código'**
+  String get scanCodeTitle;
+
+  /// No description provided for @opCreateAsset.
+  ///
+  /// In es, this message translates to:
+  /// **'Alta de {code}'**
+  String opCreateAsset(String code);
+
+  /// No description provided for @fixCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Corregir código'**
+  String get fixCode;
+
+  /// No description provided for @fixCodeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro código interno'**
+  String get fixCodeTitle;
+
   /// No description provided for @settings.
   ///
   /// In es, this message translates to:

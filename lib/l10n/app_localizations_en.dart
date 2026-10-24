@@ -951,6 +951,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerUpAndContinue => 'Check in and continue';
 
   @override
+  String get newItem => 'New item';
+
+  @override
+  String get createItem => 'Create item';
+
+  @override
+  String get chooseModel => 'Choose the model';
+
+  @override
+  String get searchModels => 'Search model or brand';
+
+  @override
+  String get noModels => 'No models. They are created on the web.';
+
+  @override
+  String get codes => 'Codes';
+
+  @override
+  String get barcodeOptional => 'Manufacturer barcode (optional)';
+
+  @override
+  String get serialNumberOptional => 'Serial number (optional)';
+
+  @override
+  String get serialRequired => 'Serial number required';
+
+  @override
+  String get custodyRequired => 'Needs a custodian';
+
+  @override
+  String get vehicle => 'Vehicle';
+
+  @override
+  String get container => 'Container';
+
+  @override
+  String get vehicleData => 'Vehicle data';
+
+  @override
+  String get chassisNumber => 'Chassis number';
+
+  @override
+  String get engineNumber => 'Engine number';
+
+  @override
+  String get year => 'Year';
+
+  @override
+  String get initialLocation => 'Where it goes';
+
+  @override
+  String get chooseLocation => 'Choose where it goes';
+
+  @override
+  String get companyLocation => 'company';
+
+  @override
+  String get me => 'me';
+
+  @override
+  String get custodianRequired => 'Choose the custodian';
+
+  @override
+  String get descriptionOptional => 'Description (optional)';
+
+  @override
+  String codeAlreadyUsed(String code) {
+    return 'There is already an item with code $code';
+  }
+
+  @override
+  String get createWithThisCode => 'Create an item with this code';
+
+  @override
+  String get scanCodeTitle => 'Scan code';
+
+  @override
+  String opCreateAsset(String code) {
+    return 'New item $code';
+  }
+
+  @override
+  String get fixCode => 'Fix code';
+
+  @override
+  String get fixCodeTitle => 'Another internal code';
+
+  @override
   String get settings => 'Settings';
 
   @override

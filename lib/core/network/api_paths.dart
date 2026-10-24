@@ -16,6 +16,7 @@ abstract final class ApiPaths {
   static const syncChanges = '/sync/changes';
 
   // Hechos (PUT idempotente con id del cliente, contrato §4)
+  static String asset(String id) => '/inventory/assets/$id';
   static String assetMovement(String id) => '/inventory/asset-movements/$id';
   static String assetStatusChange(String id) =>
       '/inventory/asset-status-changes/$id';

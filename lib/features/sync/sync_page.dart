@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/data/field_actions.dart';
+import '../../core/data/field_repository.dart';
 import '../../core/outbox/outbox_op.dart';
 import '../../core/outbox/outbox_store.dart';
 import '../../core/sync/sync_coordinator.dart';
@@ -131,6 +133,46 @@ class _FailedTile extends StatelessWidget {
 
   final OutboxOp op;
 
+  /// Alta rechazada porque el código interno ya existe en la empresa.
+  static bool _isDuplicateCode(OutboxOp op) =>
+      op.label.key == 'opCreateAsset' && op.errorStatus == 409;
+
+  /// Pide otro código y reintenta el alta con el mismo id (y sus fotos).
+  Future<void> _fixCode(BuildContext context) async {
+    final l = context.l10n;
+    final controller = TextEditingController(text: op.body?['internalCode'] as String? ?? '');
+    final code = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.fixCodeTitle),
+        content: TextField(
+          key: const Key('fixCodeField'),
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(labelText: l.internalCode),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: Text(l.cancel)),
+          FilledButton(
+            key: const Key('fixCodeSave'),
+            onPressed: () => Navigator.pop(c, controller.text.trim()),
+            child: Text(l.retry),
+          ),
+        ],
+      ),
+    );
+    if (code == null || code.isEmpty || !context.mounted) return;
+    if (await sl<FieldRepository>().internalCodeInUse(code, exceptId: op.id)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.codeAlreadyUsed(code))));
+      }
+      return;
+    }
+    final (body, patches, label) = FieldActions.withNewInternalCode(op, code);
+    await sl<OutboxStore>().retry(op.seq!, body: body, patches: patches, label: label);
+    sl<SyncCoordinator>().kick();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -159,7 +201,13 @@ class _FailedTile extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (!discarded)
+                  if (_isDuplicateCode(op))
+                    TextButton(
+                      key: const Key('fixCode'),
+                      onPressed: () => _fixCode(context),
+                      child: Text(l.fixCode),
+                    )
+                  else if (!discarded)
                     TextButton(
                       onPressed: () async {
                         await sl<OutboxStore>().retry(op.seq!);
