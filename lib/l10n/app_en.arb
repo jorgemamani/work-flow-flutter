@@ -325,5 +325,12 @@
   "repeatPin": "Repeat the new PIN",
   "pinTooShort": "Between 4 and 8 digits",
   "pinMismatch": "They do not match",
-  "pinChanged": "PIN changed"
+  "pinChanged": "PIN changed",
+  "connSavedNotSent": "{count, plural, =1{1 saved, not sent} other{{count} saved, not sent}}",
+  "connAllSavedOnPhone": "Everything saved on the phone",
+  "connSending": "Sending {count}…",
+  "connWithProblems": "{count, plural, =1{1 with problems} other{{count} with problems}}",
+  "connSessionExpired": "Session expired",
+  "back": "Back",
+  "addPhotoShort": "Add"
 }

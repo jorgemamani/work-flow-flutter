@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import '../constants/app_fonts.dart';
+import 'common.dart';
 
 class AppTextField extends StatefulWidget {
   const AppTextField({
@@ -23,6 +24,8 @@ class AppTextField extends StatefulWidget {
     this.maxLines = 1,
     this.textCapitalization = TextCapitalization.none,
     this.inputFormatters,
+    this.mono = false,
+    this.note,
   });
 
   final TextEditingController controller;
@@ -42,6 +45,12 @@ class AppTextField extends StatefulWidget {
   final TextCapitalization textCapitalization;
   final List<TextInputFormatter>? inputFormatters;
 
+  /// Números de documento y códigos: en mono y más grandes.
+  final bool mono;
+
+  /// Aclaración en gris junto a la etiqueta ("(opcional)").
+  final String? note;
+
   @override
   State<AppTextField> createState() => _AppTextFieldState();
 }
@@ -57,7 +66,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    final field = TextFormField(
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
@@ -69,9 +78,10 @@ class _AppTextFieldState extends State<AppTextField> {
       maxLines: widget.obscureText || _obscureText ? 1 : widget.maxLines,
       textCapitalization: widget.textCapitalization,
       inputFormatters: widget.inputFormatters,
-      style: Theme.of(context).textTheme.bodyLarge,
+      style: widget.mono
+          ? AppFonts.monoStyle(fontSize: 20, fontWeight: FontWeight.w500, color: AppColors.ink)
+          : const TextStyle(fontSize: 17, color: AppColors.ink),
       decoration: InputDecoration(
-        labelText: widget.label,
         hintText: widget.hint,
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.isPassword
@@ -83,33 +93,9 @@ class _AppTextFieldState extends State<AppTextField> {
                 onPressed: () => setState(() => _obscureText = !_obscureText),
               )
             : widget.suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.md,
-        ),
-        filled: true,
-        fillColor: AppColors.surfaceLight,
       ),
     );
+    // Etiqueta arriba, no flotante (ver FieldLabel).
+    return FieldLabel(widget.label, note: widget.note, child: field);
   }
 }

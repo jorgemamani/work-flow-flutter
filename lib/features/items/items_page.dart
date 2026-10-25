@@ -12,7 +12,6 @@ import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
-import '../../shared/widgets/sync_indicator.dart';
 import '../auth/presentation/session_cubit.dart';
 import 'item_lookup.dart';
 import 'widgets/asset_tile.dart';
@@ -63,7 +62,6 @@ class _ItemsPageState extends State<ItemsPage> {
               icon: const Icon(Icons.qr_code_scanner),
               onPressed: () => context.push(RouteNames.scan),
             ),
-            const SyncIndicator(),
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(112),

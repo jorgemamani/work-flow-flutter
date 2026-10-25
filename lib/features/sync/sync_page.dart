@@ -14,7 +14,7 @@ import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
-import '../../shared/widgets/sync_indicator.dart';
+import '../../shared/widgets/connection_strip.dart';
 
 /// Estado de sincronización: pendientes en orden, fallidos con su motivo
 /// (RN-25), modo sin conexión y "sincronizar ahora".

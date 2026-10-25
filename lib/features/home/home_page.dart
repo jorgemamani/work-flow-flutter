@@ -13,7 +13,6 @@ import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
-import '../../shared/widgets/sync_indicator.dart';
 import '../auth/presentation/session_cubit.dart';
 import 'home_actions.dart';
 
@@ -51,7 +50,6 @@ class HomePage extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(l.helloName(profile.firstName)),
-            actions: const [SyncIndicator()],
           ),
           body: RefreshIndicator(
             onRefresh: () => context.read<SyncCoordinator>().syncNow(),
@@ -72,8 +70,6 @@ class HomePage extends StatelessWidget {
                 padding: const EdgeInsets.all(AppSizes.md),
                 children: [
                   _ProjectCard(data: d, profile: profile),
-                  const SizedBox(height: AppSizes.sm),
-                  const SyncStatusCard(),
                   if (projectId == null)
                     BlocBuilder<SyncCoordinator, SyncStatus>(
                       builder: (context, s) => Padding(

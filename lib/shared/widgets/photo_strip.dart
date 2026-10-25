@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/photos/photo_service.dart';
 import '../../dependency_injection.dart';
 import '../constants/app_colors.dart';
+import 'dashed_border.dart';
 import '../extensions/context_extensions.dart';
 
 /// Fotos de un renglón: miniaturas, borrar y agregar (cámara o galería),
@@ -17,6 +18,7 @@ class PhotoStrip extends StatelessWidget {
     required this.max,
     this.required = false,
     this.showError = false,
+    this.tileSize = 88,
   });
 
   final List<LocalPhoto> photos;
@@ -24,6 +26,7 @@ class PhotoStrip extends StatelessWidget {
   final int max;
   final bool required;
   final bool showError;
+  final double tileSize;
 
   Future<void> _add(BuildContext context) async {
     final l = context.l10n;
@@ -58,11 +61,12 @@ class PhotoStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final missing = required && photos.isEmpty;
+    final warn = missing && showError;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 72,
+          height: tileSize,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
@@ -72,21 +76,22 @@ class PhotoStrip extends StatelessWidget {
                   child: Stack(
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(File(p.path), width: 72, height: 72, fit: BoxFit.cover),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(File(p.path), width: tileSize, height: tileSize, fit: BoxFit.cover),
                       ),
                       Positioned(
                         top: 0,
                         right: 0,
-                        child: InkWell(
-                          onTap: () {
+                        child: IconButton(
+                          tooltip: l.discard,
+                          onPressed: () {
                             photos.remove(p);
                             sl<PhotoService>().discard(p);
                             onChanged();
                           },
-                          child: Container(
-                            decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                            padding: const EdgeInsets.all(2),
+                          icon: Container(
+                            decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
+                            padding: const EdgeInsets.all(3),
                             child: const Icon(Icons.close, size: 16, color: Colors.white),
                           ),
                         ),
@@ -95,29 +100,42 @@ class PhotoStrip extends StatelessWidget {
                   ),
                 ),
               if (photos.length < max)
-                OutlinedButton(
-                  key: const Key('addPhoto'),
-                  style: OutlinedButton.styleFrom(
-                    fixedSize: const Size(72, 72),
-                    padding: EdgeInsets.zero,
-                    side: BorderSide(
-                      color: missing && showError ? AppColors.statusError : AppColors.border,
+                DashedBorder(
+                  color: missing ? AppColors.statusWarning : const Color(0xFF8A8D89),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      key: const Key('addPhoto'),
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => _add(context),
+                      child: SizedBox(
+                        width: tileSize,
+                        height: tileSize,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.photo_camera_outlined, size: 22, color: AppColors.ink),
+                            const SizedBox(height: 4),
+                            Text(
+                              l.addPhotoShort,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.ink),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: () => _add(context),
-                  child: const Icon(Icons.add_a_photo_outlined),
                 ),
             ],
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
-          missing
-              ? l.photoRequired
-              : l.photosCount(photos.length, max),
-          style: context.textTheme.bodySmall?.copyWith(
-            color: missing && showError ? AppColors.statusError : AppColors.textSecondary,
+          missing ? l.photoRequired : l.photosCount(photos.length, max),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: warn ? FontWeight.w500 : FontWeight.w400,
+            color: warn ? AppColors.statusError : (missing ? AppColors.statusWarning : AppColors.textSecondary),
           ),
         ),
       ],

@@ -10,6 +10,7 @@ import '../../dependency_injection.dart';
 import '../../routing/route_names.dart';
 import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/connection_strip.dart';
 import '../auth/presentation/session_cubit.dart';
 
 /// Escanear el código de barras o QR de un ítem (LOG-02) y abrirlo. Busca en
@@ -38,7 +39,15 @@ class _ScanPageState extends State<ScanPage> {
   bool _handling = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Fuera del build/dispose: la franja está más arriba en el árbol.
+    Future.microtask(() => fullScreenDepth.value++);
+  }
+
+  @override
   void dispose() {
+    Future.microtask(() => fullScreenDepth.value--);
     _controller.dispose();
     _manual.dispose();
     super.dispose();

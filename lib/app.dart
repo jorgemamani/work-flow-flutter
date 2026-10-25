@@ -15,6 +15,7 @@ import 'shared/constants/app_colors.dart';
 import 'shared/constants/app_fonts.dart';
 import 'shared/constants/app_sizes.dart';
 import 'shared/managers/alert_manager.dart';
+import 'shared/widgets/connection_strip.dart';
 
 class WorkFlowApp extends StatefulWidget {
   const WorkFlowApp({super.key});
@@ -77,7 +78,7 @@ class _WorkFlowAppState extends State<WorkFlowApp> with WidgetsBindingObserver {
           // Fechas (DateFormat) en el idioma de la app, no en el default de intl.
           builder: (context, child) {
             Intl.defaultLocale = Localizations.localeOf(context).toLanguageTag();
-            return child!;
+            return ConnectionFrame(child: child!);
           },
           localeResolutionCallback: (device, supported) {
             for (final l in supported) {

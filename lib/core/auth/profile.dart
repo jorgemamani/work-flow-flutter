@@ -25,6 +25,9 @@ class Profile {
   String get tenantName => _tenant['name'] as String? ?? '';
   String? get tenantCuit => _tenant['cuit'] as String?;
 
+  /// Color de la empresa (`#RRGGBB`), solo para su marca. Puede venir null.
+  String? get tenantBrandColor => _tenant['brandColor'] as String?;
+
   /// Clave para saber si los datos locales son de esta persona y empresa.
   String get ownerKey => '$userId@$tenantId';
 

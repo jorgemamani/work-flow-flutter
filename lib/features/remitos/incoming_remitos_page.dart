@@ -12,7 +12,7 @@ import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
-import '../../shared/widgets/sync_indicator.dart';
+import '../../shared/widgets/connection_strip.dart';
 import '../auth/presentation/session_cubit.dart';
 
 /// Remitos en tránsito hacia el proyecto, para confirmar su llegada.
@@ -25,7 +25,7 @@ class IncomingRemitosPage extends StatelessWidget {
     final projectId = context.watch<SessionCubit>().state.projectId;
     final repo = sl<FieldRepository>();
     return Scaffold(
-      appBar: AppBar(title: Text(l.incomingRemitos), actions: const [SyncIndicator()]),
+      appBar: AppBar(title: Text(l.incomingRemitos)),
       body: LiveQuery<(List<Remito>, List<Remito>, Map<String, Location>)>(
         sources: const {'remitos', 'remito_items', 'locations'},
         deps: [projectId],

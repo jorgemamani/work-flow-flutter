@@ -7,7 +7,6 @@ import '../../routing/route_names.dart';
 import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/widgets/common.dart';
-import '../../shared/widgets/sync_indicator.dart';
 import '../auth/presentation/session_cubit.dart';
 import 'locale_cubit.dart';
 
@@ -74,7 +73,7 @@ class AccountPage extends StatelessWidget {
     final profile = context.watch<SessionCubit>().state.profile!;
     final locale = context.watch<LocaleCubit>().state;
     return Scaffold(
-      appBar: AppBar(title: Text(l.tabAccount), actions: const [SyncIndicator()]),
+      appBar: AppBar(title: Text(l.tabAccount)),
       body: ListView(
         padding: const EdgeInsets.all(AppSizes.md),
         children: [

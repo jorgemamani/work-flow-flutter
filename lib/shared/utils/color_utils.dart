@@ -27,3 +27,15 @@ String hexFromColor(Color color) {
   final rgb = color.toARGB32() & 0xFFFFFF;
   return '#${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
 }
+
+/// Texto encima del color de la empresa: tinta o blanco, el que contraste más.
+Color onBrandColor(Color fill) {
+  double ratio(Color a, Color b) {
+    final la = a.computeLuminance();
+    final lb = b.computeLuminance();
+    return (la > lb ? la + 0.05 : lb + 0.05) / (la > lb ? lb + 0.05 : la + 0.05);
+  }
+
+  const ink = Color(0xFF16181A);
+  return ratio(fill, ink) >= ratio(fill, Colors.white) ? ink : Colors.white;
+}

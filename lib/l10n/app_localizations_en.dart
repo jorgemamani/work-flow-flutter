@@ -1144,4 +1144,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pinChanged => 'PIN changed';
+
+  @override
+  String connSavedNotSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count saved, not sent',
+      one: '1 saved, not sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get connAllSavedOnPhone => 'Everything saved on the phone';
+
+  @override
+  String connSending(int count) {
+    return 'Sending $count…';
+  }
+
+  @override
+  String connWithProblems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count with problems',
+      one: '1 with problems',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get connSessionExpired => 'Session expired';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get addPhotoShort => 'Add';
 }

@@ -638,5 +638,33 @@
   "repeatPin": "Repetí el PIN nuevo",
   "pinTooShort": "Entre 4 y 8 dígitos",
   "pinMismatch": "No coinciden",
-  "pinChanged": "PIN cambiado"
+  "pinChanged": "PIN cambiado",
+  "connSavedNotSent": "{count, plural, =1{1 guardado sin enviar} other{{count} guardados sin enviar}}",
+  "@connSavedNotSent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connAllSavedOnPhone": "Todo guardado en el teléfono",
+  "connSending": "Enviando {count}…",
+  "@connSending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connWithProblems": "{count, plural, =1{1 con problemas} other{{count} con problemas}}",
+  "@connWithProblems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connSessionExpired": "Sesión vencida",
+  "back": "Volver",
+  "addPhotoShort": "Agregar"
 }

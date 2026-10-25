@@ -14,7 +14,6 @@ import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
-import '../../shared/widgets/sync_indicator.dart';
 import '../auth/presentation/session_cubit.dart';
 
 /// Registros: bitácoras, verificaciones, informes recibidos, incidencias y
@@ -40,7 +39,6 @@ class RecordsPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(l.tabRecords),
-          actions: const [SyncIndicator()],
           bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,

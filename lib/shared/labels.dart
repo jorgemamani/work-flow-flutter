@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
+
 import '../core/outbox/outbox_op.dart';
 import '../l10n/app_localizations.dart';
+import 'constants/app_colors.dart';
 
 /// Textos de los enums de la API (viajan en inglés, contrato §1).
 extension EnumLabels on AppLocalizations {
@@ -151,3 +154,35 @@ extension EnumLabels on AppLocalizations {
         _ => raw,
       };
 }
+
+/// Color de cada estado (punto + texto). En tránsito es siempre azul; el
+/// resto, bien / atención / problema / neutro.
+Color remitoStatusColor(String s) => switch (s) {
+      'PENDING_APPROVAL' => AppColors.statusWarning,
+      'REJECTED' => AppColors.statusError,
+      'IN_TRANSIT' => AppColors.statusMove,
+      'RECEIVED' || 'CONTROLLED' => AppColors.statusSuccess,
+      'RECEIVED_WITH_DIFFERENCES' => AppColors.statusWarning,
+      _ => AppColors.statusNeutral,
+    };
+
+Color incidentStatusColor(String s) => switch (s) {
+      'OPEN' => AppColors.statusError,
+      'INVESTIGATING' => AppColors.statusWarning,
+      'RESOLVED' => AppColors.statusSuccess,
+      _ => AppColors.statusNeutral,
+    };
+
+Color requirementStatusColor(String s) => switch (s) {
+      'PENDING' || 'IN_PURCHASE' => AppColors.statusWarning,
+      'IN_TRANSFER' => AppColors.statusMove,
+      'DELIVERED' => AppColors.statusSuccess,
+      'REJECTED' => AppColors.statusError,
+      _ => AppColors.statusNeutral,
+    };
+
+Color reviewStatusColor(String? s) => switch (s) {
+      'APPROVED' => AppColors.statusSuccess,
+      'OBSERVED' => AppColors.statusWarning,
+      _ => AppColors.statusNeutral,
+    };

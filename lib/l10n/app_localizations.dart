@@ -2053,6 +2053,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'PIN cambiado'**
   String get pinChanged;
+
+  /// No description provided for @connSavedNotSent.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 guardado sin enviar} other{{count} guardados sin enviar}}'**
+  String connSavedNotSent(int count);
+
+  /// No description provided for @connAllSavedOnPhone.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo guardado en el teléfono'**
+  String get connAllSavedOnPhone;
+
+  /// No description provided for @connSending.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviando {count}…'**
+  String connSending(int count);
+
+  /// No description provided for @connWithProblems.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 con problemas} other{{count} con problemas}}'**
+  String connWithProblems(int count);
+
+  /// No description provided for @connSessionExpired.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión vencida'**
+  String get connSessionExpired;
+
+  /// No description provided for @back.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver'**
+  String get back;
+
+  /// No description provided for @addPhotoShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar'**
+  String get addPhotoShort;
 }
 
 class _AppLocalizationsDelegate

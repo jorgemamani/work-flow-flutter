@@ -11,7 +11,7 @@ import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
-import '../../shared/widgets/sync_indicator.dart';
+import '../../shared/widgets/connection_strip.dart';
 import '../auth/presentation/session_cubit.dart';
 import 'item_lookup.dart';
 import 'widgets/asset_tile.dart';
@@ -52,7 +52,6 @@ class ItemDetailPage extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(a.internalCode),
-            actions: const [SyncIndicator()],
           ),
           body: ListView(
             padding: const EdgeInsets.all(AppSizes.md),
@@ -85,9 +84,9 @@ class ItemDetailPage extends StatelessWidget {
                 children: [
                   StatusChip(l.assetStatus(a.status), color: assetStatusColor(a.status)),
                   if (ctx.conditionName(a.conditionId) != null)
-                    StatusChip(ctx.conditionName(a.conditionId)!, icon: Icons.star_outline),
+                    StatusChip(ctx.conditionName(a.conditionId)!),
                   if (a.openRemitoId != null)
-                    StatusChip(l.inOpenRemito, color: AppColors.statusWarning, icon: Icons.local_shipping_outlined),
+                    StatusChip(l.inOpenRemito, color: AppColors.statusWarning),
                   if (a.hasPendingChange)
                     StatusChip(l.pendingSync, color: AppColors.primary),
                 ],

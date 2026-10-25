@@ -173,7 +173,7 @@ class _VerificationFormPageState extends State<VerificationFormPage> {
                           ),
                         ),
                         if (_requiresPhoto(line.asset))
-                          StatusChip(l.requiresPhoto, color: AppColors.statusWarning, icon: Icons.photo_camera),
+                          StatusChip(l.requiresPhoto, color: AppColors.statusWarning),
                       ],
                     ),
                     if (ctx.conditions.isNotEmpty) ...[
