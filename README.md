@@ -5,6 +5,8 @@ App Flutter para el personal en las minas. Funciona hasta 14 días sin señal: l
 - Contrato con la API: `workflow-api/docs/contrato-mvp.md` y `workflow-api/openapi.json`.
 - Producto: `Workflow-Vision-y-Alcance-v4.md` (v4.1), sobre todo §9 (remitos) y §11 (modo offline).
 
+- Diseño: marca de Workflow con la densidad de campo. Antes de tocar UI, leé la skill `.claude/skills/workflow-design/SKILL.md` (reglas, widgets y checklist). Las fuentes IBM Plex van empaquetadas en `assets/fonts/` para que la app ande sin señal.
+
 ## Correr
 
 ```bash
