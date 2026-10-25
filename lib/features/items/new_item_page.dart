@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/auth/profile.dart';
 import '../../core/data/field_actions.dart';
 import '../../core/data/field_repository.dart';
 import '../../core/data/models.dart';
@@ -204,10 +203,8 @@ class _NewItemPageState extends State<NewItemPage> {
     }
     if (!mounted) return;
     setState(() => _saving = true);
-    final session = context.read<SessionCubit>().state;
-    final setCurrent = _photos.isNotEmpty &&
-        (session.profile?.can(Perms.photosSetCurrent, projectId: session.projectId) ?? false);
-    if (setCurrent) await sl<PhotoService>().cacheAsCurrent(_photos.first);
+    // La primera foto va a ser la vigente: se ve desde ya, sin esperar la sync.
+    if (_photos.isNotEmpty) await sl<PhotoService>().cacheAsCurrent(_photos.first);
     final id = await sl<FieldActions>().createAsset(
       AssetDraft(
         model: model,
@@ -228,7 +225,6 @@ class _NewItemPageState extends State<NewItemPage> {
         custodianEmployeeId: _custodianId,
       ),
       photos: _photos,
-      setCurrentPhoto: setCurrent,
     );
     if (!mounted) return;
     showSaved(context);

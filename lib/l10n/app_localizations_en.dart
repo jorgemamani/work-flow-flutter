@@ -70,7 +70,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'No connection. Signing in for the first time needs a signal.';
 
   @override
-  String get loginHelp => 'Forgot your PIN? Ask your company to reset it.';
+  String get loginHelp =>
+      'Forgot your password or PIN? Ask your company to reset them.';
 
   @override
   String get sessionExpiredKeepQueue =>
@@ -1069,9 +1070,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get catClothing => 'Clothing';
 
   @override
-  String opSetCurrentPhoto(String code) {
-    return 'Current photo of $code';
-  }
+  String get identifierLabel => 'Email or ID number (DNI/CUIL)';
+
+  @override
+  String get identifierHint => 'name@company.com or 30111222';
+
+  @override
+  String get invalidIdentifier => 'Enter an email or an ID number';
+
+  @override
+  String get secretLabel => 'Password or PIN';
+
+  @override
+  String get sectionProject => 'In the project';
+
+  @override
+  String get sectionLogistics => 'Logistics';
 
   @override
   String get settings => 'Settings';

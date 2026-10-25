@@ -20,7 +20,7 @@
   "signIn": "Ingresar",
   "requiredField": "Obligatorio",
   "loginOffline": "Sin conexión. Para ingresar por primera vez hace falta señal.",
-  "loginHelp": "¿Olvidaste el PIN? Pedile a tu empresa que lo resetee.",
+  "loginHelp": "¿Olvidaste la contraseña o el PIN? Pedile a tu empresa que los resetee.",
   "sessionExpiredKeepQueue": "Tu sesión venció. Ingresá de nuevo: lo que registraste sin señal se conserva y se envía después.",
   "chooseCompany": "Elegí la empresa",
   "chooseCompanyHelp": "Trabajás en más de una empresa. ¿Con cuál querés entrar?",
@@ -603,14 +603,12 @@
   "catInstrument": "Instrumento",
   "catEquipment": "Equipo",
   "catClothing": "Indumentaria",
-  "opSetCurrentPhoto": "Foto vigente de {code}",
-  "@opSetCurrentPhoto": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
+  "identifierLabel": "Email o DNI/CUIL",
+  "identifierHint": "nombre@empresa.com o 30111222",
+  "invalidIdentifier": "Ingresá un email o un DNI/CUIL",
+  "secretLabel": "Contraseña o PIN",
+  "sectionProject": "En el proyecto",
+  "sectionLogistics": "Logística",
   "settings": "Ajustes",
   "changePin": "Cambiar PIN",
   "switchCompany": "Cambiar de empresa",

@@ -52,26 +52,19 @@ class SessionManager implements SessionRefresher {
 
   // ── Login ──────────────────────────────────────────────────────────────────
 
-  Future<List<Membership>> loginField({
-    required String cuit,
-    required String documentNumber,
-    required String pin,
-  }) =>
-      _login({'cuit': cuit, 'documentNumber': documentNumber, 'pin': pin});
-
-  Future<List<Membership>> loginOffice({
-    required String email,
-    required String password,
+  /// Login único (contrato §2): [identifier] es un email o un DNI/CUIL, y
+  /// [secret] la contraseña o el PIN; la API prueba los dos. [cuit] solo elige
+  /// la empresa: sin él y con varias, se devuelven todas para elegir.
+  Future<List<Membership>> login({
+    required String identifier,
+    required String secret,
     String? cuit,
-  }) =>
-      _login({
-        'email': email,
-        'password': password,
-        if (cuit != null && cuit.isNotEmpty) 'cuit': cuit,
-      });
-
-  Future<List<Membership>> _login(Map<String, dynamic> body) async {
-    final data = await _post(ApiPaths.login, body);
+  }) async {
+    final data = await _post(ApiPaths.login, {
+      'identifier': identifier.trim(),
+      'secret': secret,
+      if (cuit != null && cuit.isNotEmpty) 'cuit': cuit,
+    });
     await _save(data);
     return [
       for (final m in data['memberships'] as List? ?? const [])

@@ -27,7 +27,6 @@ abstract final class ApiPaths {
   static String requirement(String id) => '/requirements/$id';
   static String checkIn(String id) => '/check-ins/$id';
   static String attachment(String id) => '/attachments/$id';
-  static String attachmentSetCurrent(String id) => '/attachments/$id/set-current';
 
   // Remito de devolución armado offline (POST idempotente con id del cliente)
   static const remitos = '/remitos';

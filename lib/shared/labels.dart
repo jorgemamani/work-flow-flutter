@@ -127,7 +127,6 @@ extension EnumLabels on AppLocalizations {
     final a = label.args;
     return switch (label.key) {
       'opCreateAsset' => opCreateAsset(a['code'] ?? ''),
-      'opSetCurrentPhoto' => opSetCurrentPhoto(a['code'] ?? ''),
       'opMove' => opMove(a['code'] ?? ''),
       'opStatus' => opStatus(a['code'] ?? ''),
       'opReception' => opReception(a['number'] ?? ''),

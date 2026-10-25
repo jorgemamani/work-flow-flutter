@@ -50,7 +50,7 @@ void main() {
     );
   }
 
-  test('login de campo guarda el par de tokens', () async {
+  test('login único: manda identifier y secret, y guarda el par de tokens', () async {
     when(() => dio.post<dynamic>('/auth/login', data: any(named: 'data'), options: any(named: 'options')))
         .thenAnswer((_) async => res('/auth/login', 200, {
               'data': {
@@ -63,9 +63,14 @@ void main() {
               },
             }));
 
-    final m = await session.loginField(cuit: '30123456789', documentNumber: '30111222', pin: '1234');
+    final m = await session.login(identifier: ' 30.111.222 ', secret: '1234', cuit: '30123456789');
 
     expect(m.single.tenantName, 'Arq&Top');
+    verify(() => dio.post<dynamic>(
+          '/auth/login',
+          data: {'identifier': '30.111.222', 'secret': '1234', 'cuit': '30123456789'},
+          options: any(named: 'options'),
+        )).called(1);
     expect(tokens.value!.refreshToken, 'r1');
     expect(tokens.value!.accessExpiresAt, now.add(const Duration(minutes: 15)));
   });

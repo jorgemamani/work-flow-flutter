@@ -187,4 +187,6 @@ abstract final class KvKeys {
   static const simulateOffline = 'app.simulateOffline';
   static const locale = 'app.locale';
   static const ownerKey = 'app.ownerKey';
+  static const lastCuit = 'app.lastCuit';
+  static const lastIdentifier = 'app.lastIdentifier';
 }

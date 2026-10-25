@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/auth/session_manager.dart';
@@ -13,7 +12,9 @@ import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import 'session_cubit.dart';
 
-/// Login de campo (CUIT + DNI/CUIL + PIN) u oficina (email + contraseña).
+/// Un solo login para campo y oficina (contrato §2): empresa (CUIT, opcional),
+/// email o DNI/CUIL, y contraseña o PIN. Lo que cada uno ve adentro depende
+/// de sus permisos.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -24,32 +25,41 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _form = GlobalKey<FormState>();
   final _cuit = TextEditingController();
-  final _doc = TextEditingController();
-  final _pin = TextEditingController();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-  bool _office = false;
+  final _identifier = TextEditingController();
+  final _secret = TextEditingController();
   String? _tenantName;
   Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    // Sesión vencida: precargar con quién estaba.
-    final p = context.read<SessionCubit>().state.profile;
+    _prefill();
+  }
+
+  /// Sesión vencida: con quién estaba. Si no, lo último que se tipeó.
+  Future<void> _prefill() async {
+    final cubit = context.read<SessionCubit>();
+    final p = cubit.state.profile;
+    String? cuit;
+    String? identifier;
     if (p != null) {
-      _cuit.text = p.tenantCuit ?? '';
-      _doc.text = p.documentNumber ?? '';
-      _email.text = p.email ?? '';
-      _office = p.documentNumber == null && p.email != null;
-      if (_cuit.text.isNotEmpty) _resolve(_cuit.text);
+      cuit = p.tenantCuit;
+      identifier = p.email ?? p.documentNumber;
+    } else {
+      (cuit, identifier) = await cubit.lastLogin();
     }
+    if (!mounted) return;
+    setState(() {
+      _cuit.text = cuit ?? '';
+      _identifier.text = identifier ?? '';
+    });
+    if (_cuit.text.isNotEmpty) _resolve(_cuit.text);
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    for (final c in [_cuit, _doc, _pin, _email, _password]) {
+    for (final c in [_cuit, _identifier, _secret]) {
       c.dispose();
     }
     super.dispose();
@@ -74,26 +84,16 @@ class _LoginPageState extends State<LoginPage> {
   void _submit() {
     if (!_form.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    final cubit = context.read<SessionCubit>();
-    if (_office) {
-      cubit.loginOffice(
-        email: _email.text.trim(),
-        password: _password.text,
-        cuit: _digits(_cuit.text),
-      );
-    } else {
-      cubit.loginField(
-        cuit: _digits(_cuit.text),
-        documentNumber: _digits(_doc.text),
-        pin: _pin.text,
-      );
-    }
+    context.read<SessionCubit>().login(
+          cuit: _digits(_cuit.text),
+          identifier: _identifier.text.trim(),
+          secret: _secret.text,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    String? required(String? v) => (v == null || v.trim().isEmpty) ? l.requiredField : null;
 
     return Scaffold(
       body: SafeArea(
@@ -117,15 +117,6 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.only(bottom: AppSizes.md),
                     child: _Notice(text: l.sessionExpiredKeepQueue, color: AppColors.statusWarning),
                   ),
-                SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment(value: false, label: Text(l.loginField), icon: const Icon(Icons.badge_outlined)),
-                    ButtonSegment(value: true, label: Text(l.loginOffice), icon: const Icon(Icons.mail_outline)),
-                  ],
-                  selected: {_office},
-                  onSelectionChanged: (s) => setState(() => _office = s.first),
-                ),
-                const SizedBox(height: AppSizes.lg),
                 Form(
                   key: _form,
                   child: Column(
@@ -133,15 +124,16 @@ class _LoginPageState extends State<LoginPage> {
                       AppTextField(
                         key: const Key('cuit'),
                         controller: _cuit,
-                        label: _office ? l.companyCuitOptional : l.companyCuit,
+                        label: l.companyCuitOptional,
                         hint: '30-12345678-9',
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.business),
                         onChanged: _onCuitChanged,
-                        validator: _office
-                            ? null
-                            : (v) => _digits(v ?? '').length == 11 ? null : l.invalidCuit,
+                        validator: (v) {
+                          final d = _digits(v ?? '');
+                          return d.isEmpty || d.length == 11 ? null : l.invalidCuit;
+                        },
                       ),
                       if (_tenantName != null)
                         Padding(
@@ -155,51 +147,33 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       const SizedBox(height: AppSizes.md),
-                      if (!_office) ...[
-                        AppTextField(
-                          key: const Key('document'),
-                          controller: _doc,
-                          label: l.documentNumber,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.next,
-                          prefixIcon: const Icon(Icons.person_outline),
-                          validator: required,
-                        ),
-                        const SizedBox(height: AppSizes.md),
-                        AppTextField(
-                          key: const Key('pin'),
-                          controller: _pin,
-                          label: l.pin,
-                          isPassword: true,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          textInputAction: TextInputAction.done,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          onFieldSubmitted: (_) => _submit(),
-                          validator: required,
-                        ),
-                      ] else ...[
-                        AppTextField(
-                          key: const Key('email'),
-                          controller: _email,
-                          label: l.email,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          prefixIcon: const Icon(Icons.mail_outline),
-                          validator: required,
-                        ),
-                        const SizedBox(height: AppSizes.md),
-                        AppTextField(
-                          key: const Key('password'),
-                          controller: _password,
-                          label: l.password,
-                          isPassword: true,
-                          textInputAction: TextInputAction.done,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          onFieldSubmitted: (_) => _submit(),
-                          validator: required,
-                        ),
-                      ],
+                      AppTextField(
+                        key: const Key('identifier'),
+                        controller: _identifier,
+                        label: l.identifierLabel,
+                        hint: l.identifierHint,
+                        // El teclado de email tiene @ y números: sirve para los dos.
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        prefixIcon: const Icon(Icons.person_outline),
+                        validator: (v) {
+                          final t = (v ?? '').trim();
+                          if (t.isEmpty) return l.requiredField;
+                          if (!t.contains('@') && _digits(t).length < 7) return l.invalidIdentifier;
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: AppSizes.md),
+                      AppTextField(
+                        key: const Key('secret'),
+                        controller: _secret,
+                        label: l.secretLabel,
+                        isPassword: true,
+                        textInputAction: TextInputAction.done,
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        onFieldSubmitted: (_) => _submit(),
+                        validator: (v) => (v == null || v.isEmpty) ? l.requiredField : null,
+                      ),
                     ],
                   ),
                 ),

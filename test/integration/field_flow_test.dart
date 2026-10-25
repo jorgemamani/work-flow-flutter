@@ -81,7 +81,7 @@ void main() {
     final repo = FieldRepository(records);
 
     // 1. Login de campo y descarga inicial.
-    await session.loginField(cuit: '30-12345678-9', documentNumber: '30111222', pin: '1234');
+    await session.login(cuit: '30-12345678-9', identifier: '30111222', secret: '1234');
     final me = await api.get(ApiPaths.me) as Map<String, dynamic>;
     final employeeId = (me['employee'] as Map)['id'] as String;
     await engine.pull();
@@ -182,7 +182,7 @@ void main() {
     final repo = FieldRepository(records);
 
     // Logística (inventory.write) de la empresa demo.
-    await session.loginOffice(email: 'admin@minerademo.com', password: 'Admin1234!', cuit: '30123456789');
+    await session.login(identifier: 'admin@minerademo.com', secret: 'Admin1234!', cuit: '30123456789');
     await engine.pull();
     final models = await repo.models();
     final model = models.values.firstWhere((m) => !m.isBulk && !m.requiresSerialNumber && !m.requiresCustody);
@@ -204,14 +204,14 @@ void main() {
         );
     // Uno con un código que ya existe en la API (simula que otro lo cargó antes).
     final dupId = await actions.createAsset(draftWith(taken));
-    final id = await actions.createAsset(draftWith(code), photos: [photo], setCurrentPhoto: true);
+    final id = await actions.createAsset(draftWith(code), photos: [photo]);
     expect((await repo.projectAssets(project.id)).map((a) => a.id), containsAll([dupId, id]));
     expect((await processor.drain()).stop, DrainStop.offline);
 
     connectivity.setSimulatedOffline(false);
     final report = await processor.drain();
     expect(report.failed, 1);
-    expect(report.sent, 3);
+    expect(report.sent, 2);
     final failed = (await outbox.list()).single;
     expect(failed.errorStatus, 409);
 

@@ -15,6 +15,7 @@ import '../../shared/widgets/common.dart';
 import '../../shared/widgets/live_query.dart';
 import '../../shared/widgets/sync_indicator.dart';
 import '../auth/presentation/session_cubit.dart';
+import 'home_actions.dart';
 
 class _HomeData {
   const _HomeData({
@@ -84,35 +85,7 @@ class HomePage extends StatelessWidget {
                       ),
                     )
                   else ...[
-                    SectionTitle(l.quickActions),
-                    _ActionGrid(
-                      actions: [
-                        _Action(Icons.qr_code_scanner, l.actionScan, () => context.push(RouteNames.scan), key: 'scan'),
-                        if (profile.can(Perms.remitosConfirm, projectId: projectId))
-                          _Action(Icons.local_shipping_outlined, l.actionReceiveRemito,
-                              () => context.push(RouteNames.incomingRemitos),
-                              badge: d.incoming, key: 'receive'),
-                        if (profile.can(Perms.verificationsSubmit, projectId: projectId))
-                          _Action(Icons.fact_check_outlined, l.actionVerification,
-                              () => context.push(RouteNames.newVerification), key: 'verification'),
-                        if (profile.can(Perms.submissionsCreate, projectId: projectId))
-                          _Action(Icons.edit_note, l.actionDailyLog,
-                              () => context.push(RouteNames.newDailyLog), key: 'dailyLog'),
-                        if (profile.can(Perms.incidentsCreate, projectId: projectId))
-                          _Action(Icons.report_problem_outlined, l.actionIncident,
-                              () => context.push(RouteNames.newIncident), key: 'incident'),
-                        if (profile.employeeId != null && profile.can(Perms.checkinsSelf))
-                          _Action(profile.onSite ? Icons.south : Icons.north,
-                              profile.onSite ? l.actionCheckDown : l.actionCheckUp,
-                              () => context.push(RouteNames.checkIn), key: 'checkIn'),
-                        if (profile.can(Perms.requirementsCreate, projectId: projectId))
-                          _Action(Icons.add_shopping_cart, l.actionRequirement,
-                              () => context.push(RouteNames.newRequirement), key: 'requirement'),
-                        if (profile.can(Perms.remitosWrite, projectId: projectId))
-                          _Action(Icons.assignment_return_outlined, l.actionReturn,
-                              () => context.push(RouteNames.returnRemito), key: 'return'),
-                      ],
-                    ),
+                    ..._actionSections(context, HomeActions.of(profile, projectId), profile, d),
                     SectionTitle(l.summary),
                     Card(
                       child: Column(
@@ -149,6 +122,42 @@ class HomePage extends StatelessWidget {
       },
     );
   }
+}
+
+/// Acciones del inicio. Con acciones de los dos lados, dos secciones con
+/// título; si no, una sola ("Qué querés hacer").
+List<Widget> _actionSections(BuildContext context, HomeActions a, Profile profile, _HomeData d) {
+  final l = context.l10n;
+  _Action build(HomeAction action) => switch (action) {
+        HomeAction.scan => _Action(Icons.qr_code_scanner, l.actionScan, () => context.push(RouteNames.scan), key: 'scan'),
+        HomeAction.receiveRemito => _Action(Icons.local_shipping_outlined, l.actionReceiveRemito,
+            () => context.push(RouteNames.incomingRemitos),
+            badge: d.incoming, key: 'receive'),
+        HomeAction.verification => _Action(Icons.fact_check_outlined, l.actionVerification,
+            () => context.push(RouteNames.newVerification), key: 'verification'),
+        HomeAction.dailyLog => _Action(Icons.edit_note, l.actionDailyLog, () => context.push(RouteNames.newDailyLog), key: 'dailyLog'),
+        HomeAction.incident => _Action(Icons.report_problem_outlined, l.actionIncident,
+            () => context.push(RouteNames.newIncident), key: 'incident'),
+        HomeAction.checkIn => _Action(profile.onSite ? Icons.south : Icons.north,
+            profile.onSite ? l.actionCheckDown : l.actionCheckUp, () => context.push(RouteNames.checkIn), key: 'checkIn'),
+        HomeAction.newItem => _Action(Icons.add_box_outlined, l.newItem, () => context.push(RouteNames.newItem), key: 'newItem'),
+        HomeAction.requirement => _Action(Icons.add_shopping_cart, l.actionRequirement,
+            () => context.push(RouteNames.newRequirement), key: 'requirement'),
+        HomeAction.returnRemito => _Action(Icons.assignment_return_outlined, l.actionReturn,
+            () => context.push(RouteNames.returnRemito), key: 'return'),
+      };
+  if (!a.showSections) {
+    return [
+      SectionTitle(l.quickActions),
+      _ActionGrid(actions: [for (final x in [...a.project, ...a.logistics]) build(x)]),
+    ];
+  }
+  return [
+    SectionTitle(l.sectionProject),
+    _ActionGrid(actions: [for (final x in a.project) build(x)]),
+    SectionTitle(l.sectionLogistics),
+    _ActionGrid(actions: [for (final x in a.logistics) build(x)]),
+  ];
 }
 
 class _ProjectCard extends StatelessWidget {

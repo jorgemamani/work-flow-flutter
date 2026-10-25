@@ -71,7 +71,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loginHelp =>
-      '¿Olvidaste el PIN? Pedile a tu empresa que lo resetee.';
+      '¿Olvidaste la contraseña o el PIN? Pedile a tu empresa que los resetee.';
 
   @override
   String get sessionExpiredKeepQueue =>
@@ -1070,9 +1070,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get catClothing => 'Indumentaria';
 
   @override
-  String opSetCurrentPhoto(String code) {
-    return 'Foto vigente de $code';
-  }
+  String get identifierLabel => 'Email o DNI/CUIL';
+
+  @override
+  String get identifierHint => 'nombre@empresa.com o 30111222';
+
+  @override
+  String get invalidIdentifier => 'Ingresá un email o un DNI/CUIL';
+
+  @override
+  String get secretLabel => 'Contraseña o PIN';
+
+  @override
+  String get sectionProject => 'En el proyecto';
+
+  @override
+  String get sectionLogistics => 'Logística';
 
   @override
   String get settings => 'Ajustes';

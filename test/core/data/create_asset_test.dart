@@ -81,17 +81,15 @@ void main() {
     expect(f1.body, containsPair('assetId', id));
   });
 
-  test('con photos.set_current la primera foto queda vigente, después de subirla', () async {
-    final id = await actions.createAsset(draft(), photos: [photo('f1'), photo('f2')], setCurrentPhoto: true);
+  test('la primera foto se ve como vigente desde el alta (la API la adopta al confirmarla)', () async {
+    final id = await actions.createAsset(draft(), photos: [photo('f1'), photo('f2')]);
 
     final ops = await outbox.list();
     expect(ops.map((o) => '${o.method} ${o.path}'), [
       'PUT /inventory/assets/$id',
       'PUT /attachments/f1',
       'PUT /attachments/f2',
-      'POST /attachments/f1/set-current',
     ]);
-    expect(ops.last.parentId, 'f1');
     expect((await repo.asset(id))!.currentPhotoId, 'f1');
   });
 

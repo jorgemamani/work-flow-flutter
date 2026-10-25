@@ -133,26 +133,24 @@ class SessionCubit extends Cubit<SessionState> {
     ));
   }
 
-  Future<void> loginField({
-    required String cuit,
-    required String documentNumber,
-    required String pin,
-  }) =>
-      _login(
-        () => _session.loginField(cuit: cuit, documentNumber: documentNumber, pin: pin),
-        askTenant: false,
-      );
-
-  Future<void> loginOffice({
-    required String email,
-    required String password,
+  /// Un solo login para todos: email o DNI/CUIL y contraseña o PIN.
+  Future<void> login({
+    required String identifier,
+    required String secret,
     String? cuit,
-  }) =>
-      _login(
-        () => _session.loginOffice(email: email, password: password, cuit: cuit),
-        // Con CUIT la empresa ya está elegida; sin él, se pregunta si hay varias.
-        askTenant: cuit == null || cuit.isEmpty,
-      );
+  }) async {
+    await _records.setValue(KvKeys.lastCuit, (cuit == null || cuit.isEmpty) ? null : cuit);
+    await _records.setValue(KvKeys.lastIdentifier, identifier.trim());
+    return _login(
+      () => _session.login(identifier: identifier, secret: secret, cuit: cuit),
+      // Con CUIT la empresa ya está elegida; sin él, se pregunta si hay varias.
+      askTenant: cuit == null || cuit.isEmpty,
+    );
+  }
+
+  /// Lo último que se tipeó en el login (sobrevive al cierre de sesión).
+  Future<(String?, String?)> lastLogin() async =>
+      (await _records.getValue(KvKeys.lastCuit), await _records.getValue(KvKeys.lastIdentifier));
 
   Future<void> _login(
     Future<List<Membership>> Function() call, {

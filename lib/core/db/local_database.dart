@@ -72,7 +72,9 @@ class LocalDatabase {
 
   /// Borra todo lo local (cambio de usuario o de empresa). Conserva las
   /// preferencias del teléfono ([keepKeys]).
-  Future<void> wipe({List<String> keepKeys = const ['app.locale', 'app.simulateOffline']}) async {
+  Future<void> wipe({
+    List<String> keepKeys = const ['app.locale', 'app.simulateOffline', 'app.lastCuit', 'app.lastIdentifier'],
+  }) async {
     await db.transaction((txn) async {
       await txn.delete('records');
       await txn.delete('outbox');

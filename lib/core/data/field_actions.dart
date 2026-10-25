@@ -219,17 +219,13 @@ class FieldActions {
   /// verificar: esos hechos van después en la cola). Las fotos se encolan
   /// detrás del alta con `ownerType: ASSET`.
   ///
-  /// Con [setCurrentPhoto] (permiso `photos.set_current`) la primera foto
-  /// queda como foto vigente (RN-22) una vez subida.
-  Future<String> createAsset(
-    AssetDraft draft, {
-    List<LocalPhoto> photos = const [],
-    bool setCurrentPhoto = false,
-  }) async {
+  /// La primera foto la adopta la API como foto vigente al confirmarla (el
+  /// ítem no tiene otra); el teléfono la muestra así desde ya.
+  Future<String> createAsset(AssetDraft draft, {List<LocalPhoto> photos = const []}) async {
     final id = newId();
     final at = nowIso(_clock());
     final body = {...draft.toBody(), 'occurredAt': at};
-    final current = setCurrentPhoto && photos.isNotEmpty ? photos.first : null;
+    final current = photos.isEmpty ? null : photos.first;
     await _enqueue([
       _put(
         id,
@@ -250,16 +246,6 @@ class FieldActions {
           assetId: id,
           parentId: id,
           what: draft.internalCode.trim(),
-        ),
-      if (current != null)
-        OutboxOp(
-          id: '${current.id}-current',
-          kind: OutboxKind.request,
-          method: 'POST',
-          path: ApiPaths.attachmentSetCurrent(current.id),
-          label: OutboxLabel('opSetCurrentPhoto', {'code': draft.internalCode.trim()}),
-          occurredAt: DateTime.parse(at),
-          parentId: current.id,
         ),
     ]);
     return id;

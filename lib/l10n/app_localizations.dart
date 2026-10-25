@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginHelp.
   ///
   /// In es, this message translates to:
-  /// **'¿Olvidaste el PIN? Pedile a tu empresa que lo resetee.'**
+  /// **'¿Olvidaste la contraseña o el PIN? Pedile a tu empresa que los resetee.'**
   String get loginHelp;
 
   /// No description provided for @sessionExpiredKeepQueue.
@@ -1922,11 +1922,41 @@ abstract class AppLocalizations {
   /// **'Indumentaria'**
   String get catClothing;
 
-  /// No description provided for @opSetCurrentPhoto.
+  /// No description provided for @identifierLabel.
   ///
   /// In es, this message translates to:
-  /// **'Foto vigente de {code}'**
-  String opSetCurrentPhoto(String code);
+  /// **'Email o DNI/CUIL'**
+  String get identifierLabel;
+
+  /// No description provided for @identifierHint.
+  ///
+  /// In es, this message translates to:
+  /// **'nombre@empresa.com o 30111222'**
+  String get identifierHint;
+
+  /// No description provided for @invalidIdentifier.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá un email o un DNI/CUIL'**
+  String get invalidIdentifier;
+
+  /// No description provided for @secretLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña o PIN'**
+  String get secretLabel;
+
+  /// No description provided for @sectionProject.
+  ///
+  /// In es, this message translates to:
+  /// **'En el proyecto'**
+  String get sectionProject;
+
+  /// No description provided for @sectionLogistics.
+  ///
+  /// In es, this message translates to:
+  /// **'Logística'**
+  String get sectionLogistics;
 
   /// No description provided for @settings.
   ///
