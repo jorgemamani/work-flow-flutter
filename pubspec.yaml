@@ -41,9 +41,6 @@ dependencies:
   # Ids de hechos (UUIDv7)
   uuid: ^4.5.1
 
-  # UI
-  google_fonts: ^6.2.1
-
   # Utils
   intl: ^0.20.2
   flutter_dotenv: ^5.2.1
@@ -64,3 +61,21 @@ flutter:
     - .env.dev
     - .env.staging
     - .env.prod
+
+  # IBM Plex empaquetada: google_fonts la bajaba en tiempo de ejecución y la
+  # app tiene que andar sin señal (licencia en assets/fonts/OFL.txt).
+  fonts:
+    - family: IBMPlexSans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans-Regular.ttf
+        - asset: assets/fonts/IBMPlexSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSans-Bold.ttf
+          weight: 700
+    - family: IBMPlexMono
+      fonts:
+        - asset: assets/fonts/IBMPlexMono-Regular.ttf
+        - asset: assets/fonts/IBMPlexMono-Medium.ttf
+          weight: 500

@@ -104,7 +104,7 @@ class LocalSaveHint extends StatelessWidget {
 
 Color assetStatusColor(String status) => switch (status) {
       'OPERATIONAL' => AppColors.statusSuccess,
-      'RESERVED' => AppColors.info,
+      'RESERVED' => AppColors.ink,
       'IN_REPAIR' => AppColors.statusWarning,
       'DAMAGED' => AppColors.statusError,
       'LOST' => AppColors.statusError,
