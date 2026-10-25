@@ -2095,6 +2095,576 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Agregar'**
   String get addPhotoShort;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar'**
+  String get loginTitle;
+
+  /// No description provided for @loginModeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo entrás'**
+  String get loginModeLabel;
+
+  /// No description provided for @loginFirstTime.
+  ///
+  /// In es, this message translates to:
+  /// **'La primera vez hace falta señal. Después funciona sin conexión.'**
+  String get loginFirstTime;
+
+  /// No description provided for @pinEntered.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Ningún dígito} =1{1 dígito} other{{count} dígitos}}'**
+  String pinEntered(int count);
+
+  /// No description provided for @deleteDigit.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar'**
+  String get deleteDigit;
+
+  /// No description provided for @companyCuitToggle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Trabajás en más de una empresa? Indicá el CUIT'**
+  String get companyCuitToggle;
+
+  /// No description provided for @invalidDocument.
+  ///
+  /// In es, this message translates to:
+  /// **'El DNI o CUIL tiene al menos 7 números'**
+  String get invalidDocument;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá un email'**
+  String get invalidEmail;
+
+  /// No description provided for @optional.
+  ///
+  /// In es, this message translates to:
+  /// **'(opcional)'**
+  String get optional;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In es, this message translates to:
+  /// **'nombre@empresa.com'**
+  String get emailHint;
+
+  /// No description provided for @homeTodo.
+  ///
+  /// In es, this message translates to:
+  /// **'Para hacer'**
+  String get homeTodo;
+
+  /// No description provided for @homeUpSince.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiste el {date}'**
+  String homeUpSince(String date);
+
+  /// No description provided for @homeReceiveRemito.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibir remito {number}'**
+  String homeReceiveRemito(String number);
+
+  /// No description provided for @homeDueOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence el {date}'**
+  String homeDueOn(String date);
+
+  /// No description provided for @homeDailyLogToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Bitácora de hoy'**
+  String get homeDailyLogToday;
+
+  /// No description provided for @homeDailyLogMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no la cargaste'**
+  String get homeDailyLogMissing;
+
+  /// No description provided for @homeNothingTodo.
+  ///
+  /// In es, this message translates to:
+  /// **'Nada pendiente por ahora.'**
+  String get homeNothingTodo;
+
+  /// No description provided for @homeReviewSync.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisalo en Sincronización'**
+  String get homeReviewSync;
+
+  /// No description provided for @scanAimHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Apuntá al código de barras o al QR'**
+  String get scanAimHint;
+
+  /// No description provided for @scanWriteCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribir el código'**
+  String get scanWriteCode;
+
+  /// No description provided for @scanViewItem.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver el ítem'**
+  String get scanViewItem;
+
+  /// No description provided for @scanAgain.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanear otro'**
+  String get scanAgain;
+
+  /// No description provided for @torch.
+  ///
+  /// In es, this message translates to:
+  /// **'Linterna'**
+  String get torch;
+
+  /// No description provided for @close.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar'**
+  String get close;
+
+  /// No description provided for @itemFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Ítem encontrado'**
+  String get itemFound;
+
+  /// No description provided for @inContainer.
+  ///
+  /// In es, this message translates to:
+  /// **'en {name}'**
+  String inContainer(String name);
+
+  /// No description provided for @inChargeOf.
+  ///
+  /// In es, this message translates to:
+  /// **'A cargo de {name}'**
+  String inChargeOf(String name);
+
+  /// No description provided for @search.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get search;
+
+  /// No description provided for @currentPhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto vigente'**
+  String get currentPhoto;
+
+  /// No description provided for @remitosTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Remitos'**
+  String get remitosTitle;
+
+  /// No description provided for @remitosTowards.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo que viene hacia {name}'**
+  String remitosTowards(String name);
+
+  /// No description provided for @toReceiveCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Por recibir · {count}'**
+  String toReceiveCount(int count);
+
+  /// No description provided for @receiveTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibir remito'**
+  String get receiveTitle;
+
+  /// No description provided for @reviewedOf.
+  ///
+  /// In es, this message translates to:
+  /// **'{done} de {total} revisados'**
+  String reviewedOf(int done, int total);
+
+  /// No description provided for @differencesCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Sin diferencias} =1{1 diferencia} other{{count} diferencias}}'**
+  String differencesCount(int count);
+
+  /// No description provided for @optArrived.
+  ///
+  /// In es, this message translates to:
+  /// **'Llegó'**
+  String get optArrived;
+
+  /// No description provided for @optMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta'**
+  String get optMissing;
+
+  /// No description provided for @optDamaged.
+  ///
+  /// In es, this message translates to:
+  /// **'Dañado'**
+  String get optDamaged;
+
+  /// No description provided for @howItArrived.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo llegó'**
+  String get howItArrived;
+
+  /// No description provided for @notReviewed.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin revisar'**
+  String get notReviewed;
+
+  /// No description provided for @withDifference.
+  ///
+  /// In es, this message translates to:
+  /// **'Con diferencia'**
+  String get withDifference;
+
+  /// No description provided for @oneLess.
+  ///
+  /// In es, this message translates to:
+  /// **'Uno menos'**
+  String get oneLess;
+
+  /// No description provided for @oneMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Uno más'**
+  String get oneMore;
+
+  /// No description provided for @unitsReceived.
+  ///
+  /// In es, this message translates to:
+  /// **'recibidos'**
+  String get unitsReceived;
+
+  /// No description provided for @shortBy.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan {qty}. Al confirmar se avisa a logística.'**
+  String shortBy(String qty);
+
+  /// No description provided for @leftToReview.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Falta revisar 1 ítem} other{Falta revisar {count} ítems}}'**
+  String leftToReview(int count);
+
+  /// No description provided for @markEachItem.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcá cómo llegó cada ítem para confirmar.'**
+  String get markEachItem;
+
+  /// No description provided for @confirmWithDifferences.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar con diferencias'**
+  String get confirmWithDifferences;
+
+  /// No description provided for @sentWhenSignal.
+  ///
+  /// In es, this message translates to:
+  /// **'Se envía apenas haya señal. Queda tu nombre y la hora.'**
+  String get sentWhenSignal;
+
+  /// No description provided for @scanToMark.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanear código'**
+  String get scanToMark;
+
+  /// No description provided for @notInRemito.
+  ///
+  /// In es, this message translates to:
+  /// **'{code} no está en este remito'**
+  String notInRemito(String code);
+
+  /// No description provided for @damagePhotoRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto del daño (obligatoria)'**
+  String get damagePhotoRequired;
+
+  /// No description provided for @qualTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Habilitaciones para subir'**
+  String get qualTitle;
+
+  /// No description provided for @qualRow.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentación'**
+  String get qualRow;
+
+  /// No description provided for @qualOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Vigente'**
+  String get qualOk;
+
+  /// No description provided for @qualExpiring.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence pronto'**
+  String get qualExpiring;
+
+  /// No description provided for @qualExpired.
+  ///
+  /// In es, this message translates to:
+  /// **'Vencida'**
+  String get qualExpired;
+
+  /// No description provided for @qualExpiredNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Tenés documentación vencida. Podés registrar la subida igual: queda marcada y le avisamos a RR. HH.'**
+  String get qualExpiredNote;
+
+  /// No description provided for @lastRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos registros'**
+  String get lastRecords;
+
+  /// No description provided for @registerForOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar para otra persona'**
+  String get registerForOther;
+
+  /// No description provided for @fromThePhone.
+  ///
+  /// In es, this message translates to:
+  /// **'desde la app'**
+  String get fromThePhone;
+
+  /// No description provided for @rightNowAt.
+  ///
+  /// In es, this message translates to:
+  /// **'ahora · {time}'**
+  String rightNowAt(String time);
+
+  /// No description provided for @photosDoneOf.
+  ///
+  /// In es, this message translates to:
+  /// **'{done} de {total} con foto'**
+  String photosDoneOf(int done, int total);
+
+  /// No description provided for @takePhotoOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Sacar foto de {name}'**
+  String takePhotoOf(String name);
+
+  /// No description provided for @photoReadyOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto lista de {name}. Tocá para sacar otra'**
+  String photoReadyOf(String name);
+
+  /// No description provided for @verificationPhotosNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Las fotos muestran cómo está cada ítem. No cambian su estado: si algo está roto, reportalo como incidencia.'**
+  String get verificationPhotosNote;
+
+  /// No description provided for @sentWhenSignalShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Se envía apenas haya señal.'**
+  String get sentWhenSignalShort;
+
+  /// No description provided for @dueOnShort.
+  ///
+  /// In es, this message translates to:
+  /// **'vence el {date}'**
+  String dueOnShort(String date);
+
+  /// No description provided for @showDetails.
+  ///
+  /// In es, this message translates to:
+  /// **'Condición, más fotos y notas'**
+  String get showDetails;
+
+  /// No description provided for @dailyLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Bitácora de hoy'**
+  String get dailyLogTitle;
+
+  /// No description provided for @whatWasDoneToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué se hizo hoy'**
+  String get whatWasDoneToday;
+
+  /// No description provided for @toolsAndVehicles.
+  ///
+  /// In es, this message translates to:
+  /// **'Herramientas y vehículos'**
+  String get toolsAndVehicles;
+
+  /// No description provided for @allGood.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo bien'**
+  String get allGood;
+
+  /// No description provided for @somethingWrong.
+  ///
+  /// In es, this message translates to:
+  /// **'Hay algo'**
+  String get somethingWrong;
+
+  /// No description provided for @news.
+  ///
+  /// In es, this message translates to:
+  /// **'Novedades'**
+  String get news;
+
+  /// No description provided for @needsFixReport.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Hay que arreglarlo? Reportalo como incidencia'**
+  String get needsFixReport;
+
+  /// No description provided for @photosOptional.
+  ///
+  /// In es, this message translates to:
+  /// **'(opcional)'**
+  String get photosOptional;
+
+  /// No description provided for @saveDailyLog.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar bitácora'**
+  String get saveDailyLog;
+
+  /// No description provided for @savedOnPhoneSentLater.
+  ///
+  /// In es, this message translates to:
+  /// **'Se guarda en el teléfono y se envía cuando haya señal.'**
+  String get savedOnPhoneSentLater;
+
+  /// No description provided for @whatHappenedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué pasó'**
+  String get whatHappenedTitle;
+
+  /// No description provided for @hintMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'No llegó o no está'**
+  String get hintMissing;
+
+  /// No description provided for @hintDamage.
+  ///
+  /// In es, this message translates to:
+  /// **'Está roto o falla'**
+  String get hintDamage;
+
+  /// No description provided for @hintLoss.
+  ///
+  /// In es, this message translates to:
+  /// **'No sabemos dónde está'**
+  String get hintLoss;
+
+  /// No description provided for @hintClaim.
+  ///
+  /// In es, this message translates to:
+  /// **'Un reclamo a logística'**
+  String get hintClaim;
+
+  /// No description provided for @hintOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Cualquier otra cosa'**
+  String get hintOther;
+
+  /// No description provided for @itemLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Ítem'**
+  String get itemLabel;
+
+  /// No description provided for @change.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get change;
+
+  /// No description provided for @choose.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir'**
+  String get choose;
+
+  /// No description provided for @tellBriefly.
+  ///
+  /// In es, this message translates to:
+  /// **'Contalo en pocas palabras'**
+  String get tellBriefly;
+
+  /// No description provided for @photoRequiredIfDamage.
+  ///
+  /// In es, this message translates to:
+  /// **'· obligatoria si hay un daño'**
+  String get photoRequiredIfDamage;
+
+  /// No description provided for @notifyLogistics.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar a logística'**
+  String get notifyLogistics;
+
+  /// No description provided for @seeAnswerInRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Vas a ver la respuesta en Registros.'**
+  String get seeAnswerInRecords;
+
+  /// No description provided for @syncPendingTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Envíos pendientes'**
+  String get syncPendingTitle;
+
+  /// No description provided for @retriesAlone.
+  ///
+  /// In es, this message translates to:
+  /// **'sin señal, se reintenta solo'**
+  String get retriesAlone;
+
+  /// No description provided for @cameraUnavailableWrite.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo abrir la cámara. Escribí el código.'**
+  String get cameraUnavailableWrite;
 }
 
 class _AppLocalizationsDelegate

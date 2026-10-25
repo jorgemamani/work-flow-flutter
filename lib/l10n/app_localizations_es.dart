@@ -1184,4 +1184,352 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get addPhotoShort => 'Agregar';
+
+  @override
+  String get loginTitle => 'Entrar';
+
+  @override
+  String get loginModeLabel => 'Cómo entrás';
+
+  @override
+  String get loginFirstTime =>
+      'La primera vez hace falta señal. Después funciona sin conexión.';
+
+  @override
+  String pinEntered(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dígitos',
+      one: '1 dígito',
+      zero: 'Ningún dígito',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteDigit => 'Borrar';
+
+  @override
+  String get companyCuitToggle =>
+      '¿Trabajás en más de una empresa? Indicá el CUIT';
+
+  @override
+  String get invalidDocument => 'El DNI o CUIL tiene al menos 7 números';
+
+  @override
+  String get invalidEmail => 'Ingresá un email';
+
+  @override
+  String get optional => '(opcional)';
+
+  @override
+  String get emailHint => 'nombre@empresa.com';
+
+  @override
+  String get homeTodo => 'Para hacer';
+
+  @override
+  String homeUpSince(String date) {
+    return 'Subiste el $date';
+  }
+
+  @override
+  String homeReceiveRemito(String number) {
+    return 'Recibir remito $number';
+  }
+
+  @override
+  String homeDueOn(String date) {
+    return 'Vence el $date';
+  }
+
+  @override
+  String get homeDailyLogToday => 'Bitácora de hoy';
+
+  @override
+  String get homeDailyLogMissing => 'Todavía no la cargaste';
+
+  @override
+  String get homeNothingTodo => 'Nada pendiente por ahora.';
+
+  @override
+  String get homeReviewSync => 'Revisalo en Sincronización';
+
+  @override
+  String get scanAimHint => 'Apuntá al código de barras o al QR';
+
+  @override
+  String get scanWriteCode => 'Escribir el código';
+
+  @override
+  String get scanViewItem => 'Ver el ítem';
+
+  @override
+  String get scanAgain => 'Escanear otro';
+
+  @override
+  String get torch => 'Linterna';
+
+  @override
+  String get close => 'Cerrar';
+
+  @override
+  String get itemFound => 'Ítem encontrado';
+
+  @override
+  String inContainer(String name) {
+    return 'en $name';
+  }
+
+  @override
+  String inChargeOf(String name) {
+    return 'A cargo de $name';
+  }
+
+  @override
+  String get search => 'Buscar';
+
+  @override
+  String get currentPhoto => 'Foto vigente';
+
+  @override
+  String get remitosTitle => 'Remitos';
+
+  @override
+  String remitosTowards(String name) {
+    return 'Lo que viene hacia $name';
+  }
+
+  @override
+  String toReceiveCount(int count) {
+    return 'Por recibir · $count';
+  }
+
+  @override
+  String get receiveTitle => 'Recibir remito';
+
+  @override
+  String reviewedOf(int done, int total) {
+    return '$done de $total revisados';
+  }
+
+  @override
+  String differencesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count diferencias',
+      one: '1 diferencia',
+      zero: 'Sin diferencias',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get optArrived => 'Llegó';
+
+  @override
+  String get optMissing => 'Falta';
+
+  @override
+  String get optDamaged => 'Dañado';
+
+  @override
+  String get howItArrived => 'Cómo llegó';
+
+  @override
+  String get notReviewed => 'Sin revisar';
+
+  @override
+  String get withDifference => 'Con diferencia';
+
+  @override
+  String get oneLess => 'Uno menos';
+
+  @override
+  String get oneMore => 'Uno más';
+
+  @override
+  String get unitsReceived => 'recibidos';
+
+  @override
+  String shortBy(String qty) {
+    return 'Faltan $qty. Al confirmar se avisa a logística.';
+  }
+
+  @override
+  String leftToReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Falta revisar $count ítems',
+      one: 'Falta revisar 1 ítem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get markEachItem => 'Marcá cómo llegó cada ítem para confirmar.';
+
+  @override
+  String get confirmWithDifferences => 'Confirmar con diferencias';
+
+  @override
+  String get sentWhenSignal =>
+      'Se envía apenas haya señal. Queda tu nombre y la hora.';
+
+  @override
+  String get scanToMark => 'Escanear código';
+
+  @override
+  String notInRemito(String code) {
+    return '$code no está en este remito';
+  }
+
+  @override
+  String get damagePhotoRequired => 'Foto del daño (obligatoria)';
+
+  @override
+  String get qualTitle => 'Habilitaciones para subir';
+
+  @override
+  String get qualRow => 'Documentación';
+
+  @override
+  String get qualOk => 'Vigente';
+
+  @override
+  String get qualExpiring => 'Vence pronto';
+
+  @override
+  String get qualExpired => 'Vencida';
+
+  @override
+  String get qualExpiredNote =>
+      'Tenés documentación vencida. Podés registrar la subida igual: queda marcada y le avisamos a RR. HH.';
+
+  @override
+  String get lastRecords => 'Últimos registros';
+
+  @override
+  String get registerForOther => 'Registrar para otra persona';
+
+  @override
+  String get fromThePhone => 'desde la app';
+
+  @override
+  String rightNowAt(String time) {
+    return 'ahora · $time';
+  }
+
+  @override
+  String photosDoneOf(int done, int total) {
+    return '$done de $total con foto';
+  }
+
+  @override
+  String takePhotoOf(String name) {
+    return 'Sacar foto de $name';
+  }
+
+  @override
+  String photoReadyOf(String name) {
+    return 'Foto lista de $name. Tocá para sacar otra';
+  }
+
+  @override
+  String get verificationPhotosNote =>
+      'Las fotos muestran cómo está cada ítem. No cambian su estado: si algo está roto, reportalo como incidencia.';
+
+  @override
+  String get sentWhenSignalShort => 'Se envía apenas haya señal.';
+
+  @override
+  String dueOnShort(String date) {
+    return 'vence el $date';
+  }
+
+  @override
+  String get showDetails => 'Condición, más fotos y notas';
+
+  @override
+  String get dailyLogTitle => 'Bitácora de hoy';
+
+  @override
+  String get whatWasDoneToday => 'Qué se hizo hoy';
+
+  @override
+  String get toolsAndVehicles => 'Herramientas y vehículos';
+
+  @override
+  String get allGood => 'Todo bien';
+
+  @override
+  String get somethingWrong => 'Hay algo';
+
+  @override
+  String get news => 'Novedades';
+
+  @override
+  String get needsFixReport => '¿Hay que arreglarlo? Reportalo como incidencia';
+
+  @override
+  String get photosOptional => '(opcional)';
+
+  @override
+  String get saveDailyLog => 'Guardar bitácora';
+
+  @override
+  String get savedOnPhoneSentLater =>
+      'Se guarda en el teléfono y se envía cuando haya señal.';
+
+  @override
+  String get whatHappenedTitle => 'Qué pasó';
+
+  @override
+  String get hintMissing => 'No llegó o no está';
+
+  @override
+  String get hintDamage => 'Está roto o falla';
+
+  @override
+  String get hintLoss => 'No sabemos dónde está';
+
+  @override
+  String get hintClaim => 'Un reclamo a logística';
+
+  @override
+  String get hintOther => 'Cualquier otra cosa';
+
+  @override
+  String get itemLabel => 'Ítem';
+
+  @override
+  String get change => 'Cambiar';
+
+  @override
+  String get choose => 'Elegir';
+
+  @override
+  String get tellBriefly => 'Contalo en pocas palabras';
+
+  @override
+  String get photoRequiredIfDamage => '· obligatoria si hay un daño';
+
+  @override
+  String get notifyLogistics => 'Avisar a logística';
+
+  @override
+  String get seeAnswerInRecords => 'Vas a ver la respuesta en Registros.';
+
+  @override
+  String get syncPendingTitle => 'Envíos pendientes';
+
+  @override
+  String get retriesAlone => 'sin señal, se reintenta solo';
+
+  @override
+  String get cameraUnavailableWrite =>
+      'No se pudo abrir la cámara. Escribí el código.';
 }

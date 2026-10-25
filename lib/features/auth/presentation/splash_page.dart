@@ -16,13 +16,11 @@ class SplashPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.work_rounded, color: Colors.white, size: 56),
-            const SizedBox(height: 24),
             Text(
               AppBranding.appName,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
             ),
             const SizedBox(height: 48),

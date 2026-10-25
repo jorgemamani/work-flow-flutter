@@ -6,10 +6,11 @@ import '../../core/auth/profile.dart';
 import '../../core/data/models.dart';
 import '../../routing/route_names.dart';
 import '../../shared/constants/app_colors.dart';
-import '../../shared/constants/app_sizes.dart';
+import '../../shared/constants/app_fonts.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
+import '../../shared/widgets/field_scaffold.dart';
 import '../../shared/widgets/live_query.dart';
 import '../../shared/widgets/connection_strip.dart';
 import '../auth/presentation/session_cubit.dart';
@@ -34,134 +35,149 @@ class ItemDetailPage extends StatelessWidget {
       builder: (context, ctx) {
         final a = ctx.assets[assetId];
         if (a == null) {
-          return Scaffold(
-            appBar: AppBar(),
+          return FieldScaffold(
             body: EmptyState(icon: Icons.search_off, text: l.itemNotFound),
           );
         }
         final model = ctx.models[a.modelId];
         final brand = ctx.brands[model?.brandId];
-        final inProject = a.effectiveProjectId != null && a.effectiveProjectId == session.projectId;
-        final mineOrProject = inProject ||
-            (a.holderType == HolderTypes.employee && a.holderId == profile.employeeId);
-        final canMove = mineOrProject &&
-            a.holderType != HolderTypes.inTransit &&
-            a.openRemitoId == null &&
-            profile.can(Perms.moveWithinProject, projectId: session.projectId);
+        final can = ItemAbilities.of(a, profile: profile, projectId: session.projectId);
         final contents = ctx.contents(a);
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(a.internalCode),
-          ),
-          body: ListView(
-            padding: const EdgeInsets.all(AppSizes.md),
-            children: [
-              AspectRatio(
-                aspectRatio: 4 / 3,
-                child: LayoutBuilder(
-                  builder: (context, c) => CurrentPhoto(
-                    attachmentId: a.currentPhotoId,
-                    size: c.maxWidth,
-                    icon: Icons.photo_outlined,
-                  ),
-                ),
-              ),
-              if (a.currentPhotoId == null)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSizes.xs),
-                  child: Text(l.noCurrentPhoto, style: context.textTheme.bodySmall),
-                ),
-              const SizedBox(height: AppSizes.md),
-              Text(
-                model?.name ?? '',
-                style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              if (brand != null) Text(brand.name, style: context.textTheme.bodyMedium),
-              const SizedBox(height: AppSizes.sm),
-              Wrap(
-                spacing: AppSizes.sm,
-                runSpacing: AppSizes.xs,
-                children: [
-                  StatusChip(l.assetStatus(a.status), color: assetStatusColor(a.status)),
-                  if (ctx.conditionName(a.conditionId) != null)
-                    StatusChip(ctx.conditionName(a.conditionId)!),
-                  if (a.openRemitoId != null)
-                    StatusChip(l.inOpenRemito, color: AppColors.statusWarning),
-                  if (a.hasPendingChange)
-                    StatusChip(l.pendingSync, color: AppColors.primary),
-                ],
-              ),
-              SectionTitle(l.whereIsIt),
-              Card(
-                child: ListTile(
-                  leading: Icon(_holderIcon(a.holderType)),
-                  title: Text(ctx.where(a, inTransit: l.inTransit, withPerson: l.withPerson)),
-                  subtitle: a.locationUpdatedAt == null
-                      ? null
-                      : Text(l.sinceAgo(timeAgo(context, a.locationUpdatedAt!))),
-                ),
-              ),
-              SectionTitle(l.details),
-              Card(
-                child: Column(
+        final custodian = ctx.employees[a.custodianEmployeeId]?.fullName;
+        final chain = ctx.resolver.chain(a);
+        final inTransit = a.holderType == HolderTypes.inTransit;
+        final actions = <Widget>[
+          if (can.canMove)
+            _ActionRow(
+              key: const Key('moveItem'),
+              icon: Icons.arrow_forward,
+              label: l.moveItem,
+              onTap: () => context.push(RouteNames.moveItem(a.id)),
+            ),
+          if (can.canChangeStatus)
+            _ActionRow(
+              key: const Key('changeStatus'),
+              icon: Icons.schedule,
+              label: l.changeStatus,
+              onTap: () => context.push(RouteNames.changeStatus(a.id)),
+            ),
+          if (profile.can(Perms.incidentsCreate, projectId: session.projectId))
+            _ActionRow(
+              icon: Icons.warning_amber_rounded,
+              label: l.reportIncident,
+              onTap: () => context.push('${RouteNames.newIncident}?assetId=${a.id}'),
+            ),
+          if (profile.can(Perms.requirementsCreate, projectId: session.projectId))
+            _ActionRow(
+              icon: Icons.build_outlined,
+              label: l.requestRepairOrWriteOff,
+              onTap: () => context.push('${RouteNames.newRequirement}?assetId=${a.id}'),
+            ),
+        ];
+        return FieldScaffold(
+          title: model?.name ?? a.internalCode,
+          above: Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Chapa(a.internalCode),
+                if (inTransit)
+                  StatusChip(l.inTransit, color: AppColors.statusMove, fontSize: 15)
+                else
+                  StatusChip(l.assetStatus(a.status), color: assetStatusColor(a.status), fontSize: 15),
+                if (ctx.conditionName(a.conditionId) != null) StatusChip(ctx.conditionName(a.conditionId)!, fontSize: 15),
+                if (a.openRemitoId != null) StatusChip(l.inOpenRemito, color: AppColors.statusMove, fontSize: 15),
+                if (a.hasPendingChange) StatusChip(l.pendingSync, color: AppColors.statusWarning, fontSize: 15),
+              ],
+            ),
+          subtitle: Text([
+            if (brand != null) brand.name,
+            if (custodian != null) l.inChargeOf(custodian),
+          ].join(' · ')),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SectionTitle(l.whereIsIt, padTop: false),
+                RuledList(
                   children: [
-                    _row(l.internalCode, a.internalCode),
-                    if (a.manufacturerBarcode != null) _row(l.barcode, a.manufacturerBarcode!),
-                    if (a.serialNumber != null) _row(l.serialNumber, a.serialNumber!),
-                    if (a.licensePlate != null) _row(l.licensePlate, a.licensePlate!),
-                    if (model != null) _row(l.category, l.assetCategory(model.category)),
-                    if (a.custodianEmployeeId != null)
-                      _row(l.custodian, ctx.employees[a.custodianEmployeeId]?.fullName ?? '—'),
-                    if (a.description != null) _row(l.description, a.description!),
+                    for (final (i, part) in chain.indexed)
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(i * 18.0, 12, 0, 12),
+                        child: Row(
+                          children: [
+                            if (i > 0) ...[
+                              const Text('└', style: TextStyle(color: AppColors.textDisabled, fontSize: 16)),
+                              const SizedBox(width: 8),
+                            ],
+                            Icon(_holderIcon(part.type), size: 18, color: AppColors.textSecondary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                switch (part.type) {
+                                  HolderTypes.inTransit => l.inTransit,
+                                  HolderTypes.employee => '${l.withPerson} ${part.name}'.trim(),
+                                  _ => part.name,
+                                },
+                                style: TextStyle(fontSize: 16, fontWeight: i == 0 ? FontWeight.w600 : FontWeight.w400),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
-              ),
-              if (contents.isNotEmpty) ...[
-                SectionTitle(l.contents(contents.length)),
-                for (final c in contents)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                    child: AssetTile(
-                      asset: c,
-                      ctx: ctx,
-                      onTap: () => context.push(RouteNames.itemDetail(c.id)),
+                if (a.locationUpdatedAt != null) ...[
+                  const SizedBox(height: 6),
+                  Text(l.sinceAgo(timeAgo(context, a.locationUpdatedAt!)),
+                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                ],
+              ],
+            ),
+            Row(
+              children: [
+                CurrentPhoto(attachmentId: a.currentPhotoId, size: 88, height: 66, icon: Icons.photo_camera_outlined),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    a.currentPhotoId == null ? l.noCurrentPhoto : l.currentPhoto,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            if (actions.isNotEmpty) RuledList(children: actions),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SectionTitle(l.details, padTop: false),
+                _row(l.internalCode, a.internalCode, mono: true),
+                if (a.manufacturerBarcode != null) _row(l.barcode, a.manufacturerBarcode!, mono: true),
+                if (a.serialNumber != null) _row(l.serialNumber, a.serialNumber!, mono: true),
+                if (a.licensePlate != null) _row(l.licensePlate, a.licensePlate!, mono: true),
+                if (model != null) _row(l.category, l.assetCategory(model.category)),
+                if (custodian != null) _row(l.custodian, custodian),
+                if (a.description != null) _row(l.description, a.description!),
+              ],
+            ),
+            if (contents.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SectionTitle(l.contents(contents.length), padTop: false),
+                  DecoratedBox(
+                    decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.ink))),
+                    child: Column(
+                      children: [
+                        for (final c in contents)
+                          AssetTile(asset: c, ctx: ctx, onTap: () => context.push(RouteNames.itemDetail(c.id))),
+                      ],
                     ),
                   ),
-              ],
-              const SizedBox(height: AppSizes.lg),
-              if (canMove) ...[
-                FilledButton.icon(
-                  key: const Key('moveItem'),
-                  icon: const Icon(Icons.open_with),
-                  label: Text(l.moveItem),
-                  onPressed: () => context.push(RouteNames.moveItem(a.id)),
-                ),
-                const SizedBox(height: AppSizes.sm),
-              ],
-              // La API exige inventory.move para cambiar estado o condición.
-              if (mineOrProject && profile.can(Perms.inventoryMove, projectId: session.projectId))
-                OutlinedButton.icon(
-                  key: const Key('changeStatus'),
-                  style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                  icon: const Icon(Icons.tune),
-                  label: Text(l.changeStatus),
-                  onPressed: () => context.push(RouteNames.changeStatus(a.id)),
-                ),
-              const SizedBox(height: AppSizes.sm),
-              if (profile.can(Perms.incidentsCreate, projectId: session.projectId))
-                TextButton.icon(
-                  icon: const Icon(Icons.report_problem_outlined),
-                  label: Text(l.reportIncident),
-                  onPressed: () => context.push('${RouteNames.newIncident}?assetId=${a.id}'),
-                ),
-              if (profile.can(Perms.requirementsCreate, projectId: session.projectId))
-                TextButton.icon(
-                  icon: const Icon(Icons.build_outlined),
-                  label: Text(l.requestRepairOrWriteOff),
-                  onPressed: () => context.push('${RouteNames.newRequirement}?assetId=${a.id}'),
-                ),
-            ],
-          ),
+                ],
+              ),
+          ],
         );
       },
     );
@@ -174,12 +190,37 @@ class ItemDetailPage extends StatelessWidget {
         _ => Icons.local_shipping_outlined,
       };
 
-  static Widget _row(String k, String v) => ListTile(
-        dense: true,
-        title: Text(k),
-        trailing: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 200),
-          child: Text(v, textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
+  static Widget _row(String k, String v, {bool mono = false}) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 130,
+              child: Text(k, style: const TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+            ),
+            Expanded(
+              child: Text(
+                v,
+                style: mono ? AppFonts.monoStyle(fontSize: 15, color: AppColors.ink) : const TextStyle(fontSize: 15),
+              ),
+            ),
+          ],
         ),
+      );
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({super.key, required this.icon, required this.label, required this.onTap});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => RowLink(
+        leading: Icon(icon, size: 22, color: AppColors.ink),
+        title: label,
+        onTap: onTap,
       );
 }

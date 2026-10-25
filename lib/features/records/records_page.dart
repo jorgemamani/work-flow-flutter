@@ -57,7 +57,7 @@ String _date(BuildContext context, DateTime? d) =>
     d == null ? '' : DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_Hm().format(d);
 
 Widget _pendingChip(BuildContext context, Model m) =>
-    m.hasPendingChange ? StatusChip(context.l10n.pendingSync, color: AppColors.primary) : const SizedBox.shrink();
+    m.hasPendingChange ? StatusChip(context.l10n.pendingSync, color: AppColors.statusWarning) : const SizedBox.shrink();
 
 class _SubmissionList extends StatelessWidget {
   const _SubmissionList({required this.type, required this.empty, required this.newRoute});
@@ -101,9 +101,10 @@ class _SubmissionList extends StatelessWidget {
                   subtitle: Text([
                     _date(context, s.occurredAt),
                     if (lines is int) l.itemsCount(lines),
-                    if (!s.isLocal) l.reviewStatus(s.reviewStatus),
                   ].join(' · ')),
-                  trailing: _pendingChip(context, s),
+                  trailing: s.hasPendingChange
+                      ? _pendingChip(context, s)
+                      : StatusChip(l.reviewStatus(s.reviewStatus), color: reviewStatusColor(s.reviewStatus)),
                 ),
               );
             },
@@ -182,15 +183,15 @@ class _IncidentList extends StatelessWidget {
               final sev = det?.severity ?? s.payload['_severity'] as String?;
               return Card(
                 child: ListTile(
-                  leading: const Icon(Icons.report_problem_outlined, color: AppColors.statusWarning),
                   title: Text(s.title ?? l.incidentKind(kind)),
                   subtitle: Text([
                     l.incidentKind(kind),
                     if (sev != null) l.severity(sev),
-                    if (det != null) l.incidentStatus(det.status),
                     _date(context, s.occurredAt),
                   ].join(' · ')),
-                  trailing: _pendingChip(context, s),
+                  trailing: det == null || s.hasPendingChange
+                      ? _pendingChip(context, s)
+                      : StatusChip(l.incidentStatus(det.status), color: incidentStatusColor(det.status)),
                 ),
               );
             },
@@ -228,11 +229,12 @@ class _RequirementList extends StatelessWidget {
                 child: ListTile(
                   title: Text(l.requirementKind(r.kind)),
                   subtitle: Text([
-                    l.requirementStatus(r.status),
                     _date(context, r.requestedAt),
                     if (r.notes != null && r.notes!.isNotEmpty) r.notes!,
                   ].join(' · ')),
-                  trailing: _pendingChip(context, r),
+                  trailing: r.hasPendingChange
+                      ? _pendingChip(context, r)
+                      : StatusChip(l.requirementStatus(r.status), color: requirementStatusColor(r.status)),
                 ),
               );
             },

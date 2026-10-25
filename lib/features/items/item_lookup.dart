@@ -1,3 +1,4 @@
+import '../../core/auth/profile.dart';
 import '../../core/data/field_repository.dart';
 import '../../core/data/models.dart';
 import '../../dependency_injection.dart';
@@ -76,3 +77,25 @@ const itemSources = {
   'asset_conditions',
   'stock_balances',
 };
+
+/// Qué puede hacer la persona con un ítem (solo UX: la API valida siempre).
+class ItemAbilities {
+  const ItemAbilities({required this.canMove, required this.canChangeStatus});
+
+  final bool canMove;
+  final bool canChangeStatus;
+
+  factory ItemAbilities.of(Asset a, {required Profile profile, required String? projectId}) {
+    final inProject = a.effectiveProjectId != null && a.effectiveProjectId == projectId;
+    final mineOrProject =
+        inProject || (a.holderType == HolderTypes.employee && a.holderId == profile.employeeId);
+    return ItemAbilities(
+      canMove: mineOrProject &&
+          a.holderType != HolderTypes.inTransit &&
+          a.openRemitoId == null &&
+          profile.can(Perms.moveWithinProject, projectId: projectId),
+      // La API exige inventory.move para cambiar estado o condición.
+      canChangeStatus: mineOrProject && profile.can(Perms.inventoryMove, projectId: projectId),
+    );
+  }
+}

@@ -113,11 +113,11 @@ class _ScanTab extends StatelessWidget {
         label: label,
         excludeSemantics: true,
         child: GestureDetector(
-          key: const Key('navScan'),
+          key: const Key('action-scan'),
           behavior: HitTestBehavior.opaque,
           onTap: () => context.push(RouteNames.scan),
           child: OverflowBox(
-            maxHeight: AppSizes.bottomNavHeight + 18,
+            maxHeight: AppSizes.bottomNavHeight + 24,
             alignment: Alignment.bottomCenter,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -139,7 +139,8 @@ class _ScanTab extends StatelessWidget {
                   label,
                   style: const TextStyle(fontFamily: AppFonts.sans, fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink),
                 ),
-                const SizedBox(height: 6),
+                // Misma línea de base que las otras pestañas.
+                const SizedBox(height: 10),
               ],
             ),
           ),

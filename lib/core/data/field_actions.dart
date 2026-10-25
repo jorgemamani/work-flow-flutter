@@ -539,14 +539,25 @@ class FieldActions {
   }
 
   /// Bitácora diaria (REP-01).
+  /// [equipmentOk]: cómo están las herramientas y vehículos; [news], las
+  /// novedades. Las fotos son opcionales.
   Future<void> submitDailyLog({
     required String projectId,
     required String notes,
     List<String> tasks = const [],
+    bool? equipmentOk,
+    String? news,
+    List<LocalPhoto> photos = const [],
   }) async {
     final id = newId();
     final at = nowIso(_clock());
-    final payload = {'notes': notes, if (tasks.isNotEmpty) 'tasks': tasks};
+    final cleanNews = news?.trim() ?? '';
+    final payload = {
+      'notes': notes,
+      if (tasks.isNotEmpty) 'tasks': tasks,
+      if (equipmentOk != null) 'equipmentOk': equipmentOk,
+      if (cleanNews.isNotEmpty) 'news': cleanNews,
+    };
     await _enqueue([
       _put(
         id,
@@ -570,6 +581,8 @@ class FieldActions {
           }),
         ],
       ),
+      for (final p in photos)
+        _photo(p, ownerType: 'SUBMISSION', ownerId: id, parentId: id, what: at.substring(0, 10)),
     ]);
   }
 

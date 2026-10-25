@@ -199,9 +199,12 @@ class _WorkFlowAppState extends State<WorkFlowApp> with WidgetsBindingObserver {
           foregroundColor: ink,
           disabledForegroundColor: AppColors.textDisabled,
           minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
-          side: const BorderSide(color: ink, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: radius),
           textStyle: const TextStyle(fontFamily: AppFonts.sans, fontWeight: FontWeight.w600, fontSize: 17),
+        ).copyWith(
+          side: WidgetStateBorderSide.resolveWith(
+            (s) => BorderSide(color: s.contains(WidgetState.disabled) ? AppColors.lineStrong : ink, width: 1.5),
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(

@@ -78,6 +78,8 @@ class _AppTextFieldState extends State<AppTextField> {
       maxLines: widget.obscureText || _obscureText ? 1 : widget.maxLines,
       textCapitalization: widget.textCapitalization,
       inputFormatters: widget.inputFormatters,
+      // El teclado numérico no tiene "Listo": tocar afuera lo cierra.
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       style: widget.mono
           ? AppFonts.monoStyle(fontSize: 20, fontWeight: FontWeight.w500, color: AppColors.ink)
           : const TextStyle(fontSize: 17, color: AppColors.ink),

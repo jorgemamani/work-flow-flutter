@@ -18,6 +18,7 @@ class FieldScaffold extends StatelessWidget {
     this.titleBadge,
     this.subtitle,
     this.eyebrow,
+    this.above,
     this.headerBottom,
     this.topTrailing,
     this.titleTrailing,
@@ -36,6 +37,9 @@ class FieldScaffold extends StatelessWidget {
   final Widget? titleBadge;
   final Widget? subtitle;
   final String? eyebrow;
+
+  /// Arriba del título (chapa y estado del ítem).
+  final Widget? above;
 
   /// Debajo del título (progreso).
   final Widget? headerBottom;
@@ -62,6 +66,7 @@ class FieldScaffold extends StatelessWidget {
       titleBadge: titleBadge,
       subtitle: subtitle,
       eyebrow: eyebrow,
+      above: above,
       headerBottom: headerBottom,
       topTrailing: topTrailing,
       titleTrailing: titleTrailing,
@@ -70,6 +75,7 @@ class FieldScaffold extends StatelessWidget {
     Widget content;
     if (children != null) {
       final list = ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: EdgeInsets.fromLTRB(AppSizes.md, canPop ? 4 : AppSizes.md, AppSizes.md, AppSizes.lg),
         children: [
           header,
@@ -92,7 +98,13 @@ class FieldScaffold extends StatelessWidget {
     }
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(bottom: footer == null, child: content),
+      // Tocar afuera de un campo cierra el teclado (el numérico no tiene
+      // "Listo" y tapa el botón de abajo).
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: SafeArea(bottom: footer == null, child: content),
+      ),
       bottomNavigationBar: footer,
     );
   }
@@ -105,6 +117,7 @@ class _Header extends StatelessWidget {
     required this.titleBadge,
     required this.subtitle,
     required this.eyebrow,
+    required this.above,
     required this.headerBottom,
     required this.topTrailing,
     required this.titleTrailing,
@@ -116,6 +129,7 @@ class _Header extends StatelessWidget {
   final Widget? titleBadge;
   final Widget? subtitle;
   final String? eyebrow;
+  final Widget? above;
   final Widget? headerBottom;
   final Widget? topTrailing;
   final Widget? titleTrailing;
@@ -157,6 +171,7 @@ class _Header extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (above != null) ...[above!, const SizedBox(height: 10)],
                       if (eyebrow != null) ...[
                         Text(eyebrow!, style: const TextStyle(fontSize: 15, color: AppColors.textSecondary)),
                         const SizedBox(height: 6),

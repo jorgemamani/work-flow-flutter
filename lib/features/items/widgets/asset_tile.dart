@@ -7,6 +7,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/photos/photo_service.dart';
 import '../../../dependency_injection.dart';
 import '../../../shared/constants/app_colors.dart';
+import '../../../shared/constants/app_fonts.dart';
 import '../../../shared/constants/app_sizes.dart';
 import '../../../shared/extensions/context_extensions.dart';
 import '../../../shared/labels.dart';
@@ -32,43 +33,49 @@ class AssetTile extends StatelessWidget {
     final l = context.l10n;
     final model = ctx.models[asset.modelId];
     final where = ctx.where(asset, inTransit: l.inTransit, withPerson: l.withPerson);
-    return Card(
+    final inTransit = asset.holderType == HolderTypes.inTransit;
+    return DecoratedBox(
+      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.border))),
       child: InkWell(
         key: Key('asset-${asset.internalCode}'),
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.sm),
-          child: Row(
-            children: [
-              CurrentPhoto(attachmentId: asset.currentPhotoId, size: 56, icon: _icon(model)),
-              const SizedBox(width: AppSizes.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model?.name ?? asset.internalCode,
-                      style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(asset.internalCode, style: context.textTheme.bodySmall),
-                    if (where.isNotEmpty)
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.rowHeight + 8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                CurrentPhoto(attachmentId: asset.currentPhotoId, size: 52, icon: _icon(model)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        where,
+                        model?.name ?? asset.internalCode,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                       ),
-                  ],
+                      const SizedBox(height: 3),
+                      Text(asset.internalCode, style: AppFonts.monoStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      if (where.isNotEmpty)
+                        Text(
+                          where,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSizes.sm),
-              trailing ??
-                  StatusChip(l.assetStatus(asset.status), color: assetStatusColor(asset.status)),
-            ],
+                const SizedBox(width: AppSizes.sm),
+                trailing ??
+                    (inTransit
+                        ? StatusChip(l.inTransit, color: AppColors.statusMove)
+                        : StatusChip(l.assetStatus(asset.status), color: assetStatusColor(asset.status))),
+              ],
+            ),
           ),
         ),
       ),
@@ -89,12 +96,16 @@ class CurrentPhoto extends StatefulWidget {
     super.key,
     required this.attachmentId,
     this.size = 56,
+    this.height,
     this.icon = Icons.inventory_2_outlined,
     this.fit = BoxFit.cover,
   });
 
   final String? attachmentId;
   final double size;
+
+  /// Alto distinto del ancho (foto 4:3 en el detalle).
+  final double? height;
   final IconData icon;
   final BoxFit fit;
 
@@ -130,14 +141,15 @@ class _CurrentPhotoState extends State<CurrentPhoto> {
 
   @override
   Widget build(BuildContext context) {
+    final h = widget.height ?? widget.size;
     final placeholder = Container(
       width: widget.size,
-      height: widget.size,
+      height: h,
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: AppColors.border,
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       ),
-      child: Icon(widget.icon, color: AppColors.primary),
+      child: Icon(widget.icon, color: AppColors.textSecondary),
     );
     final f = _file;
     if (f == null) return placeholder;
@@ -146,7 +158,7 @@ class _CurrentPhotoState extends State<CurrentPhoto> {
       child: Image.file(
         f,
         width: widget.size,
-        height: widget.size,
+        height: h,
         fit: widget.fit,
         errorBuilder: (_, __, ___) => placeholder,
       ),

@@ -10,11 +10,14 @@ import '../../core/sync/sync_coordinator.dart';
 import '../../core/sync/sync_engine.dart';
 import '../../dependency_injection.dart';
 import '../../shared/constants/app_colors.dart';
+import '../../shared/constants/app_fonts.dart';
 import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
+import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/connection_strip.dart';
+import '../../shared/widgets/field_scaffold.dart';
 
 /// Estado de sincronización: pendientes en orden, fallidos con su motivo
 /// (RN-25), modo sin conexión y "sincronizar ahora".
@@ -28,88 +31,33 @@ class SyncPage extends StatelessWidget {
     return BlocBuilder<SyncCoordinator, SyncStatus>(
       builder: (context, s) {
         final coordinator = context.read<SyncCoordinator>();
-        return Scaffold(
-          appBar: AppBar(title: Text(l.syncTitle)),
-          body: FutureBuilder<List<OutboxOp>>(
-            // Se vuelve a leer cada vez que cambia el estado (contadores incluidos).
-            key: ValueKey(Object.hash(s.counts, s.syncing)),
-            future: outbox.list(),
-            builder: (context, snap) {
-              final ops = snap.data ?? const <OutboxOp>[];
-              final pending = [for (final o in ops) if (o.status == OutboxStatus.pending) o];
-              final failed = [for (final o in ops) if (o.status != OutboxStatus.pending) o];
-              return ListView(
-                padding: const EdgeInsets.all(AppSizes.md),
+        return FutureBuilder<List<OutboxOp>>(
+          // Se vuelve a leer cada vez que cambia el estado (contadores incluidos).
+          key: ValueKey(Object.hash(s.counts, s.syncing)),
+          future: outbox.list(),
+          builder: (context, snap) {
+            final ops = snap.data ?? const <OutboxOp>[];
+            final pending = [for (final o in ops) if (o.status == OutboxStatus.pending) o];
+            final failed = [for (final o in ops) if (o.status != OutboxStatus.pending) o];
+            return FieldScaffold(
+              title: l.syncPendingTitle,
+              subtitle: Text([
+                s.lastSyncAt == null ? l.neverSynced : l.lastSync(timeAgo(context, s.lastSyncAt!)),
+                if (!s.online) l.retriesAlone,
+              ].join(' · ')),
+              gap: 22,
+              footer: FieldFooter(
                 children: [
-                  Card(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Icon(s.online ? Icons.wifi : Icons.wifi_off,
-                              color: s.online ? AppColors.statusSuccess : AppColors.statusWarning),
-                          title: Text(s.online ? l.online : l.offline),
-                          subtitle: Text(s.lastSyncAt == null
-                              ? l.neverSynced
-                              : l.lastSync(timeAgo(context, s.lastSyncAt!))),
-                        ),
-                        const Divider(height: 1),
-                        SwitchListTile(
-                          key: const Key('offlineSwitch'),
-                          secondary: const Icon(Icons.airplanemode_active),
-                          title: Text(l.workOffline),
-                          subtitle: Text(l.workOfflineHelp),
-                          value: s.simulatedOffline,
-                          onChanged: coordinator.setSimulatedOffline,
-                        ),
-                        if (s.sessionExpired)
-                          ListTile(
-                            leading: const Icon(Icons.lock_clock, color: AppColors.statusError),
-                            title: Text(l.sessionExpiredKeepQueue),
-                          ),
-                        if (s.lastError != null && s.lastError != 'offline')
-                          ListTile(
-                            leading: const Icon(Icons.error_outline, color: AppColors.statusError),
-                            title: Text(s.lastError!),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                  FilledButton.icon(
+                  AppButton(
                     key: const Key('syncNow'),
+                    label: s.syncing ? l.syncing : l.syncNow,
+                    isLoading: s.syncing,
                     onPressed: !s.online || s.syncing ? null : coordinator.syncNow,
-                    icon: s.syncing
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.sync),
-                    label: Text(s.syncing ? l.syncing : l.syncNow),
                   ),
-                  if (failed.isNotEmpty) ...[
-                    SectionTitle(l.failedTitle(failed.length)),
-                    for (final o in failed) _FailedTile(op: o),
-                  ],
-                  SectionTitle(l.pendingTitle(pending.length)),
-                  if (pending.isEmpty)
-                    EmptyState(icon: Icons.cloud_done_outlined, text: l.nothingPending)
-                  else
-                    Card(
-                      child: Column(
-                        children: [
-                          for (final o in pending)
-                            ListTile(
-                              dense: true,
-                              leading: Icon(o.kind == OutboxKind.attachment ? Icons.photo_outlined : Icons.schedule),
-                              title: Text(l.outboxLabel(o.label)),
-                              subtitle: Text([
-                                DateFormat.yMMMd().add_Hm().format(o.occurredAt.toLocal()),
-                                if (o.attempts > 0) l.attempts(o.attempts),
-                                if (o.lastError != null) l.outboxError(o.lastError),
-                              ].join(' · ')),
-                            ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: AppSizes.lg),
                   TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, decoration: TextDecoration.underline),
+                    ),
                     onPressed: !s.online
                         ? null
                         : () async {
@@ -119,9 +67,114 @@ class SyncPage extends StatelessWidget {
                     child: Text(l.redownloadAll),
                   ),
                 ],
-              );
-            },
-          ),
+              ),
+              children: [
+                if (s.sessionExpired)
+                  FieldNotice(
+                    icon: Icons.lock_clock_outlined,
+                    iconColor: AppColors.statusError,
+                    child: Text(l.sessionExpiredKeepQueue),
+                  ),
+                if (s.lastError != null && s.lastError != 'offline')
+                  FieldNotice(
+                    icon: Icons.error_outline,
+                    iconColor: AppColors.statusError,
+                    child: Text(s.lastError!),
+                  ),
+                if (failed.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSizes.sm),
+                        child: StatusChip(l.failedTitle(failed.length), color: AppColors.statusError, fontSize: 16),
+                      ),
+                      RuledList(children: [for (final o in failed) _FailedTile(op: o)]),
+                    ],
+                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.pendingTitle(pending.length), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: AppSizes.sm),
+                    RuledList(
+                      children: [
+                        if (pending.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            child: Text(l.nothingPending, style: const TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+                          ),
+                        for (final (i, o) in pending.indexed)
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: AppSizes.rowHeight),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 30,
+                                    child: Text('${i + 1}', style: AppFonts.monoStyle(fontSize: 14, color: AppColors.textSecondary)),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(l.outboxLabel(o.label),
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          [
+                                            DateFormat('dd/MM HH:mm').format(o.occurredAt.toLocal()),
+                                            if (o.attempts > 0) l.attempts(o.attempts),
+                                            if (o.lastError != null) l.outboxError(o.lastError),
+                                          ].join(' · '),
+                                          style: AppFonts.monoStyle(fontSize: 13, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (o.kind == OutboxKind.attachment)
+                                    const Icon(Icons.photo_outlined, size: 20, color: AppColors.textSecondary),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                DecoratedBox(
+                  decoration: const BoxDecoration(
+                    border: Border.symmetric(horizontal: BorderSide(color: AppColors.border)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l.workOffline, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 3),
+                              Text(l.workOfflineHelp,
+                                  style: const TextStyle(fontSize: 14, height: 1.4, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.md),
+                        Switch(
+                          key: const Key('offlineSwitch'),
+                          value: s.simulatedOffline,
+                          onChanged: coordinator.setSimulatedOffline,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -178,52 +231,63 @@ class _FailedTile extends StatelessWidget {
     final l = context.l10n;
     final discarded = op.status == OutboxStatus.discarded;
     final color = discarded ? AppColors.statusWarning : AppColors.statusError;
+    final actionStyle = OutlinedButton.styleFrom(
+      minimumSize: const Size(0, AppSizes.buttonHeightSm),
+      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+    final primary = _isDuplicateCode(op)
+        ? OutlinedButton(
+            key: const Key('fixCode'),
+            style: actionStyle,
+            onPressed: () => _fixCode(context),
+            child: Text(l.fixCode),
+          )
+        : discarded
+            ? null
+            : OutlinedButton(
+                style: actionStyle,
+                onPressed: () async {
+                  await sl<OutboxStore>().retry(op.seq!);
+                  sl<SyncCoordinator>().kick();
+                },
+                child: Text(l.retry),
+              );
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.sm),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.sm),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.outboxLabel(op.label), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 3),
+          Text(l.outboxError(op.lastError), style: TextStyle(fontSize: 15, height: 1.4, color: color)),
+          const SizedBox(height: 3),
+          Text(
+            [
+              DateFormat('dd/MM HH:mm').format(op.occurredAt.toLocal()),
+              if (op.attempts > 0) l.attempts(op.attempts),
+              if (op.errorStatus != null) 'HTTP ${op.errorStatus}',
+            ].join(' · '),
+            style: AppFonts.monoStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 12),
+          Row(
             children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(discarded ? Icons.info_outline : Icons.error_outline, color: color),
-                title: Text(l.outboxLabel(op.label)),
-                subtitle: Text(
-                  [
-                    DateFormat.yMMMd().add_Hm().format(op.occurredAt.toLocal()),
-                    if (op.errorStatus != null) 'HTTP ${op.errorStatus}',
-                  ].join(' · '),
-                ),
-              ),
-              Text(l.outboxError(op.lastError), style: TextStyle(color: color)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (_isDuplicateCode(op))
-                    TextButton(
-                      key: const Key('fixCode'),
-                      onPressed: () => _fixCode(context),
-                      child: Text(l.fixCode),
-                    )
-                  else if (!discarded)
-                    TextButton(
-                      onPressed: () async {
-                        await sl<OutboxStore>().retry(op.seq!);
-                        sl<SyncCoordinator>().kick();
-                      },
-                      child: Text(l.retry),
-                    ),
-                  TextButton(
-                    onPressed: () => sl<OutboxStore>().dismiss(op.seq!),
-                    child: Text(discarded ? l.understood : l.discard),
+              if (primary != null) ...[Expanded(child: primary), const SizedBox(width: 8)],
+              Expanded(
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, AppSizes.buttonHeightSm),
+                    foregroundColor: discarded ? AppColors.ink : AppColors.statusError,
+                    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
-                ],
+                  onPressed: () => sl<OutboxStore>().dismiss(op.seq!),
+                  child: Text(discarded ? l.understood : l.discard),
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

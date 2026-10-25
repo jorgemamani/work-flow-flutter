@@ -304,13 +304,17 @@ class ChoiceGrid<T> extends StatelessWidget {
         children: [
           for (final (ri, row) in rows.indexed) ...[
             if (ri > 0) const SizedBox(height: 8),
-            Row(
-              children: [
-                for (var i = 0; i < columns; i++) ...[
-                  if (i > 0) const SizedBox(width: 8),
-                  Expanded(child: i < row.length ? _tile(row[i]) : const SizedBox.shrink()),
+            // Misma altura en toda la fila aunque un texto ocupe dos líneas.
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < columns; i++) ...[
+                    if (i > 0) const SizedBox(width: 8),
+                    Expanded(child: i < row.length ? _tile(row[i]) : const SizedBox.shrink()),
+                  ],
                 ],
-              ],
+              ),
             ),
           ],
         ],

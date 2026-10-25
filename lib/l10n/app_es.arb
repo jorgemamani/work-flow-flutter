@@ -666,5 +666,232 @@
   },
   "connSessionExpired": "Sesión vencida",
   "back": "Volver",
-  "addPhotoShort": "Agregar"
+  "addPhotoShort": "Agregar",
+  "loginTitle": "Entrar",
+  "loginModeLabel": "Cómo entrás",
+  "loginFirstTime": "La primera vez hace falta señal. Después funciona sin conexión.",
+  "pinEntered": "{count, plural, =0{Ningún dígito} =1{1 dígito} other{{count} dígitos}}",
+  "@pinEntered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteDigit": "Borrar",
+  "companyCuitToggle": "¿Trabajás en más de una empresa? Indicá el CUIT",
+  "invalidDocument": "El DNI o CUIL tiene al menos 7 números",
+  "invalidEmail": "Ingresá un email",
+  "optional": "(opcional)",
+  "emailHint": "nombre@empresa.com",
+  "homeTodo": "Para hacer",
+  "homeUpSince": "Subiste el {date}",
+  "@homeUpSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeReceiveRemito": "Recibir remito {number}",
+  "@homeReceiveRemito": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDueOn": "Vence el {date}",
+  "@homeDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDailyLogToday": "Bitácora de hoy",
+  "homeDailyLogMissing": "Todavía no la cargaste",
+  "homeNothingTodo": "Nada pendiente por ahora.",
+  "homeReviewSync": "Revisalo en Sincronización",
+  "scanAimHint": "Apuntá al código de barras o al QR",
+  "scanWriteCode": "Escribir el código",
+  "scanViewItem": "Ver el ítem",
+  "scanAgain": "Escanear otro",
+  "torch": "Linterna",
+  "close": "Cerrar",
+  "itemFound": "Ítem encontrado",
+  "inContainer": "en {name}",
+  "@inContainer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inChargeOf": "A cargo de {name}",
+  "@inChargeOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "search": "Buscar",
+  "currentPhoto": "Foto vigente",
+  "remitosTitle": "Remitos",
+  "remitosTowards": "Lo que viene hacia {name}",
+  "@remitosTowards": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "toReceiveCount": "Por recibir · {count}",
+  "@toReceiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receiveTitle": "Recibir remito",
+  "reviewedOf": "{done} de {total} revisados",
+  "@reviewedOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "differencesCount": "{count, plural, =0{Sin diferencias} =1{1 diferencia} other{{count} diferencias}}",
+  "@differencesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "optArrived": "Llegó",
+  "optMissing": "Falta",
+  "optDamaged": "Dañado",
+  "howItArrived": "Cómo llegó",
+  "notReviewed": "Sin revisar",
+  "withDifference": "Con diferencia",
+  "oneLess": "Uno menos",
+  "oneMore": "Uno más",
+  "unitsReceived": "recibidos",
+  "shortBy": "Faltan {qty}. Al confirmar se avisa a logística.",
+  "@shortBy": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "leftToReview": "{count, plural, =1{Falta revisar 1 ítem} other{Falta revisar {count} ítems}}",
+  "@leftToReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "markEachItem": "Marcá cómo llegó cada ítem para confirmar.",
+  "confirmWithDifferences": "Confirmar con diferencias",
+  "sentWhenSignal": "Se envía apenas haya señal. Queda tu nombre y la hora.",
+  "scanToMark": "Escanear código",
+  "notInRemito": "{code} no está en este remito",
+  "@notInRemito": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "damagePhotoRequired": "Foto del daño (obligatoria)",
+  "qualTitle": "Habilitaciones para subir",
+  "qualRow": "Documentación",
+  "qualOk": "Vigente",
+  "qualExpiring": "Vence pronto",
+  "qualExpired": "Vencida",
+  "qualExpiredNote": "Tenés documentación vencida. Podés registrar la subida igual: queda marcada y le avisamos a RR. HH.",
+  "lastRecords": "Últimos registros",
+  "registerForOther": "Registrar para otra persona",
+  "fromThePhone": "desde la app",
+  "rightNowAt": "ahora · {time}",
+  "@rightNowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "photosDoneOf": "{done} de {total} con foto",
+  "@photosDoneOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "takePhotoOf": "Sacar foto de {name}",
+  "@takePhotoOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "photoReadyOf": "Foto lista de {name}. Tocá para sacar otra",
+  "@photoReadyOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationPhotosNote": "Las fotos muestran cómo está cada ítem. No cambian su estado: si algo está roto, reportalo como incidencia.",
+  "sentWhenSignalShort": "Se envía apenas haya señal.",
+  "dueOnShort": "vence el {date}",
+  "@dueOnShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "showDetails": "Condición, más fotos y notas",
+  "dailyLogTitle": "Bitácora de hoy",
+  "whatWasDoneToday": "Qué se hizo hoy",
+  "toolsAndVehicles": "Herramientas y vehículos",
+  "allGood": "Todo bien",
+  "somethingWrong": "Hay algo",
+  "news": "Novedades",
+  "needsFixReport": "¿Hay que arreglarlo? Reportalo como incidencia",
+  "photosOptional": "(opcional)",
+  "saveDailyLog": "Guardar bitácora",
+  "savedOnPhoneSentLater": "Se guarda en el teléfono y se envía cuando haya señal.",
+  "whatHappenedTitle": "Qué pasó",
+  "hintMissing": "No llegó o no está",
+  "hintDamage": "Está roto o falla",
+  "hintLoss": "No sabemos dónde está",
+  "hintClaim": "Un reclamo a logística",
+  "hintOther": "Cualquier otra cosa",
+  "itemLabel": "Ítem",
+  "change": "Cambiar",
+  "choose": "Elegir",
+  "tellBriefly": "Contalo en pocas palabras",
+  "photoRequiredIfDamage": "· obligatoria si hay un daño",
+  "notifyLogistics": "Avisar a logística",
+  "seeAnswerInRecords": "Vas a ver la respuesta en Registros.",
+  "syncPendingTitle": "Envíos pendientes",
+  "retriesAlone": "sin señal, se reintenta solo",
+  "cameraUnavailableWrite": "No se pudo abrir la cámara. Escribí el código."
 }

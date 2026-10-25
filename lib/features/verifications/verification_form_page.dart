@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/data/field_actions.dart';
 import '../../core/data/field_repository.dart';
 import '../../core/data/models.dart';
 import '../../dependency_injection.dart';
+import '../../core/photos/photo_service.dart';
 import '../../shared/constants/app_colors.dart';
+import '../../shared/constants/app_fonts.dart';
 import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/common.dart';
+import '../../shared/widgets/field_scaffold.dart';
 import '../../shared/widgets/photo_strip.dart';
 import '../auth/presentation/session_cubit.dart';
 import '../items/item_lookup.dart';
@@ -120,109 +125,260 @@ class _VerificationFormPageState extends State<VerificationFormPage> {
     context.pop();
   }
 
+  /// Un toque: cámara directa (con guantes no hay menú de por medio).
+  Future<void> _quickPhoto(VerificationLineInput line) async {
+    if (line.photos.length >= _limit(context)) return;
+    final photo = await sl<PhotoService>().take(fromCamera: true);
+    if (photo == null || !mounted) return;
+    setState(() => line.photos.add(photo));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final ctx = _ctx;
     if (ctx == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     final limit = _limit(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l.actionVerification)),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSizes.md),
+    final withPhoto = _lines.where((x) => x.photos.isNotEmpty).length;
+    final missing = _lines.where((x) => _requiresPhoto(x.asset) && x.photos.isEmpty).length;
+    final due = _schedule?.nextDueAt;
+    return FieldScaffold(
+      title: _schedule?.name ?? l.actionVerification,
+      subtitle: Text([
+        l.photoLimitInfo(limit),
+        if (due != null) l.dueOnShort(DateFormat('dd/MM').format(due.toLocal())),
+      ].join(' · ')),
+      headerBottom: _lines.isEmpty
+          ? null
+          : ProgressHeader(
+              label: l.photosDoneOf(withPhoto, _lines.length),
+              value: withPhoto / _lines.length,
+            ),
+      footer: FieldFooter(
+        hint: missing > 0 ? l.verificationMissingPhotos(missing) : l.sentWhenSignalShort,
         children: [
-          if (_schedules.isNotEmpty) ...[
-            DropdownButtonFormField<String?>(
-              initialValue: _schedule?.id,
-              decoration: InputDecoration(labelText: l.scheduleOptional),
-              items: [
-                DropdownMenuItem(value: null, child: Text(l.noSchedule)),
-                for (final s in _schedules) DropdownMenuItem(value: s.id, child: Text(s.name)),
-              ],
-              onChanged: (v) => setState(() {
-                _schedule = v == null ? null : _schedules.firstWhere((s) => s.id == v);
-              }),
-            ),
-            const SizedBox(height: AppSizes.sm),
-          ],
-          Text(l.photoLimitInfo(limit), style: context.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
-          SectionTitle(
-            l.itemsCount(_lines.length),
-            trailing: TextButton.icon(
-              key: const Key('addVerificationItems'),
-              onPressed: _addItems,
-              icon: const Icon(Icons.playlist_add),
-              label: Text(l.chooseItems),
-            ),
-          ),
-          if (_lines.isEmpty) EmptyState(icon: Icons.fact_check_outlined, text: l.verificationEmpty),
-          for (final line in _lines) ...[
-            Card(
-              key: Key('vline-${line.asset.internalCode}'),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            ctx.resolver.label(line.asset),
-                            style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        if (_requiresPhoto(line.asset))
-                          StatusChip(l.requiresPhoto, color: AppColors.statusWarning),
-                      ],
-                    ),
-                    if (ctx.conditions.isNotEmpty) ...[
-                      const SizedBox(height: AppSizes.sm),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: [
-                          for (final c in ctx.conditions)
-                            ChoiceChip(
-                              label: Text(c.name),
-                              selected: line.conditionId == c.id,
-                              onSelected: (_) => setState(() => line.conditionId = c.id),
-                            ),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: AppSizes.sm),
-                    PhotoStrip(
-                      photos: line.photos,
-                      max: limit,
-                      required: _requiresPhoto(line.asset),
-                      showError: _showErrors,
-                      onChanged: () => setState(() {}),
-                    ),
-                    TextFormField(
-                      initialValue: line.notes,
-                      decoration: InputDecoration(labelText: l.notesOptional, isDense: true),
-                      onChanged: (v) => line.notes = v,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSizes.sm),
-          ],
-          TextField(
-            controller: _notes,
-            maxLines: 2,
-            decoration: InputDecoration(labelText: l.generalNotes),
-          ),
-          const LocalSaveHint(),
-          FilledButton(
+          AppButton(
             key: const Key('submitVerification'),
-            onPressed: _lines.isEmpty || _saving ? null : _submit,
-            child: Text(l.submitVerification),
+            label: l.submitVerification,
+            isLoading: _saving,
+            onPressed: _lines.isEmpty ? null : _submit,
           ),
         ],
       ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.md, AppSizes.md, AppSizes.lg),
+        children: [
+          if (_schedules.isNotEmpty) ...[
+            FieldLabel(
+              l.scheduleOptional,
+              child: DropdownButtonFormField<String?>(
+                initialValue: _schedule?.id,
+                items: [
+                  DropdownMenuItem(value: null, child: Text(l.noSchedule)),
+                  for (final s in _schedules) DropdownMenuItem(value: s.id, child: Text(s.name)),
+                ],
+                onChanged: (v) => setState(() {
+                  _schedule = v == null ? null : _schedules.firstWhere((s) => s.id == v);
+                }),
+              ),
+            ),
+            const SizedBox(height: AppSizes.md),
+          ],
+          AppButton(
+            key: const Key('addVerificationItems'),
+            label: _lines.isEmpty ? l.chooseItems : l.itemsCount(_lines.length),
+            isOutlined: true,
+            icon: const Icon(Icons.playlist_add, size: 22),
+            onPressed: _addItems,
+          ),
+          const SizedBox(height: AppSizes.md),
+          if (_lines.isEmpty)
+            EmptyState(icon: Icons.photo_camera_outlined, text: l.verificationEmpty)
+          else
+            RuledList(
+              children: [
+                for (final line in _lines)
+                  _VLine(
+                    key: Key('vline-${line.asset.internalCode}'),
+                    line: line,
+                    ctx: ctx,
+                    limit: limit,
+                    requiresPhoto: _requiresPhoto(line.asset),
+                    showErrors: _showErrors,
+                    onQuickPhoto: () => _quickPhoto(line),
+                    onChanged: () => setState(() {}),
+                  ),
+              ],
+            ),
+          if (_lines.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(l.verificationPhotosNote, style: const TextStyle(fontSize: 14, height: 1.45, color: AppColors.textSecondary)),
+            const SizedBox(height: AppSizes.md),
+            FieldLabel(l.generalNotes, child: TextField(controller: _notes, maxLines: 2)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Un ítem: nombre, código y el botón de cámara (en tinta cuando ya tiene
+/// foto). Abajo, plegado, la condición, más fotos y notas.
+class _VLine extends StatefulWidget {
+  const _VLine({
+    super.key,
+    required this.line,
+    required this.ctx,
+    required this.limit,
+    required this.requiresPhoto,
+    required this.showErrors,
+    required this.onQuickPhoto,
+    required this.onChanged,
+  });
+
+  final VerificationLineInput line;
+  final ItemContext ctx;
+  final int limit;
+  final bool requiresPhoto;
+  final bool showErrors;
+  final VoidCallback onQuickPhoto;
+  final VoidCallback onChanged;
+
+  @override
+  State<_VLine> createState() => _VLineState();
+}
+
+class _VLineState extends State<_VLine> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final line = widget.line;
+    final name = widget.ctx.modelName(line.asset);
+    final done = line.photos.isNotEmpty;
+    final warn = widget.requiresPhoto && !done && widget.showErrors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 72),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _open = !_open),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name.isEmpty ? line.asset.internalCode : name,
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 3),
+                        Wrap(
+                          spacing: 10,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(line.asset.internalCode,
+                                style: AppFonts.monoStyle(fontSize: 13, color: AppColors.textSecondary)),
+                            if (widget.requiresPhoto && !done)
+                              StatusChip(l.requiresPhoto,
+                                  color: warn ? AppColors.statusError : AppColors.statusWarning, fontSize: 13),
+                            if (line.photos.length > 1)
+                              Text(l.photosCount(line.photos.length, widget.limit),
+                                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Semantics(
+                  button: true,
+                  label: done ? l.photoReadyOf(name) : l.takePhotoOf(name),
+                  excludeSemantics: true,
+                  child: Material(
+                    color: done ? AppColors.ink : AppColors.surfaceLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: done ? BorderSide.none : BorderSide(color: warn ? AppColors.statusError : AppColors.ink, width: 1.5),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: widget.onQuickPhoto,
+                      child: SizedBox(
+                        width: 64,
+                        height: AppSizes.buttonHeight,
+                        child: Icon(
+                          done ? Icons.check : Icons.photo_camera_outlined,
+                          size: 24,
+                          color: done ? Colors.white : AppColors.ink,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (!_open)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 36),
+                foregroundColor: AppColors.textSecondary,
+                textStyle: const TextStyle(fontSize: 14, decoration: TextDecoration.underline),
+              ),
+              onPressed: () => setState(() => _open = true),
+              child: Text(l.showDetails),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (widget.ctx.conditions.isNotEmpty) ...[
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final c in widget.ctx.conditions)
+                        ChoiceChip(
+                          label: Text(c.name),
+                          selected: line.conditionId == c.id,
+                          onSelected: (_) {
+                            line.conditionId = c.id;
+                            widget.onChanged();
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                PhotoStrip(
+                  photos: line.photos,
+                  max: widget.limit,
+                  required: widget.requiresPhoto,
+                  showError: widget.showErrors,
+                  onChanged: widget.onChanged,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  initialValue: line.notes,
+                  decoration: InputDecoration(hintText: l.notesOptional),
+                  onChanged: (v) => line.notes = v,
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

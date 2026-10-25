@@ -7,15 +7,17 @@ import '../../core/data/models.dart';
 import '../../dependency_injection.dart';
 import '../../routing/route_names.dart';
 import '../../shared/constants/app_colors.dart';
-import '../../shared/constants/app_sizes.dart';
+import '../../shared/constants/app_fonts.dart';
 import '../../shared/extensions/context_extensions.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
-import '../../shared/widgets/live_query.dart';
 import '../../shared/widgets/connection_strip.dart';
+import '../../shared/widgets/field_scaffold.dart';
+import '../../shared/widgets/live_query.dart';
 import '../auth/presentation/session_cubit.dart';
 
-/// Remitos en tránsito hacia el proyecto, para confirmar su llegada.
+/// Remitos en tránsito hacia el proyecto, para confirmar su llegada, y los
+/// últimos que se tocaron desde el teléfono.
 class IncomingRemitosPage extends StatelessWidget {
   const IncomingRemitosPage({super.key});
 
@@ -24,69 +26,111 @@ class IncomingRemitosPage extends StatelessWidget {
     final l = context.l10n;
     final projectId = context.watch<SessionCubit>().state.projectId;
     final repo = sl<FieldRepository>();
-    return Scaffold(
-      appBar: AppBar(title: Text(l.incomingRemitos)),
-      body: LiveQuery<(List<Remito>, List<Remito>, Map<String, Location>)>(
-        sources: const {'remitos', 'remito_items', 'locations'},
-        deps: [projectId],
-        query: () async {
-          final all = projectId == null ? <Remito>[] : await repo.projectRemitos(projectId);
-          return (
-            projectId == null ? <Remito>[] : await repo.incomingRemitos(projectId),
-            [
-              for (final r in all)
-                if (r.hasPendingChange || r.type == 'RETURN') r,
-            ],
-            await repo.locations(),
-          );
-        },
-        builder: (context, d) {
-          final (incoming, recent, locs) = d;
-          return ListView(
-            padding: const EdgeInsets.all(AppSizes.md),
-            children: [
-              if (incoming.isEmpty)
-                EmptyState(icon: Icons.local_shipping_outlined, text: l.noIncomingRemitos)
-              else
-                for (final r in incoming)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                    child: Card(
-                      child: ListTile(
-                        key: Key('remito-${r.number}'),
-                        leading: const Icon(Icons.local_shipping, color: AppColors.primary),
-                        title: Text('${l.remitoType(r.type)} ${r.displayNumber}'),
-                        subtitle: Text([
-                          l.fromTo(locs[r.originId]?.name ?? '—', locs[r.destinationId]?.name ?? '—'),
-                          if (r.dispatchedAt != null) l.dispatchedAgo(timeAgo(context, r.dispatchedAt!)),
-                        ].join('\n')),
-                        isThreeLine: r.dispatchedAt != null,
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => context.push(RouteNames.receiveRemito(r.id)),
-                      ),
-                    ),
-                  ),
-              if (recent.isNotEmpty) ...[
-                SectionTitle(l.recentRemitos),
-                for (final r in recent)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSizes.sm),
-                    child: Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.receipt_long_outlined),
-                        title: Text('${l.remitoType(r.type)} ${r.displayNumber}'),
-                        subtitle: Text(l.remitoStatus(r.status)),
-                        trailing: r.hasPendingChange
-                            ? StatusChip(l.pendingSync, color: AppColors.primary)
-                            : null,
-                      ),
-                    ),
+    return LiveQuery<(List<Remito>, List<Remito>, Map<String, Location>, Map<String, int>, Project?)>(
+      sources: const {'remitos', 'remito_items', 'locations', 'projects'},
+      deps: [projectId],
+      query: () async {
+        final all = projectId == null ? <Remito>[] : await repo.projectRemitos(projectId);
+        final incoming = projectId == null ? <Remito>[] : await repo.incomingRemitos(projectId);
+        return (
+          incoming,
+          [
+            for (final r in all)
+              if (r.hasPendingChange || r.type == 'RETURN') r,
+          ],
+          await repo.locations(),
+          {for (final r in incoming) r.id: (await repo.remitoItems(r.id)).length},
+          await repo.project(projectId),
+        );
+      },
+      builder: (context, d) {
+        final (incoming, recent, locs, counts, project) = d;
+        String place(String? id) => locs[id]?.name ?? '—';
+        return FieldScaffold(
+          title: l.remitosTitle,
+          subtitle: project == null ? null : Text(l.remitosTowards(project.name)),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SectionTitle(l.toReceiveCount(incoming.length), strong: true, padTop: false),
+                if (incoming.isEmpty)
+                  RuledList(children: [EmptyState(icon: Icons.local_shipping_outlined, text: l.noIncomingRemitos)])
+                else
+                  RuledList(
+                    children: [
+                      for (final r in incoming)
+                        InkWell(
+                          key: Key('remito-${r.number}'),
+                          onTap: () => context.push(RouteNames.receiveRemito(r.id)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Chapa(r.displayNumber, fontSize: 14),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(l.remitoType(r.type),
+                                          style: const TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+                                    ),
+                                    StatusChip(l.remitoStatus(r.status), color: remitoStatusColor(r.status)),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  l.fromTo(place(r.originId), place(r.destinationId)),
+                                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        r.dispatchedAt == null ? '' : l.dispatchedAgo(timeAgo(context, r.dispatchedAt!)),
+                                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                                      ),
+                                    ),
+                                    Text(l.itemsCount(counts[r.id] ?? 0),
+                                        style: AppFonts.monoStyle(fontSize: 14, color: AppColors.textSecondary)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
               ],
-            ],
-          );
-        },
-      ),
+            ),
+            if (recent.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SectionTitle(l.recentRemitos, strong: true, padTop: false),
+                  RuledList(
+                    children: [
+                      for (final r in recent)
+                        RowLink(
+                          leading: Chapa(r.displayNumber, fontSize: 14),
+                          title: l.remitoType(r.type),
+                          detail: Wrap(
+                            spacing: 12,
+                            children: [
+                              StatusChip(l.remitoStatus(r.status), color: remitoStatusColor(r.status)),
+                              if (r.hasPendingChange) StatusChip(l.pendingSync, color: AppColors.statusWarning),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+          ],
+        );
+      },
     );
   }
 }
