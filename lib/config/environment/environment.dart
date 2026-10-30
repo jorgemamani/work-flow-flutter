@@ -18,9 +18,6 @@ class Environment {
   late BaseConfig _config;
   BaseConfig get config => _config;
 
-  /// Atajo rápido: `true` cuando la app usa datasources mock.
-  bool get useMockData => _config.useMockData;
-
   Future<void> init() async {
     const envName =
         String.fromEnvironment('ENVIRONMENT', defaultValue: 'dev');

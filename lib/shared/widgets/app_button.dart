@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import '../constants/app_fonts.dart';
 import '../constants/app_sizes.dart';
+import '../theme/tenant_brand.dart';
 import 'app_loading.dart';
 
+/// Botón de campo (56 px, radio 14). Lleno = la acción principal, en el color
+/// de la empresa; [isOutlined] = secundaria, con borde de ese color. Una sola acción principal
+/// por pantalla.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -14,8 +19,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.width,
     this.height = AppSizes.buttonHeight,
-    this.backgroundColor,
-    this.foregroundColor,
+    this.subtitle,
   });
 
   final String label;
@@ -25,57 +29,63 @@ class AppButton extends StatelessWidget {
   final Widget? icon;
   final double? width;
   final double height;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
+
+  /// Segunda línea en mono ("ahora · 07:42").
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
-    final content = isLoading
-        ? AppLoading(color: isOutlined ? AppColors.primary : Colors.white)
-        : (icon != null
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  icon!,
-                  const SizedBox(width: AppSizes.sm),
-                  Text(label),
-                ],
-              )
-            : Text(label));
-
-    if (isOutlined) {
-      return SizedBox(
-        width: width ?? double.infinity,
-        height: height,
-        child: OutlinedButton(
-          onPressed: isLoading ? null : onPressed,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: foregroundColor ?? AppColors.primary,
-            side: BorderSide(color: foregroundColor ?? AppColors.primary),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            ),
-          ),
-          child: content,
-        ),
-      );
+    final brand = context.brand;
+    final fg = isOutlined ? brand.ink : brand.on;
+    final Widget content;
+    if (isLoading) {
+      content = AppLoading(color: fg);
+    } else {
+      final text = subtitle == null
+          ? Text(label)
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(label),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontFamily: AppFonts.mono,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: onPressed == null ? AppColors.textSecondary : fg.withValues(alpha: 0.75),
+                  ),
+                ),
+              ],
+            );
+      content = icon == null
+          ? text
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [icon!, const SizedBox(width: 10), Flexible(child: text)],
+            );
     }
-
+    final size = Size(width ?? double.infinity, height);
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.primary,
-          foregroundColor: foregroundColor ?? Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          ),
-          elevation: 0,
-        ),
-        child: content,
-      ),
+      child: isOutlined
+          ? OutlinedButton(
+              onPressed: isLoading ? null : onPressed,
+              style: OutlinedButton.styleFrom(minimumSize: size),
+              child: content,
+            )
+          : FilledButton(
+              onPressed: isLoading ? null : onPressed,
+              style: FilledButton.styleFrom(
+                minimumSize: size,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(height > AppSizes.buttonHeight ? AppSizes.radiusLg : AppSizes.radiusMd),
+                ),
+              ),
+              child: content,
+            ),
     );
   }
 }

@@ -1,35 +1,15 @@
-import 'package:equatable/equatable.dart';
-
-class AppException extends Equatable implements Exception {
-  const AppException({
-    required this.message,
-    this.statusCode,
-    this.data,
-  });
+/// Error de la API con el `message` listo para mostrar (contrato §1).
+class ApiException implements Exception {
+  const ApiException(this.message, {this.statusCode});
 
   final String message;
   final int? statusCode;
-  final dynamic data;
 
   @override
-  List<Object?> get props => [message, statusCode, data];
-
-  @override
-  String toString() => 'AppException(message: $message, statusCode: $statusCode)';
+  String toString() => 'ApiException($statusCode, $message)';
 }
 
-class NetworkException extends AppException {
-  const NetworkException({required super.message, super.statusCode});
-}
-
-class UnauthorizedException extends AppException {
-  const UnauthorizedException({super.message = 'No autorizado. Por favor inicia sesión.'});
-}
-
-class ServerException extends AppException {
-  const ServerException({required super.message, super.statusCode});
-}
-
-class CacheException extends AppException {
-  const CacheException({required super.message});
+/// La sesión no se puede renovar: hay que volver a ingresar.
+class SessionExpiredException implements Exception {
+  const SessionExpiredException();
 }

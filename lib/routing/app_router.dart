@@ -1,178 +1,118 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../dependency_injection.dart';
-import '../features/auth/presentation/bloc/auth_bloc.dart';
-import '../features/auth/presentation/pages/forgot_password_page.dart';
-import '../features/auth/presentation/pages/login_page.dart';
-import '../features/bitacora/presentation/pages/bitacora_page.dart';
-import '../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../features/inventory/domain/entities/asset.dart';
-import '../features/inventory/presentation/bloc/asset_detail_bloc.dart';
-import '../features/inventory/presentation/bloc/asset_detail_event.dart';
-import '../features/inventory/presentation/bloc/asset_form_bloc.dart';
-import '../features/inventory/presentation/bloc/inventory_bloc.dart';
-import '../features/inventory/presentation/pages/asset_detail_page.dart';
-import '../features/inventory/presentation/pages/asset_form_page.dart';
-import '../features/inventory/presentation/pages/inventory_page.dart';
-import '../features/splash/presentation/pages/splash_page.dart';
+import '../features/account/account_page.dart';
+import '../features/account/change_pin_page.dart';
+import '../features/auth/presentation/login_page.dart';
+import '../features/auth/presentation/select_tenant_page.dart';
+import '../features/auth/presentation/session_cubit.dart';
+import '../features/auth/presentation/splash_page.dart';
+import '../features/checkins/check_in_page.dart';
+import '../features/home/home_page.dart';
+import '../features/incidents/incident_form_page.dart';
+import '../features/items/item_detail_page.dart';
+import '../features/items/items_page.dart';
+import '../features/items/move_item_page.dart';
+import '../features/items/new_item_page.dart';
+import '../features/items/scan_page.dart';
+import '../features/items/status_change_page.dart';
+import '../features/records/daily_log_form_page.dart';
+import '../features/records/records_page.dart';
+import '../features/remitos/incoming_remitos_page.dart';
+import '../features/remitos/receive_remito_page.dart';
+import '../features/remitos/return_remito_page.dart';
+import '../features/requirements/requirement_form_page.dart';
+import '../features/sync/sync_page.dart';
+import '../features/verifications/verification_form_page.dart';
 import '../shared/navigation/app_shell.dart';
-import '../shared/pages/account_page.dart';
 import 'go_router_refresh_stream.dart';
 import 'route_names.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'root',
-);
-
-final _shellNavigatorDashboardKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell-dashboard');
-final _shellNavigatorInventoryKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell-inventory');
-final _shellNavigatorBitacoraKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell-bitacora');
+final GlobalKey<NavigatorState> rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
 
 GoRouter buildAppRouter() {
-  final authBloc = sl<AuthBloc>();
+  final session = sl<SessionCubit>();
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: RouteNames.splash,
-    debugLogDiagnostics: true,
-    // Notifica al router cada vez que cambia el estado de auth.
-    refreshListenable: GoRouterRefreshStream(authBloc.stream),
+    // Solo cambios de fase (login, logout, elegir empresa): refrescar con cada
+    // cambio de perfil reconstruía las pantallas abiertas y perdía su estado.
+    refreshListenable: GoRouterRefreshStream(session.stream.map((s) => s.phase).distinct()),
     redirect: (context, state) {
-      final authState = authBloc.state;
+      final phase = session.state.phase;
       final loc = state.uri.path;
-
-      final isOnSplash = loc == RouteNames.splash;
-      final isOnAuth =
-          loc == RouteNames.login || loc == RouteNames.forgotPassword;
-
-      if (authState is AuthLoading || authState is AuthInitial) {
-        return isOnSplash ? null : RouteNames.splash;
+      switch (phase) {
+        case SessionPhase.unknown:
+          return loc == RouteNames.splash ? null : RouteNames.splash;
+        case SessionPhase.unauthenticated:
+          return loc == RouteNames.login ? null : RouteNames.login;
+        case SessionPhase.choosingTenant:
+          return loc == RouteNames.selectTenant ? null : RouteNames.selectTenant;
+        case SessionPhase.authenticated:
+          if (loc == RouteNames.splash ||
+              loc == RouteNames.login ||
+              loc == RouteNames.selectTenant) {
+            return RouteNames.home;
+          }
+          return null;
       }
-
-      if (authState is AuthUnauthenticated) {
-        return isOnAuth ? null : RouteNames.login;
-      }
-
-      // Autenticado: redirigir splash/login al dashboard.
-      if (authState is AuthAuthenticated) {
-        if (isOnSplash || isOnAuth) return RouteNames.dashboard;
-      }
-
-      return null;
     },
     routes: [
-      // ── Rutas públicas ─────────────────────────────────────────────────────
+      GoRoute(path: RouteNames.splash, builder: (_, __) => const SplashPage()),
+      GoRoute(path: RouteNames.login, builder: (_, __) => const LoginPage()),
       GoRoute(
-        path: RouteNames.splash,
-        name: 'splash',
-        builder: (context, state) => const SplashPage(),
+        path: RouteNames.selectTenant,
+        builder: (_, __) => const SelectTenantPage(),
       ),
-      GoRoute(
-        path: RouteNames.login,
-        name: 'login',
-        builder: (context, state) => const LoginPage(),
-      ),
-      GoRoute(
-        path: RouteNames.forgotPassword,
-        name: 'forgotPassword',
-        builder: (context, state) => const ForgotPasswordPage(),
-      ),
-
-      // ── Rutas sin shell (accesibles desde cualquier parte) ─────────────────
-      GoRoute(
-        path: RouteNames.account,
-        name: 'account',
-        parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const AccountPage(),
-      ),
-
-      // ── Shell con bottom nav (sección autenticada) ─────────────────────────
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            AppShell(navigationShell: navigationShell),
+        builder: (context, state, shell) => AppShell(navigationShell: shell),
         branches: [
-          // Branch 0: Home / Dashboard
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorDashboardKey,
-            routes: [
-              GoRoute(
-                path: RouteNames.dashboard,
-                name: 'dashboard',
-                builder: (context, state) => const DashboardPage(),
-              ),
-            ],
-          ),
-
-          // Branch 1: Inventario
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorInventoryKey,
-            routes: [
-              GoRoute(
-                path: RouteNames.inventory,
-                name: 'inventory',
-                // BlocProvider.value reutiliza el singleton de DI.
-                builder: (context, state) => BlocProvider.value(
-                  value: sl<InventoryBloc>(),
-                  child: const InventoryPage(),
-                ),
-                routes: [
-                  GoRoute(
-                    path: 'form',
-                    name: 'assetForm',
-                    parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) {
-                      final asset = state.extra as Asset?;
-                      return MultiBlocProvider(
-                        providers: [
-                          BlocProvider(create: (_) => sl<AssetFormBloc>()),
-                          // BlocProvider.value comparte el singleton:
-                          // el add(InventoryLoadRequested) del form
-                          // llega a la misma instancia que usa InventoryPage.
-                          BlocProvider.value(value: sl<InventoryBloc>()),
-                        ],
-                        child: AssetFormPage(asset: asset),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'detail',
-                    name: 'assetDetail',
-                    parentNavigatorKey: rootNavigatorKey,
-                    builder: (context, state) {
-                      final preview = state.extra as Asset;
-                      return BlocProvider(
-                        create: (_) => sl<AssetDetailBloc>()
-                          ..add(AssetDetailLoadRequested(preview)),
-                        child: AssetDetailPage(preview: preview),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Branch 2: Bitácora
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorBitacoraKey,
-            routes: [
-              GoRoute(
-                path: RouteNames.bitacora,
-                name: 'bitacora',
-                builder: (context, state) => const BitacoraPage(),
-              ),
-            ],
-          ),
+          StatefulShellBranch(routes: [
+            GoRoute(path: RouteNames.home, builder: (_, __) => const HomePage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: RouteNames.items, builder: (_, __) => const ItemsPage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: RouteNames.records, builder: (_, __) => const RecordsPage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: RouteNames.account, builder: (_, __) => const AccountPage()),
+          ]),
         ],
       ),
+      _page(RouteNames.scan, (_) => const ScanPage()),
+      _page(
+        RouteNames.newItem,
+        (s) => NewItemPage(
+          initialCode: s.uri.queryParameters['code'],
+          initialBarcode: s.uri.queryParameters['barcode'],
+        ),
+      ),
+      _page('${RouteNames.item}/:id', (s) => ItemDetailPage(assetId: s.pathParameters['id']!)),
+      _page('${RouteNames.item}/:id/move', (s) => MoveItemPage(assetId: s.pathParameters['id']!)),
+      _page('${RouteNames.item}/:id/status', (s) => StatusChangePage(assetId: s.pathParameters['id']!)),
+      _page(RouteNames.incomingRemitos, (_) => const IncomingRemitosPage()),
+      _page('${RouteNames.remito}/:id/receive', (s) => ReceiveRemitoPage(remitoId: s.pathParameters['id']!)),
+      _page(RouteNames.returnRemito, (_) => const ReturnRemitoPage()),
+      _page(RouteNames.newVerification, (_) => const VerificationFormPage()),
+      _page(RouteNames.newDailyLog, (_) => const DailyLogFormPage()),
+      _page(RouteNames.newIncident, (s) => IncidentFormPage(assetId: s.uri.queryParameters['assetId'])),
+      _page(RouteNames.newRequirement, (s) => RequirementFormPage(assetId: s.uri.queryParameters['assetId'])),
+      _page(RouteNames.checkIn, (_) => const CheckInPage()),
+      _page(RouteNames.sync, (_) => const SyncPage()),
+      _page(RouteNames.changePin, (_) => const ChangePinPage()),
     ],
   );
 }
 
-/// Instancia singleton del router, construida en [buildAppRouter].
+GoRoute _page(String path, Widget Function(GoRouterState) build) => GoRoute(
+      path: path,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, s) => build(s),
+    );
+
 late final GoRouter appRouter;
