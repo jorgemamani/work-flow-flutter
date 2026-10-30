@@ -4,6 +4,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_fonts.dart';
 import '../constants/app_sizes.dart';
 import '../extensions/context_extensions.dart';
+import '../theme/tenant_brand.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key, required this.icon, required this.text});
@@ -270,7 +271,7 @@ class ChoiceOption<T> {
 }
 
 /// Opciones grandes en grilla (llegó / falta / dañado, tipo de problema):
-/// lo elegido en tinta. Con [allowNone], tocar lo elegido lo desmarca.
+/// lo elegido en el color de la empresa. Con [allowNone], tocar lo elegido lo desmarca.
 class ChoiceGrid<T> extends StatelessWidget {
   const ChoiceGrid({
     super.key,
@@ -324,15 +325,20 @@ class ChoiceGrid<T> extends StatelessWidget {
 
   Widget _tile(ChoiceOption<T> o) {
     final on = o.value == selected;
-    final fg = on ? Colors.white : AppColors.ink;
+    return Builder(builder: (context) => _tileIn(context, o, on));
+  }
+
+  Widget _tileIn(BuildContext context, ChoiceOption<T> o, bool on) {
+    final brand = context.brand;
+    final fg = on ? brand.on : AppColors.ink;
     return Semantics(
       selected: on,
       button: true,
       child: Material(
-        color: on ? AppColors.ink : AppColors.surfaceLight,
+        color: on ? brand.fill : AppColors.surfaceLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: on ? AppColors.ink : AppColors.lineStrong, width: 1.5),
+          side: BorderSide(color: on ? brand.fill : AppColors.lineStrong, width: 1.5),
         ),
         child: InkWell(
           key: o.key,

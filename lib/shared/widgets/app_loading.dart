@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../constants/app_colors.dart';
 
 class AppLoading extends StatelessWidget {
   const AppLoading({super.key, this.color, this.size = 24});
@@ -15,7 +14,7 @@ class AppLoading extends StatelessWidget {
       height: size,
       child: CircularProgressIndicator(
         strokeWidth: 2.5,
-        color: color ?? AppColors.primary,
+        color: color,
       ),
     );
   }

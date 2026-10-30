@@ -12,6 +12,7 @@ import '../../shared/constants/app_colors.dart';
 import '../../shared/constants/app_fonts.dart';
 import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/theme/tenant_brand.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/field_scaffold.dart';
@@ -222,7 +223,7 @@ class _VerificationFormPageState extends State<VerificationFormPage> {
   }
 }
 
-/// Un ítem: nombre, código y el botón de cámara (en tinta cuando ya tiene
+/// Un ítem: nombre, código y el botón de cámara (en el color de la empresa cuando ya tiene
 /// foto). Abajo, plegado, la condición, más fotos y notas.
 class _VLine extends StatefulWidget {
   const _VLine({
@@ -300,10 +301,12 @@ class _VLineState extends State<_VLine> {
                   label: done ? l.photoReadyOf(name) : l.takePhotoOf(name),
                   excludeSemantics: true,
                   child: Material(
-                    color: done ? AppColors.ink : AppColors.surfaceLight,
+                    color: done ? context.brand.fill : AppColors.surfaceLight,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: done ? BorderSide.none : BorderSide(color: warn ? AppColors.statusError : AppColors.ink, width: 1.5),
+                      side: done
+                          ? BorderSide.none
+                          : BorderSide(color: warn ? AppColors.statusError : context.brand.ink, width: 1.5),
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
@@ -314,7 +317,7 @@ class _VLineState extends State<_VLine> {
                         child: Icon(
                           done ? Icons.check : Icons.photo_camera_outlined,
                           size: 24,
-                          color: done ? Colors.white : AppColors.ink,
+                          color: done ? context.brand.on : context.brand.ink,
                         ),
                       ),
                     ),

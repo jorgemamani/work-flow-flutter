@@ -6,6 +6,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_fonts.dart';
 import '../constants/app_sizes.dart';
 import '../extensions/context_extensions.dart';
+import '../theme/tenant_brand.dart';
 
 /// Pestañas: Inicio · Ítems · Escanear · Registros · Cuenta. Escanear va al
 /// centro, en tinta, y abre el escáner encima de la pestaña actual. La
@@ -73,7 +74,7 @@ class _Tab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.ink : AppColors.textSecondary;
+    final color = selected ? context.brand.ink : AppColors.textSecondary;
     return Semantics(
       selected: selected,
       button: true,
@@ -126,13 +127,13 @@ class _ScanTab extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.ink,
+                    color: context.brand.fill,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(color: AppColors.ink.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 6)),
                     ],
                   ),
-                  child: const Icon(Icons.qr_code_scanner, size: 26, color: Colors.white),
+                  child: Icon(Icons.qr_code_scanner, size: 26, color: context.brand.on),
                 ),
                 const SizedBox(height: 4),
                 Text(

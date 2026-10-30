@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_fonts.dart';
 import '../constants/app_sizes.dart';
+import '../theme/tenant_brand.dart';
 import 'app_loading.dart';
 
-/// Botón de campo (56 px, radio 14). Lleno = la acción principal, en tinta;
-/// [isOutlined] = secundaria, con borde de tinta. Una sola acción principal
+/// Botón de campo (56 px, radio 14). Lleno = la acción principal, en el color
+/// de la empresa; [isOutlined] = secundaria, con borde de ese color. Una sola acción principal
 /// por pantalla.
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -34,10 +35,11 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = isOutlined ? AppColors.ink : Colors.white;
+    final brand = context.brand;
+    final fg = isOutlined ? brand.ink : brand.on;
     final Widget content;
     if (isLoading) {
-      content = AppLoading(color: isOutlined ? AppColors.ink : Colors.white);
+      content = AppLoading(color: fg);
     } else {
       final text = subtitle == null
           ? Text(label)

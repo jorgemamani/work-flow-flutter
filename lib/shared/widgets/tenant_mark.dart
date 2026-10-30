@@ -4,11 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/auth/presentation/session_cubit.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_fonts.dart';
-import '../utils/color_utils.dart';
+import '../theme/tenant_brand.dart';
 
 /// Marca de la empresa: su inicial sobre su color (`brandColor` de
-/// `/auth/me`). Es el único lugar donde aparece el color de la empresa; sin
-/// color, tinta.
+/// `/auth/me`; sin color, el petróleo de Workflow).
 class TenantMark extends StatelessWidget {
   const TenantMark({super.key, this.size = 28, this.showName = false});
 
@@ -19,7 +18,8 @@ class TenantMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final profile = context.select((SessionCubit c) => c.state.profile);
     final name = profile?.tenantName ?? '';
-    final fill = colorFromHex(profile?.tenantBrandColor) ?? AppColors.ink;
+    final brand = context.brand;
+    final fill = brand.fill;
     final mark = Semantics(
       label: name,
       child: Container(
@@ -33,7 +33,7 @@ class TenantMark extends StatelessWidget {
             fontFamily: AppFonts.sans,
             fontSize: size * 0.44,
             fontWeight: FontWeight.w700,
-            color: onBrandColor(fill),
+            color: brand.on,
           ),
         ),
       ),

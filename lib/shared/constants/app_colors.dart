@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// Marca de Workflow: base neutra fija para todas las empresas. El color de
-/// cada empresa va solo en su marca ([TenantMark]); lo que significa algo
-/// (acción principal, estados, avisos) sale de acá y es igual para todos.
+/// cada empresa es el acento ([TenantBrand]: botón principal, lo elegido, el
+/// foco, el avance); lo que significa algo (texto, estados, avisos, la franja
+/// sin conexión) sale de acá y es igual para todos.
 class AppColors {
   AppColors._();
 
-  /// Tinta: botón principal, lo elegido, la franja sin conexión.
+  /// Tinta: el texto, la chapa, la franja sin conexión.
   static const Color ink = Color(0xFF16181A);
   static const Color primary = ink;
 
@@ -42,9 +43,8 @@ class AppColors {
   /// Avisos en tinta (snackbars).
   static const Color statusInfo = ink;
 
-  /// Puntos sobre tinta (franja de conexión, tarjeta del proyecto).
+  /// Punto de la franja sin conexión (sobre tinta).
   static const Color offlineDot = Color(0xFFF2B544);
-  static const Color onInkSuccessDot = Color(0xFF6FBF8A);
 
   /// Fondo del escáner.
   static const Color scannerBackground = Color(0xFF0E0F10);

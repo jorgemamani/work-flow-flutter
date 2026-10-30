@@ -13,6 +13,7 @@ import '../../shared/constants/app_colors.dart';
 import '../../shared/constants/app_fonts.dart';
 import '../../shared/constants/app_sizes.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/theme/tenant_brand.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/connection_strip.dart';
 import '../../shared/widgets/field_scaffold.dart';
@@ -222,7 +223,7 @@ List<Widget> _actionSections(BuildContext context, HomeActions a) {
   return [section(l.sectionProject, project), section(l.sectionLogistics, logistics)];
 }
 
-/// Tarjeta en tinta: arriba o abajo, en qué proyecto. Abre la subida y bajada.
+/// Tarjeta en el color de la empresa: arriba o abajo, en qué proyecto. Abre la subida y bajada.
 class _ProjectCard extends StatelessWidget {
   const _ProjectCard({required this.data, required this.profile});
 
@@ -235,8 +236,10 @@ class _ProjectCard extends StatelessWidget {
     final p = data.project;
     final employee = profile.employeeId != null;
     final canCheckIn = employee && profile.can(Perms.checkinsSelf);
+    final brand = context.brand;
+    final on = brand.on;
     return Material(
-      color: AppColors.ink,
+      color: brand.fill,
       borderRadius: BorderRadius.circular(AppSizes.radiusLg),
       child: InkWell(
         key: const Key('action-checkIn'),
@@ -250,12 +253,14 @@ class _ProjectCard extends StatelessWidget {
               if (employee) ...[
                 Row(
                   children: [
-                    StatusDot(profile.onSite ? AppColors.onInkSuccessDot : const Color(0xFFA9ABA6)),
+                    // Sobre el color de la empresa el punto va en el color del texto: el
+                    // estado lo dice la palabra.
+                    StatusDot(profile.onSite ? on : on.withValues(alpha: 0.45)),
                     const SizedBox(width: 8),
                     Text(
                       profile.onSite ? l.onSite : l.offSite,
                       key: const Key('onSiteStatus'),
-                      style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.78)),
+                      style: TextStyle(fontSize: 14, color: on.withValues(alpha: 0.8)),
                     ),
                   ],
                 ),
@@ -267,13 +272,13 @@ class _ProjectCard extends StatelessWidget {
                     child: Text(
                       p?.name ?? l.noProjectShort,
                       key: const Key('currentProject'),
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white),
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: on),
                     ),
                   ),
                   if (data.projects.length > 1)
                     IconButton(
                       tooltip: l.changeProject,
-                      icon: const Icon(Icons.swap_horiz, color: Colors.white),
+                      icon: Icon(Icons.swap_horiz, color: on),
                       onPressed: () => _pickProject(context),
                     ),
                 ],
@@ -286,14 +291,14 @@ class _ProjectCard extends StatelessWidget {
                       child: profile.onSite && data.lastUp != null
                           ? Text(
                               l.homeUpSince(DateFormat('dd/MM').format(data.lastUp!.toLocal())),
-                              style: const TextStyle(fontSize: 15, color: Colors.white),
+                              style: TextStyle(fontSize: 15, color: on),
                             )
                           : Text(
                               profile.onSite ? l.actionCheckDown : l.actionCheckUp,
-                              style: const TextStyle(fontSize: 15, color: Colors.white),
+                              style: TextStyle(fontSize: 15, color: on),
                             ),
                     ),
-                    const Icon(Icons.chevron_right, color: Colors.white),
+                    Icon(Icons.chevron_right, color: on),
                   ],
                 ),
               ],
@@ -366,7 +371,7 @@ class _ActionGrid extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 child: Row(
                   children: [
-                    Icon(a.icon, size: 22, color: AppColors.ink),
+                    Icon(a.icon, size: 22, color: context.brand.ink),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(

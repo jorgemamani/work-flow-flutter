@@ -8,6 +8,7 @@ import '../../routing/route_names.dart';
 import '../../shared/constants/app_colors.dart';
 import '../../shared/constants/app_fonts.dart';
 import '../../shared/extensions/context_extensions.dart';
+import '../../shared/theme/tenant_brand.dart';
 import '../../shared/labels.dart';
 import '../../shared/widgets/common.dart';
 import '../../shared/widgets/field_scaffold.dart';
@@ -219,7 +220,7 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RowLink(
-        leading: Icon(icon, size: 22, color: AppColors.ink),
+        leading: Icon(icon, size: 22, color: context.brand.ink),
         title: label,
         onTap: onTap,
       );
