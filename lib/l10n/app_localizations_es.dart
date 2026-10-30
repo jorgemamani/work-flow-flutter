@@ -1189,42 +1189,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loginTitle => 'Entrar';
 
   @override
-  String get loginModeLabel => 'Cómo entrás';
-
-  @override
   String get loginFirstTime =>
       'La primera vez hace falta señal. Después funciona sin conexión.';
 
   @override
-  String pinEntered(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count dígitos',
-      one: '1 dígito',
-      zero: 'Ningún dígito',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get deleteDigit => 'Borrar';
-
-  @override
-  String get companyCuitToggle =>
-      '¿Trabajás en más de una empresa? Indicá el CUIT';
-
-  @override
-  String get invalidDocument => 'El DNI o CUIL tiene al menos 7 números';
-
-  @override
-  String get invalidEmail => 'Ingresá un email';
-
-  @override
   String get optional => '(opcional)';
-
-  @override
-  String get emailHint => 'nombre@empresa.com';
 
   @override
   String get homeTodo => 'Para hacer';

@@ -668,22 +668,8 @@
   "back": "Volver",
   "addPhotoShort": "Agregar",
   "loginTitle": "Entrar",
-  "loginModeLabel": "Cómo entrás",
   "loginFirstTime": "La primera vez hace falta señal. Después funciona sin conexión.",
-  "pinEntered": "{count, plural, =0{Ningún dígito} =1{1 dígito} other{{count} dígitos}}",
-  "@pinEntered": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "deleteDigit": "Borrar",
-  "companyCuitToggle": "¿Trabajás en más de una empresa? Indicá el CUIT",
-  "invalidDocument": "El DNI o CUIL tiene al menos 7 números",
-  "invalidEmail": "Ingresá un email",
   "optional": "(opcional)",
-  "emailHint": "nombre@empresa.com",
   "homeTodo": "Para hacer",
   "homeUpSince": "Subiste el {date}",
   "@homeUpSince": {

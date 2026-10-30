@@ -2102,59 +2102,17 @@ abstract class AppLocalizations {
   /// **'Entrar'**
   String get loginTitle;
 
-  /// No description provided for @loginModeLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cómo entrás'**
-  String get loginModeLabel;
-
   /// No description provided for @loginFirstTime.
   ///
   /// In es, this message translates to:
   /// **'La primera vez hace falta señal. Después funciona sin conexión.'**
   String get loginFirstTime;
 
-  /// No description provided for @pinEntered.
-  ///
-  /// In es, this message translates to:
-  /// **'{count, plural, =0{Ningún dígito} =1{1 dígito} other{{count} dígitos}}'**
-  String pinEntered(int count);
-
-  /// No description provided for @deleteDigit.
-  ///
-  /// In es, this message translates to:
-  /// **'Borrar'**
-  String get deleteDigit;
-
-  /// No description provided for @companyCuitToggle.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Trabajás en más de una empresa? Indicá el CUIT'**
-  String get companyCuitToggle;
-
-  /// No description provided for @invalidDocument.
-  ///
-  /// In es, this message translates to:
-  /// **'El DNI o CUIL tiene al menos 7 números'**
-  String get invalidDocument;
-
-  /// No description provided for @invalidEmail.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá un email'**
-  String get invalidEmail;
-
   /// No description provided for @optional.
   ///
   /// In es, this message translates to:
   /// **'(opcional)'**
   String get optional;
-
-  /// No description provided for @emailHint.
-  ///
-  /// In es, this message translates to:
-  /// **'nombre@empresa.com'**
-  String get emailHint;
 
   /// No description provided for @homeTodo.
   ///
