@@ -162,13 +162,14 @@ ThemeData buildAppTheme(TenantBrand brand) {
       selectedColor: brand.fill,
       backgroundColor: AppColors.surfaceLight,
       checkmarkColor: brand.on,
-      labelStyle: WidgetStateTextStyle.resolveWith(
-        (s) => TextStyle(
-          fontFamily: AppFonts.sans,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: s.contains(WidgetState.selected) ? brand.on : ink,
-        ),
+      // El chip resuelve el estado solo en el color del texto (no en un
+      // WidgetStateTextStyle): sin esto el texto queda sin color, blanco sobre
+      // blanco.
+      labelStyle: TextStyle(
+        fontFamily: AppFonts.sans,
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: WidgetStateColor.resolveWith((s) => s.contains(WidgetState.selected) ? brand.on : ink),
       ),
       side: WidgetStateBorderSide.resolveWith(
         (s) => s.contains(WidgetState.selected)
